@@ -1,0 +1,557 @@
+// Horecom — Prisma Schema (Final, merged from both expert packages)
+// Closes gaps #1 (Inventory source), #3 (Substitution), #4 (WhatsApp templates), #6 (Subscription cold-start)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Segment {
+  ENTERPRISE
+  SMB_REPLENISHMENT
+  MICRO_GROUPBUY
+}
+
+enum UserRole {
+  OWNER
+  STAFF
+  ADMIN
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum OrderStatus {
+  CREATED
+  INVOICE_SENT
+  WAITING_PAYMENT
+  PAID
+  CONFIRMED
+  PARTIALLY_CONFIRMED
+  PICKING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum ItemStatus {
+  PENDING
+  CONFIRMED
+  SUBSTITUTED
+  OUT_OF_STOCK
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  REVIEW_REQUIRED
+  CANCELLED
+}
+
+enum CadenceType {
+  WEEKLY
+  TWICE_WEEKLY
+  BIWEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum GroupBuyStatus {
+  OPEN
+  THRESHOLD_REACHED
+  CLOSED_SUCCESS
+  CLOSED_FAILED
+  CANCELLED
+}
+
+enum FallbackMode {
+  SOLO_PURCHASE
+  REFUND
+  WAIT_NEXT_WINDOW
+}
+
+enum PricingMode {
+  STANDARD
+  SUBSCRIPTION
+  GROUP
+}
+
+enum StorageType {
+  AMBIENT
+  REFRIGERATED
+  FROZEN
+}
+
+enum DocumentType {
+  INVOICE
+  CONSIGNMENT_NOTE
+  RECEIPT
+  CERTIFICATE
+  OTHER
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  SMS
+  EMAIL
+  PUSH
+}
+
+enum NotificationKind {
+  ORDER_CONFIRMED
+  ORDER_DELIVERED
+  SUBSCRIPTION_REMINDER
+  SUBSCRIPTION_REVIEW_REQUIRED
+  GROUP_THRESHOLD_REACHED
+  GROUP_FAILED
+  PRICE_CHANGED
+  STOCK_ALERT
+  SUBSTITUTION_REVIEW
+}
+
+enum TemplateApprovalStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum InventoryUpdateSource {
+  MANUAL_ADMIN
+  SUPPLIER_WEBHOOK
+  SCHEDULED_POLL
+  ORDER_DEDUCTION
+}
+
+// ============================================================
+// CORE B2B MODELS
+// ============================================================
+
+model Company {
+  id                        String   @id @default(cuid())
+  name                      String
+  businessType              String?
+  segment                   Segment
+  binOrIin                  String?
+  city                      String   @default("Astana")
+  preferredDeliveryWindows  Json?
+  substitutionPreference    String   @default("ASK")
+  
+  users                     User[]
+  addresses                 Address[]
+  carts                     Cart[]
+  orders                    Order[]
+  subscriptionPlans         SubscriptionPlan[]
+  groupBuyParticipations    GroupBuyParticipation[]
+  groupBuyOffersInitiated   GroupBuyOffer[]
+  documents                 Document[]
+  notifications             NotificationLog[]
+  
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  
+  @@index([segment])
+  @@index([city])
+}
+
+model User {
+  id           String    @id @default(cuid())
+  companyId    String?
+  company      Company?  @relation(fields: [companyId], references: [id])
+  role         UserRole  @default(STAFF)
+  name         String?
+  phone        String    @unique
+  email        String?   @unique
+  lastLoginAt  DateTime?
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  @@index([phone])
+  @@index([companyId])
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  label     String
+  city      String  @default("Astana")
+  street    String
+  house     String
+  details   String?
+  comment   String?
+  isDefault Boolean @default(false)
+  
+  orders    Order[]
+  
+  @@index([companyId])
+}
+
+// ============================================================
+// CATALOG
+// ============================================================
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  nameKz    String?
+  slug      String     @unique
+  sortOrder Int        @default(0)
+  parentId  String?
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+  products  Product[]
+}
+
+model Product {
+  id                      String      @id @default(cuid())
+  sku                     String      @unique
+  name                    String
+  nameKz                  String?
+  slug                    String      @unique
+  description             String?
+  descriptionKz           String?
+  brand                   String?
+  imageUrl                String?
+  imageUrls               String[]    @default([])
+  
+  categoryId              String
+  category                Category    @relation(fields: [categoryId], references: [id])
+  
+  storageType             StorageType @default(AMBIENT)
+  unitType                String
+  packLabel               String
+  minOrderQty             Int         @default(1)
+  
+  isGroupEligible         Boolean     @default(false)
+  isSubscriptionEligible  Boolean     @default(false)
+  isActive                Boolean     @default(true)
+  
+  inventorySnapshot       InventorySnapshot?
+  prices                  Price[]
+  cartItems               CartItem[]
+  orderItems              OrderItem[]
+  subscriptionPlanItems   SubscriptionPlanItem[]
+  groupBuyOffers          GroupBuyOffer[]
+  
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  
+  @@index([categoryId, isActive])
+  @@index([slug])
+  @@index([isGroupEligible, isActive])
+  @@index([isSubscriptionEligible, isActive])
+}
+
+model InventorySnapshot {
+  id            String                @id @default(cuid())
+  productId     String                @unique
+  product       Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  availableQty  Int                   @default(0)
+  stockStatus   StockStatus
+  source        InventoryUpdateSource @default(MANUAL_ADMIN)
+  sourceRef     String?
+  updatedAt     DateTime              @updatedAt
+}
+
+model Price {
+  id                  String    @id @default(cuid())
+  productId           String
+  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  basePrice           Decimal   @db.Decimal(12, 2)
+  oldPrice            Decimal?  @db.Decimal(12, 2)
+  currency            String    @default("KZT")
+  unitLabel           String
+  
+  wholesaleThreshold  Int?
+  wholesalePrice      Decimal?  @db.Decimal(12, 2)
+  groupPrice          Decimal?  @db.Decimal(12, 2)
+  groupThreshold      Int?
+  
+  validUntil          DateTime?
+  createdAt           DateTime  @default(now())
+  
+  @@index([productId])
+}
+
+// ============================================================
+// CART & ORDERS
+// ============================================================
+
+model Cart {
+  id         String     @id @default(cuid())
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id])
+  sessionId  String?
+  status     String     @default("ACTIVE")
+  
+  items      CartItem[]
+  
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  
+  @@index([companyId])
+  @@index([sessionId])
+}
+
+model CartItem {
+  id              String       @id @default(cuid())
+  cartId          String
+  cart            Cart         @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id])
+  quantity        Int
+  unitPriceAtAdd  Decimal      @db.Decimal(12, 2)
+  pricingMode     PricingMode  @default(STANDARD)
+  warningsJson    Json?
+  createdAt       DateTime     @default(now())
+  
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id                     String      @id @default(cuid())
+  number                 String      @unique
+  companyId              String
+  company                Company     @relation(fields: [companyId], references: [id])
+  addressId              String
+  address                Address     @relation(fields: [addressId], references: [id])
+  
+  status                 OrderStatus @default(CREATED)
+  paymentStatus          String      @default("PENDING")
+  fulfillmentStatus      String      @default("PENDING")
+  
+  deliveryWindow         Json
+  subtotal               Decimal     @db.Decimal(12, 2)
+  total                  Decimal     @db.Decimal(12, 2)
+  
+  pricingModeSummary     Json?
+  paymentHandoffRef      String?
+  substitutionPreference String      @default("ASK")
+  comment                String?
+  source                 String      @default("WEB")
+  
+  items                  OrderItem[]
+  documents              Document[]
+  
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+  
+  @@index([companyId, status])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id                     String     @id @default(cuid())
+  orderId                String
+  order                  Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId              String
+  product                Product    @relation(fields: [productId], references: [id])
+  
+  productNameSnapshot    String
+  unitLabelSnapshot      String
+  
+  quantity               Int
+  unitPrice              Decimal    @db.Decimal(12, 2)
+  lineTotal              Decimal    @db.Decimal(12, 2)
+  
+  itemStatus             ItemStatus @default(PENDING)
+  substituteProductId    String?
+  substituteReason       String?
+  substituteProposedAt   DateTime?
+  substituteApprovedAt   DateTime?
+  substituteApprovedBy   String?
+  
+  @@index([orderId])
+}
+
+// ============================================================
+// SUBSCRIPTION (S2)
+// ============================================================
+
+model SubscriptionPlan {
+  id                  String              @id @default(cuid())
+  companyId           String
+  company             Company             @relation(fields: [companyId], references: [id])
+  
+  status              SubscriptionStatus  @default(ACTIVE)
+  cadenceType         CadenceType
+  customCadenceJson   Json?
+  
+  nextDeliveryDate    DateTime
+  cutoffAt            DateTime?
+  
+  isColdStart         Boolean             @default(true)
+  
+  notes               String?
+  
+  items               SubscriptionPlanItem[]
+  upcomingOrders      UpcomingSubscriptionOrder[]
+  
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  @@index([companyId, status])
+  @@index([nextDeliveryDate])
+}
+
+model SubscriptionPlanItem {
+  id                  String           @id @default(cuid())
+  subscriptionPlanId  String
+  subscriptionPlan    SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  productId           String
+  product             Product          @relation(fields: [productId], references: [id])
+  defaultQty          Int
+  lastSuggestedQty    Int?
+  isActive            Boolean          @default(true)
+  
+  lastOrderedAt       DateTime?
+  avgIntervalDays     Float?
+  
+  @@unique([subscriptionPlanId, productId])
+}
+
+model UpcomingSubscriptionOrder {
+  id                  String           @id @default(cuid())
+  subscriptionPlanId  String
+  subscriptionPlan    SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  
+  status              String           @default("DRAFT")
+  scheduledFor        DateTime
+  cutoffAt            DateTime
+  estimatedTotal      Decimal          @db.Decimal(12, 2)
+  reviewRequired      Boolean          @default(false)
+  reviewReasonJson    Json?
+  
+  itemsSnapshot       Json
+  resultOrderId       String?
+  
+  createdAt           DateTime         @default(now())
+  
+  @@index([scheduledFor, status])
+  @@index([cutoffAt])
+}
+
+// ============================================================
+// GROUP BUY (S3) — V1.5
+// ============================================================
+
+model GroupBuyOffer {
+  id                   String         @id @default(cuid())
+  productId            String
+  product              Product        @relation(fields: [productId], references: [id])
+  
+  initiatorCompanyId   String?
+  initiatorCompany     Company?       @relation(fields: [initiatorCompanyId], references: [id])
+  
+  targetQty            Int
+  currentQty           Int            @default(0)
+  targetParticipants   Int?
+  currentParticipants  Int            @default(0)
+  
+  soloPrice            Decimal        @db.Decimal(12, 2)
+  groupPrice           Decimal        @db.Decimal(12, 2)
+  
+  deadlineAt           DateTime
+  status               GroupBuyStatus @default(OPEN)
+  fallbackMode         FallbackMode   @default(SOLO_PURCHASE)
+  
+  isPublic             Boolean        @default(true)
+  shareToken           String         @unique @default(cuid())
+  
+  participations       GroupBuyParticipation[]
+  
+  createdAt            DateTime       @default(now())
+  
+  @@index([status, deadlineAt])
+  @@index([productId])
+}
+
+model GroupBuyParticipation {
+  id                String         @id @default(cuid())
+  groupBuyOfferId   String
+  groupBuyOffer     GroupBuyOffer  @relation(fields: [groupBuyOfferId], references: [id], onDelete: Cascade)
+  companyId         String
+  company           Company        @relation(fields: [companyId], references: [id])
+  
+  reservedQty       Int
+  status            String         @default("WAITING")
+  joinedAt          DateTime       @default(now())
+  paidAt            DateTime?
+  
+  @@unique([groupBuyOfferId, companyId])
+}
+
+// ============================================================
+// DOCUMENTS
+// ============================================================
+
+model Document {
+  id         String       @id @default(cuid())
+  type       DocumentType
+  title      String
+  fileUrl    String
+  
+  orderId    String?
+  order      Order?       @relation(fields: [orderId], references: [id])
+  companyId  String?
+  company    Company?     @relation(fields: [companyId], references: [id])
+  
+  createdAt  DateTime     @default(now())
+  
+  @@index([orderId])
+  @@index([companyId])
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model NotificationLog {
+  id           String              @id @default(cuid())
+  companyId    String?
+  company      Company?            @relation(fields: [companyId], references: [id])
+  channel      NotificationChannel
+  kind         NotificationKind
+  templateId   String?
+  template     WhatsAppTemplate?   @relation(fields: [templateId], references: [id])
+  payloadJson  Json
+  status       String              @default("PENDING")
+  sentAt       DateTime?
+  errorMessage String?
+  createdAt    DateTime            @default(now())
+  
+  @@index([companyId])
+  @@index([status, createdAt])
+}
+
+model WhatsAppTemplate {
+  id              String                  @id @default(cuid())
+  name            String                  @unique
+  kind            NotificationKind
+  language        String                  @default("ru")
+  body            String
+  buttonsJson     Json?
+  approvalStatus  TemplateApprovalStatus  @default(DRAFT)
+  metaTemplateId  String?
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  
+  notifications   NotificationLog[]
+  
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+}
