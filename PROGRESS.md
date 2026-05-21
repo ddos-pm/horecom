@@ -301,9 +301,31 @@
 - Internal Links в long-form страницах используют next/link с href="/catalog" — intl middleware редиректит на /{locale}/catalog (308). Производительно меньше, чем locale-aware Link, но работает.
 - App pages → marketing links (например /cart → /catalog button) проходят через intl redirect → /ru/catalog. Косметика.
 
-## V0 Plan — Этапы 8-9: pending
+## V0 Plan — Этап 8: Pre-deploy polish (DONE — May 21, 2026)
 
-- [ ] **Этап 8** — Pre-deploy polish (0.5 дня)
+### Polish
+- [x] `app/not-found.tsx` — global 404 с CTA "Открыть каталог" + WhatsApp + ссылка на главную
+- [x] `app/error.tsx` — global error boundary с "Перезагрузить" + WhatsApp + error.digest
+- [x] `app/(marketing)/[locale]/catalog/loading.tsx` — skeleton (12 placeholder cards)
+- [x] `app/(app)/orders/loading.tsx` — skeleton (5 placeholder rows)
+- [x] Privacy Policy переписана — реальные данные individual entrepreneur (details on request) (legalName, ИИН, юр. + физ. адреса), убраны упоминания Neon/PostHog/Sentry/AmoCRM которых нет в V0
+- [x] Sonner toasts уже подключены везде где нужно (Этапы 3-6)
+- [x] Empty states покрыты (cart, orders, dashboard, subscription/manage, admin lists)
+- [x] OG image (1200×630) уже в metadata (Этап 0)
+- [x] Favicon в табе (Этап 0)
+- [x] Старые компоненты `components/header.tsx` + `components/footer.tsx` удалены (Этап 0)
+
+### Skipped for V0 (not blocking deploy)
+- Lighthouse mobile audit (co-founder проверит на проде)
+- Terms of Service — co-founder использует генератор (manual outside code)
+- Полная extraction long-form контента в i18n keys (V1 follow-up)
+
+### Verification
+- [x] `npm run build` clean
+
+## V0 Plan — Этап 9: pending
+
+- [ ] **Этап 9** — Deploy на Vercel + v0.0.1 tag (15 мин)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
