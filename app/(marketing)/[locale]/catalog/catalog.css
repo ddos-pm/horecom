@@ -306,10 +306,17 @@
     padding: 6px 0;
     border-top: 1px dashed var(--c-border);
     border-bottom: 1px dashed var(--c-border);
+    overflow: hidden;
   }
-  .card-data div { display: flex; flex-direction: column; gap: 2px; }
+  .card-data > div {
+    display: flex; flex-direction: column; gap: 2px;
+    min-width: 0; flex: 1 1 0;
+  }
   .card-data .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .card-data .v { font-size: 12px; color: var(--c-fg); font-weight: 600; }
+  .card-data .v {
+    font-size: 12px; color: var(--c-fg); font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .card-data .v.green { color: var(--c-success); }
   .card-data .v.amber { color: var(--c-warning); }
   .card-data .v.gray { color: var(--c-fg-4); }

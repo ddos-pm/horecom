@@ -62,7 +62,7 @@ export default async function CatalogPage({
         category: true,
       },
       orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
-      take: 60,
+      take: 200,
     }),
     prisma.product.count({ where: { isActive: true } }),
   ]);
@@ -319,7 +319,9 @@ export default async function CatalogPage({
                           <div>
                             <div className="k">Стек</div>
                             <div className={STOCK_CLASS[stock?.stockStatus ?? "OUT_OF_STOCK"]}>
-                              {stock?.availableQty ?? 0} {formatUnit(p.unitType)}
+                              {stock?.availableQty && stock.availableQty > 0
+                                ? `${stock.availableQty} ${formatUnit(p.unitType)}`
+                                : "Под заказ"}
                             </div>
                           </div>
                           <div>
