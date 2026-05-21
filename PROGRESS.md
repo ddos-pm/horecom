@@ -354,7 +354,33 @@
 - `design-final-clean/INTEGRATION_BRIEF.md` — бриф с пошаговой инструкцией
 - Папка в `.gitignore` — на диске, не в репо (484KB статики мокапов).
 
-## V0 Plan — Этап 9: Deploy на Vercel (READY — May 21, 2026)
+## V0 Plan — Этап 9: Deploy на Vercel (LIVE — May 21, 2026)
+
+### Production
+- [x] **Live URL:** https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app
+- [x] Vercel scope: `dd-osaman-s-projects` (co-founder)
+- [x] GitHub: `ddos-pm/horecom` (13 коммитов от skeleton до design v2)
+- [x] Supabase Postgres подключён через Transaction pooler `aws-1-ap-northeast-1` (Tokyo, IPv4 proxy)
+- [x] `DATABASE_URL` (6543, `pgbouncer=true`) + `DIRECT_URL` (5432, для миграций)
+- [x] 7 env vars в Vercel production
+- [x] Next.js 15.5.18 (CVE-патч, Vercel требует 15.5.x+)
+- [x] GitHub auto-deploy подключён к Vercel project (push → auto-build)
+- [x] Supabase Auth URL Configuration обновлён (Site URL + Redirect URLs включают production)
+- [x] Vercel Deployment Protection выключен (production URL публичный для grant reviewers)
+
+### Smoke test (passed 2026-05-21)
+- [x] `/` → redirect `/ru` (200, 144KB)
+- [x] `/ru/catalog` → 200, 1.3MB, реальные 190 SKU из БД
+- [x] `/ru/subscription` → 200, 96KB
+- [x] `/ru/group-buying` → 200, 165KB
+- [x] `/kz` → 200, локаль работает
+- [x] `/cart`, `/login` → 200
+- [x] v2 markers в HTML: hc-header, hc-drawer, hc-footer, hero-status, trust-grid, segs, cats, prods, ops-band, cta-strip, Operational seriousness
+
+### Deferred (manual, не блокеры)
+- [ ] Custom domain (например `app.horecom.kz`) — ждёт решение от co-founderа
+- [ ] менеджер admin: `UPDATE "User" SET "isAdmin"=true WHERE email='***REMOVED***';` — после её первого magic-link логина
+- [ ] Этап 1.5 deferred steps 4-6 (catalog/PDP/subscription/group-buying по v2-дизайну)
 
 ### Что подготовлено в коде
 - [x] `vercel.json` создан: installCommand `npm install --legacy-peer-deps`, buildCommand `prisma migrate deploy && prisma generate && next build`, framework `nextjs`, region `fra1` (Frankfurt — ближе к KZ)
