@@ -54,7 +54,7 @@ function LoginForm() {
 
   if (sent) {
     return (
-      <div className="container-tight py-12 md:py-16">
+      <div className="container-tight flex-1 flex flex-col items-center justify-center py-12 md:py-16">
         <div className="mx-auto max-w-md space-y-3 text-center">
           <StandaloneLogo />
           <h1 className="text-2xl font-semibold">Проверьте почту</h1>
@@ -64,19 +64,27 @@ function LoginForm() {
           <p className="text-xs text-muted-foreground">
             Не пришло за минуту? Проверьте папку Спам. Ссылка действует 1 час.
           </p>
+          <a
+            href="/ru"
+            className="mt-6 inline-block text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← На главную
+          </a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container-tight py-12 md:py-16">
-      <div className="mx-auto max-w-md space-y-4">
+    <div className="container-tight flex-1 flex flex-col items-center justify-center py-12 md:py-16">
+      <div className="mx-auto w-full max-w-md space-y-4">
         <StandaloneLogo />
-        <h1 className="text-2xl font-semibold text-center">Вход в Horecom</h1>
-        <p className="text-sm text-muted-foreground">
-          Введите email — пришлём ссылку для входа. Регистрация и вход — в одном шаге.
-        </p>
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">Вход в Horecom</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Введите email — пришлём ссылку для входа. Регистрация и вход — в одном шаге.
+          </p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
@@ -92,6 +100,11 @@ function LoginForm() {
             {loading ? "Отправляю…" : "Получить ссылку"}
           </Button>
         </form>
+        <div className="text-center">
+          <a href="/ru" className="text-sm text-muted-foreground hover:text-foreground">
+            ← На главную
+          </a>
+        </div>
       </div>
     </div>
   );
