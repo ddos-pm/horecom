@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { MarketingHeader } from "@/components/marketing/header";
-import { MarketingFooter } from "@/components/marketing/footer";
-import { JsonLd, ORG_JSON_LD, WEBSITE_JSON_LD } from "@/components/json-ld";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -54,15 +51,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className={inter.variable}>
-      <head>
-        <JsonLd data={ORG_JSON_LD} />
-        <JsonLd data={WEBSITE_JSON_LD} />
-      </head>
-      <body className="min-h-screen flex flex-col">
-        <MarketingHeader />
-        <main className="flex-1">{children}</main>
-        <MarketingFooter />
-      </body>
+      <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );
 }

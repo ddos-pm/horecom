@@ -40,9 +40,34 @@
 - [ ] Stock quantities = 0 for all 190 products — менеджер to set via admin panel (Этап 6)
 - [ ] Brands detected for only 5/190 products — manual enrichment via admin (Этап 6)
 
-## V0 Plan — Этапы 1-9: pending
+## V0 Plan — Этап 1: Route groups (marketing) и (app) (DONE — May 21, 2026)
 
-- [ ] **Этап 1** — Route groups (marketing) и (app) (1 день)
+### Structure
+- [x] `app/(marketing)/` создан, 12 маршрутов перенесены (page, catalog, product/[slug], about, how-ordering-works, subscription, group-buying, delivery-and-payment, faq, privacy, llms.txt, sitemap)
+- [x] `app/(app)/` создан, 9 маршрутов (cart перенесён, login + dashboard + checkout + orders + orders/[id] + profile + subscription/manage + admin как placeholders)
+- [x] `app/layout.tsx` урезан до root (html + body + Inter font, без UI chrome)
+- [x] `app/(marketing)/layout.tsx` создан — MarketingHeader + main + MarketingFooter + JSON-LD (Org + WebSite)
+- [x] `app/(app)/layout.tsx` создан — AppHeader (компактный) + AppSidebar (desktop) + mobile bottom nav
+
+### Components
+- [x] `components/app/header.tsx` — sticky header с логотипом + cart icon + Аккаунт dropdown (placeholder, wires in Этап 2)
+- [x] `components/app/sidebar.tsx` — Обзор / Заказы / Подписки / Профиль + Admin link; desktop side-nav + mobile bottom-nav
+
+### Middleware
+- [x] `middleware.ts` — placeholder для subdomain split (`app.horecom.kz`) и future auth gates
+- [x] Matcher исключает `_next/static`, images, favicon, logos
+
+### Verification
+- [x] `npm run build` clean (22 routes: 12 marketing + 9 app + sitemap + middleware 31.8 kB)
+- [x] `/catalog` → MarketingHeader/Footer + JSON-LD
+- [x] `/cart`, `/dashboard` → AppHeader/Sidebar, no JSON-LD
+- [x] Route groups path resolution working (Next.js handles `/cart` → `(app)/cart`, `/catalog` → `(marketing)/catalog` без явной маршрутизации)
+
+### Known issue addressed
+- [x] **Prisma connection drops on idle direct connection** (Supabase port 5432 закрывает idle коннекции). Added `?connection_limit=1&pool_timeout=20` to `DATABASE_URL` in `.env`/`.env.local`. Fix: switch to Transaction Pooler (port 6543) on Vercel — нужен регион проекта.
+
+## V0 Plan — Этапы 2-9: pending
+
 - [ ] **Этап 2** — Auth: Supabase magic link + onboarding (1 день)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
