@@ -51,9 +51,11 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  reactComponentAnnotation: { enabled: false },
   tunnelRoute: "/monitoring",
   sourcemaps: { disable: true },
-  disableLogger: true,
-  automaticVercelMonitors: false,
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    reactComponentAnnotation: { enabled: false },
+    automaticVercelMonitors: false,
+  },
 });
