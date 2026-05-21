@@ -120,6 +120,16 @@ function productToCard(p: {
  *
  * Cheaper than enabling pg_trgm + russian dictionary; good enough for V0.
  */
+// Russian function words and connectors that would otherwise be added as
+// per-word stems and match every enriched useCases / descriptionExtended
+// row (e.g. "для" appears in every "для X" use-case line). Filter them out
+// of the per-word stem list — they don't carry product signal.
+const SEARCH_STOPWORDS = new Set([
+  "для", "и", "в", "с", "к", "по", "из", "на", "от", "до", "у", "о", "об",
+  "при", "за", "под", "над", "без", "или", "но", "а", "что", "это", "как",
+  "the", "and", "for", "of", "to", "in", "on", "with", "by", "or",
+]);
+
 function buildSearchStems(query: string): string[] {
   const stems = new Set<string>();
   const q = query.trim();
@@ -138,10 +148,10 @@ function buildSearchStems(query: string): string[] {
       stems.add(v.slice(0, cut).replace(/ё/g, "е"));
       stems.add(v.slice(0, cut).replace(/е/g, "ё"));
     }
-    // Per-word stems for multi-word queries.
+    // Per-word stems for multi-word queries — skip function words/stopwords.
     if (v.includes(" ")) {
       v.split(/\s+/)
-        .filter((w) => w.length >= 3)
+        .filter((w) => w.length >= 4 && !SEARCH_STOPWORDS.has(w.toLowerCase()))
         .forEach((w) => stems.add(w));
     }
   }
