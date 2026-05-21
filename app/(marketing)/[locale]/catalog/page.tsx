@@ -1,9 +1,10 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Search, Filter, ArrowDownUp, Grid3x3, List, ChevronDown } from "lucide-react";
+import { Filter, ArrowDownUp, Grid3x3, List, ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { QuickAddButton } from "@/components/cart/quick-add-button";
+import { CatalogSearchInput } from "@/components/marketing/catalog-search-input";
 import { formatUnit } from "@/lib/units";
 import "./catalog.css";
 
@@ -110,18 +111,11 @@ export default async function CatalogPage({
             </span>
           </div>
 
-          <form className="toolbar" action="/catalog" method="get">
-            <label className="search-big">
-              <Search className="h-4 w-4" />
-              <input
-                type="search"
-                name="q"
-                defaultValue={query}
-                placeholder="Шоколад Barry Callebaut, мука 25 кг, пюре манго…"
-              />
-              <kbd className="kbd-shortcut">⌘K</kbd>
-            </label>
-            {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
+          <div className="toolbar">
+            <CatalogSearchInput
+              defaultValue={query}
+              placeholder="Шоколад Barry Callebaut, мука 25 кг, пюре манго…"
+            />
             <div className="toolbar-right">
               <button type="button" className="filt-mobile-btn">
                 <Filter className="h-3.5 w-3.5" />
@@ -141,7 +135,7 @@ export default async function CatalogPage({
                 </button>
               </div>
             </div>
-          </form>
+          </div>
 
           {(categorySlug || subscriptionOnly || groupOnly || query) && (
             <div className="chips">
