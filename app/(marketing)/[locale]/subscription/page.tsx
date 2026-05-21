@@ -261,6 +261,7 @@ export default async function SubscriptionPage() {
                     width={36}
                     height={36}
                     style={{ background: "#000", padding: 4 }}
+                    unoptimized
                   />
                 </div>
                 <div>

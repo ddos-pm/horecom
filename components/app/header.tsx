@@ -21,6 +21,7 @@ export async function AppHeader() {
             width={320}
             height={86}
             className="h-7 w-auto"
+            unoptimized
             priority
           />
         </Link>

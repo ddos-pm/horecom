@@ -15,6 +15,7 @@ function StandaloneLogo() {
         width={569}
         height={113}
         className="h-12 w-auto md:h-14"
+        unoptimized
         priority
       />
     </div>
