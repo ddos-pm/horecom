@@ -470,11 +470,27 @@
 ## Этап 1.5 СТАТУС: 5/5 v2-страниц DONE
 - home, catalog, product, subscription, group-buying — все в production через auto-deploy
 
-## Blocked on access (AI этапы из расширенного ТЗ)
+## AI этапы (groundwork DONE, runtime — отложено)
 
-- [!] **Этап AI-1 Product enrichment** — нужен `ANTHROPIC_API_KEY` в `.env.local` + файл `PRODUCT_ENRICHMENT_SCRIPT.md` (в launch package отсутствует)
-- [!] **MCP find_similar embeddings** — нужен `OPENAI_API_KEY` + enable pgvector extension в Supabase (Dashboard → Database → Extensions → "vector"). Текущий find_similar работает на category+brand+price heuristics.
-- [!] Файлы из расширенного ТЗ которых нет в launch package: `PRODUCT_ENRICHMENT_SCRIPT.md`, `AI_ARCHITECTURE.md`
+### Готово в коде (commits `4c6d00b`, `296cd80`)
+- [x] **Schema migration `20260521050000_product_enrichment_fields`** применена: Product.{brandResolved, descriptionExtended, useCases, composition, storageInfo, enrichedAt, embedding}
+- [x] **pgvector extension** включён в Supabase + Product.embedding vector(1536) + HNSW cosine index через `prisma db execute scripts/enable-pgvector.sql`
+- [x] **`scripts/enrich-products.ts`** — Claude Sonnet, 5 полей, --dry-run, --sku, --limit, --force; safe prompts (returns null when uncertain)
+- [x] **`scripts/generate-product-embeddings.ts`** — OpenAI text-embedding-3-small (1536 dim) + raw SQL update Product.embedding
+- [x] **`lib/mcp/tools.ts findSimilar`** — auto-uses pgvector если embeddings есть, fallback на heuristic
+- [x] **`docs/MCP_INTEGRATION.md`** — полная инструкция для co-founderа (curl tests, Claude Desktop config)
+- [x] **PUBLIC_BASE_URL** centralized — `productUrl(slug)` helper читает из `NEXT_PUBLIC_BASE_URL` env, fallback на stable Vercel alias `horecom-platform-eosin.vercel.app`
+
+### Runtime запуск отложен
+- [ ] `ANTHROPIC_API_KEY` в .env.local + Vercel — для запуска `enrich-products.ts` (~$0.60, 15 мин)
+- [ ] `OPENAI_API_KEY` в .env.local + Vercel — для embeddings (~$0.001, 2 мин)
+- После добавления keys: dry-run на 1 SKU → confirm output → full enrich → embeddings → тест `find_similar` на 3 SKU (сгущёнка, сироп, шоколад)
+
+## 🌍 Stable production URL: https://horecom-platform-eosin.vercel.app
+
+- Это Vercel project alias, не меняется при push (в отличие от per-deploy URL с random hash)
+- Все docs (MCP, README) и MCP tool responses сейчас указывают на него
+- Когда подключим custom domain `horecom.kz` — поменяем только `NEXT_PUBLIC_BASE_URL` env var, без редеплоя
 
 ### Что подготовлено в коде
 - [x] `vercel.json` создан: installCommand `npm install --legacy-peer-deps`, buildCommand `prisma migrate deploy && prisma generate && next build`, framework `nextjs`, region `fra1` (Frankfurt — ближе к KZ)
