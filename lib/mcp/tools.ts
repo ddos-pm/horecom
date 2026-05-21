@@ -11,6 +11,17 @@ import { COMPANY } from "@/lib/company";
 
 const WHATSAPP_PHONE = "77078607779";
 
+// Public site URL used inside MCP responses (product_url, confirmation_url).
+// Prefers NEXT_PUBLIC_BASE_URL env (set per-deploy), falls back to the
+// stable Vercel alias, then to the future canonical domain.
+const PUBLIC_BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ||
+  "https://horecom-platform-eosin.vercel.app";
+
+function productUrl(slug: string) {
+  return `${PUBLIC_BASE_URL}/ru/product/${slug}`;
+}
+
 // ────────────────────────────────────────────────────────────────────
 // Schemas
 
@@ -90,7 +101,7 @@ function productToCard(p: {
     available_quantity: stock?.availableQty ?? 0,
     moq: p.minOrderQty,
     image_url: p.imageUrl ?? null,
-    product_url: `https://horecom.kz/ru/product/${p.slug}`,
+    product_url: productUrl(p.slug),
   };
 }
 
@@ -177,7 +188,7 @@ export async function getProduct(input: z.infer<typeof getProductSchema>) {
       last_updated: p.inventorySnapshot?.updatedAt.toISOString() ?? null,
     },
     images: p.imageUrl ? [p.imageUrl, ...p.imageUrls] : p.imageUrls,
-    product_url: `https://horecom.kz/ru/product/${p.slug}`,
+    product_url: productUrl(p.slug),
   };
 }
 
@@ -218,7 +229,7 @@ export async function checkInventory(input: z.infer<typeof checkInventorySchema>
     result.alternatives = alternatives.map((a) => ({
       sku: a.sku,
       name: a.name,
-      product_url: `https://horecom.kz/ru/product/${a.slug}`,
+      product_url: productUrl(a.slug),
       similarity_score: 0.7,
     }));
   }
@@ -333,7 +344,7 @@ export async function findSimilar(input: z.infer<typeof findSimilarSchema>) {
           in_stock: r.in_stock,
           price_per_pack: r.price_per_pack ?? 0,
           price_difference_percent: Math.round(priceDiff * 10) / 10,
-          product_url: `https://horecom.kz/ru/product/${r.slug}`,
+          product_url: productUrl(r.slug),
         };
       }),
     };
@@ -379,7 +390,7 @@ export async function findSimilar(input: z.infer<typeof findSimilarSchema>) {
       in_stock: (r.product.inventorySnapshot?.availableQty ?? 0) > 0,
       price_per_pack: r.cPrice,
       price_difference_percent: Math.round(r.priceDiff * 10) / 10,
-      product_url: `https://horecom.kz/ru/product/${r.product.slug}`,
+      product_url: productUrl(r.product.slug),
     })),
   };
 }
@@ -488,7 +499,7 @@ export async function createDraftOrder(
     },
   });
 
-  const confirmationUrl = `https://horecom.kz/ru/orders/${order.id}?just_created=true`;
+  const confirmationUrl = `${PUBLIC_BASE_URL}/ru/orders/${order.id}?just_created=true`;
   const waText = `Здравствуйте! Я хочу подтвердить заказ ${number} (создан через AI-агент). Состав: ${itemsDetailed
     .map((i) => `${i.name} × ${i.quantity}`)
     .join(", ")}. Итого: ${total.toLocaleString("ru-RU")} ₸. Адрес: ${input.delivery_address}. Связь: ${input.customer_name}, ${input.customer_phone}.`;

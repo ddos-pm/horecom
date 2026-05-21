@@ -357,7 +357,7 @@
 ## V0 Plan — Этап 9: Deploy на Vercel (LIVE — May 21, 2026)
 
 ### Production
-- [x] **Live URL:** https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app
+- [x] **Live URL:** https://horecom-platform-eosin.vercel.app
 - [x] Vercel scope: `dd-osaman-s-projects` (co-founder)
 - [x] GitHub: `ddos-pm/horecom` (13 коммитов от skeleton до design v2)
 - [x] Supabase Postgres подключён через Transaction pooler `aws-1-ap-northeast-1` (Tokyo, IPv4 proxy)
@@ -417,7 +417,7 @@
 {
   "mcpServers": {
     "horecom": {
-      "url": "https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app/api/mcp"
+      "url": "https://horecom-platform-eosin.vercel.app/api/mcp"
     }
   }
 }

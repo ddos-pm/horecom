@@ -13,7 +13,7 @@
 | `/api/mcp/call` | POST | Выполнить tool: `{ "tool_name": "...", "arguments": {...} }` |
 
 **Base URL (production):**
-`https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app`
+`https://horecom-platform-eosin.vercel.app`
 
 ## 6 tools
 
@@ -33,7 +33,7 @@
 {
   "mcpServers": {
     "horecom": {
-      "url": "https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app/api/mcp"
+      "url": "https://horecom-platform-eosin.vercel.app/api/mcp"
     }
   }
 }
@@ -46,7 +46,7 @@
 ## Quick curl tests
 
 ```bash
-BASE="https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app/api/mcp"
+BASE="https://horecom-platform-eosin.vercel.app/api/mcp"
 
 # 1. Manifest
 curl -s "$BASE/manifest.json" | jq
