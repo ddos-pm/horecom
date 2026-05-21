@@ -34,6 +34,7 @@ enum StockStatus {
 }
 
 enum OrderStatus {
+  DRAFT_PENDING_CONFIRMATION
   CREATED
   INVOICE_SENT
   WAITING_PAYMENT
@@ -349,6 +350,7 @@ model Order {
   substitutionPreference String      @default("ASK")
   comment                String?
   source                 String      @default("WEB")
+  agentMetadata          Json?
   
   items                  OrderItem[]
   documents              Document[]
@@ -582,4 +584,23 @@ model GroupBuyInterest {
 
   @@index([createdAt])
   @@index([companyId])
+}
+
+// ============================================================
+// MCP SERVER (agentic commerce — Stage X)
+// ============================================================
+
+model McpCall {
+  id         String   @id @default(cuid())
+  toolName   String
+  input      Json
+  output     Json?
+  error      String?
+  durationMs Int
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([toolName, createdAt])
+  @@index([createdAt])
 }
