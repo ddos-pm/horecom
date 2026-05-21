@@ -1,13 +1,12 @@
-import Link from "next/link";
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
-import { Badge } from "@/components/ui/badge";
-import { formatPrice, stockStatusInfo } from "@/lib/utils";
-import { QuickAddButton } from "@/components/cart/quick-add-button";
 import type { Metadata } from "next";
+import { Search, Filter, ArrowDownUp, Grid3x3, List, ChevronDown } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { Link } from "@/i18n/routing";
+import { QuickAddButton } from "@/components/cart/quick-add-button";
+import "./catalog.css";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Каталог · опт ингредиентов для кондитерских и HoReCa",
@@ -15,190 +14,357 @@ export const metadata: Metadata = {
     "Полный каталог Horecom: шоколад, бакалея, начинки, молочная продукция, упаковка. Оптовые цены, доставка по Астане.",
 };
 
+const STOCK_CLASS: Record<string, string> = {
+  IN_STOCK: "v green",
+  LOW_STOCK: "v amber",
+  OUT_OF_STOCK: "v red",
+};
+
 export default async function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; subscription?: string; group?: string }>;
 }) {
-  const params = await searchParams;
-  const query = params.q?.trim() ?? "";
-  const categorySlug = params.category;
+  const sp = await searchParams;
+  const query = sp.q?.trim() ?? "";
+  const categorySlug = sp.category;
+  const subscriptionOnly = sp.subscription === "true";
+  const groupOnly = sp.group === "true";
 
-  const categories = await prisma.category.findMany({
-    orderBy: { sortOrder: "asc" },
-    include: { _count: { select: { products: { where: { isActive: true } } } } },
-  });
+  const [categories, products, total] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { sortOrder: "asc" },
+      include: { _count: { select: { products: { where: { isActive: true } } } } },
+    }),
+    prisma.product.findMany({
+      where: {
+        isActive: true,
+        ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+        ...(subscriptionOnly ? { isSubscriptionEligible: true } : {}),
+        ...(groupOnly ? { isGroupEligible: true } : {}),
+        ...(query
+          ? {
+              OR: [
+                { name: { contains: query, mode: "insensitive" as const } },
+                { brand: { contains: query, mode: "insensitive" as const } },
+                { sku: { contains: query, mode: "insensitive" as const } },
+              ],
+            }
+          : {}),
+      },
+      include: {
+        prices: { take: 1, orderBy: { createdAt: "desc" } },
+        inventorySnapshot: true,
+        category: true,
+      },
+      orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
+      take: 60,
+    }),
+    prisma.product.count({ where: { isActive: true } }),
+  ]);
 
-  const products = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-      ...(query
-        ? {
-            OR: [
-              { name: { contains: query, mode: "insensitive" } },
-              { brand: { contains: query, mode: "insensitive" } },
-              { sku: { contains: query, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
-    include: {
-      prices: { take: 1, orderBy: { createdAt: "desc" } },
-      inventorySnapshot: true,
-      category: true,
-    },
-    orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
-  });
+  const activeCategory = categorySlug ? categories.find((c) => c.slug === categorySlug) : null;
+  const subscriptionCount = await prisma.product
+    .count({ where: { isActive: true, isSubscriptionEligible: true } })
+    .catch(() => 0);
+  const groupCount = await prisma.product
+    .count({ where: { isActive: true, isGroupEligible: true } })
+    .catch(() => 0);
+  const inStockCount = await prisma.product
+    .count({ where: { isActive: true, inventorySnapshot: { availableQty: { gt: 0 } } } })
+    .catch(() => 0);
 
   return (
-    <div className="container-tight py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Каталог</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {products.length} {products.length === 1 ? "товар" : "товаров"}
-          {categorySlug ? ` в категории «${categories.find((c) => c.slug === categorySlug)?.name}»` : ""}
-          {query ? ` по запросу «${query}»` : ""}
-        </p>
-      </div>
+    <>
+      <section className="cat-head">
+        <div className="container-x cat-head-inner">
+          <div className="breadcrumb">
+            <Link href="/">Главная</Link>
+            <span className="sep">/</span>
+            <span>Каталог</span>
+            {activeCategory && (
+              <>
+                <span className="sep">/</span>
+                <span>{activeCategory.name}</span>
+              </>
+            )}
+          </div>
 
-      <div className="grid gap-8 md:grid-cols-[240px_1fr]">
-        {/* Sidebar: categories */}
-        <aside className="space-y-1">
-          <Link
-            href="/catalog"
-            className={`block rounded-md px-3 py-2 text-sm transition-colors ${
-              !categorySlug ? "bg-primary/10 font-medium text-primary" : "hover:bg-accent"
-            }`}
-          >
-            Все категории
-            <span className="ml-2 text-xs text-muted-foreground">
-              ({categories.reduce((sum, c) => sum + c._count.products, 0)})
+          <h1>
+            {activeCategory ? `${activeCategory.name} · ${products.length} SKU` : `Каталог · ${total} SKU`}
+          </h1>
+          <div className="sub">
+            <b>
+              {products.length} {plural(products.length, "товар", "товара", "товаров")}
+            </b>{" "}
+            {activeCategory ? `в категории «${activeCategory.name}»` : `в ${categories.length} категориях`} ·{" "}
+            обновлено сегодня ·{" "}
+            <span style={{ color: "var(--c-success)", fontWeight: 600 }}>
+              <span className="live-dot-blue" style={{ background: "var(--c-success)" }} /> данные о наличии в реальном времени
             </span>
-          </Link>
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/catalog?category=${cat.slug}`}
-              className={`block rounded-md px-3 py-2 text-sm transition-colors ${
-                categorySlug === cat.slug ? "bg-primary/10 font-medium text-primary" : "hover:bg-accent"
-              }`}
-            >
-              {cat.name}
-              <span className="ml-2 text-xs text-muted-foreground">({cat._count.products})</span>
-            </Link>
-          ))}
-        </aside>
+          </div>
 
-        {/* Products grid */}
-        <div>
-          {products.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+          <form className="toolbar" action="/catalog" method="get">
+            <label className="search-big">
+              <Search className="h-4 w-4" />
+              <input
+                type="search"
+                name="q"
+                defaultValue={query}
+                placeholder="Шоколад Barry Callebaut, мука 25 кг, пюре манго…"
+              />
+              <kbd className="kbd-shortcut">⌘K</kbd>
+            </label>
+            {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
+            <div className="toolbar-right">
+              <button type="button" className="filt-mobile-btn">
+                <Filter className="h-3.5 w-3.5" />
+                Фильтры
+              </button>
+              <button type="button" className="sort">
+                <ArrowDownUp className="h-3.5 w-3.5" />
+                В наличии
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              <div className="view-toggle">
+                <button type="button" className="active" aria-label="Сетка">
+                  <Grid3x3 className="h-4 w-4" />
+                </button>
+                <button type="button" aria-label="Список">
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {(categorySlug || subscriptionOnly || groupOnly || query) && (
+            <div className="chips">
+              <span className="t-meta" style={{ color: "var(--c-fg-3)", fontSize: 12, marginRight: 4 }}>
+                Фильтры:
+              </span>
+              {activeCategory && (
+                <Link href="/catalog" className="chip active">
+                  {activeCategory.name} <span className="x">×</span>
+                </Link>
+              )}
+              {subscriptionOnly && (
+                <Link
+                  href={{ pathname: "/catalog", query: { category: categorySlug } }}
+                  className="chip active"
+                >
+                  Подписка <span className="x">×</span>
+                </Link>
+              )}
+              {groupOnly && (
+                <Link
+                  href={{ pathname: "/catalog", query: { category: categorySlug } }}
+                  className="chip active"
+                >
+                  Группа <span className="x">×</span>
+                </Link>
+              )}
+              {query && (
+                <Link
+                  href={{ pathname: "/catalog", query: { category: categorySlug } }}
+                  className="chip active"
+                >
+                  «{query}» <span className="x">×</span>
+                </Link>
+              )}
+              <Link
+                href="/catalog"
+                className="t-meta"
+                style={{ fontSize: 12, color: "var(--c-blue)", fontWeight: 500 }}
+              >
+                Сбросить
+              </Link>
             </div>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
+      </section>
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16 text-center">
-      <div className="mb-3 text-4xl">🔍</div>
-      <h3 className="text-lg font-semibold">Ничего не нашлось</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        Попробуйте другой запрос или напишите в WhatsApp — поможем найти нужный товар или подобрать аналог.
-      </p>
-      <a
-        href="https://api.whatsapp.com/send/?phone=77078607779"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 text-sm font-medium text-primary hover:underline"
-      >
-        Написать в WhatsApp →
-      </a>
-    </div>
-  );
-}
+      <div className="container-x">
+        <div className="cat-layout">
+          <aside className="sidebar">
+            <div className="filt">
+              <h4>Категории</h4>
+              <div className="cat-list">
+                <Link
+                  href="/catalog"
+                  className={!categorySlug ? "active" : ""}
+                >
+                  <span>Все товары</span>
+                  <span className="n">{total}</span>
+                </Link>
+                {categories.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={{ pathname: "/catalog", query: { category: c.slug } }}
+                    className={categorySlug === c.slug ? "active" : ""}
+                  >
+                    <span>{c.name}</span>
+                    <span className="n">{c._count.products}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-type ProductWithRelations = Awaited<ReturnType<typeof prisma.product.findMany>>[number] & {
-  prices: { basePrice: { toString: () => string }; unitLabel: string }[];
-  inventorySnapshot: { stockStatus: string } | null;
-  category: { name: string };
-};
+            <div className="filt">
+              <h4>Наличие</h4>
+              <label className="check">
+                <input type="checkbox" readOnly /> В наличии <span className="n">{inStockCount}</span>
+              </label>
+            </div>
 
-function ProductCard({ product }: { product: ProductWithRelations }) {
-  const price = product.prices[0];
-  const stock = product.inventorySnapshot;
-  const stockInfo = stock ? stockStatusInfo(stock.stockStatus) : null;
+            <div className="filt" style={{ borderBottom: 0 }}>
+              <h4>Режим работы</h4>
+              <Link
+                href={{
+                  pathname: "/catalog",
+                  query: { category: categorySlug, subscription: subscriptionOnly ? undefined : "true" },
+                }}
+                className="filt-toggle"
+                style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
+              >
+                <input type="checkbox" checked={subscriptionOnly} readOnly /> Доступна{" "}
+                <span className="pill pill-orange" style={{ marginLeft: "auto" }}>
+                  Подписка · {subscriptionCount}
+                </span>
+              </Link>
+              <Link
+                href={{
+                  pathname: "/catalog",
+                  query: { category: categorySlug, group: groupOnly ? undefined : "true" },
+                }}
+                className="filt-toggle"
+                style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
+              >
+                <input type="checkbox" checked={groupOnly} readOnly /> Доступна{" "}
+                <span className="pill pill-blue" style={{ marginLeft: "auto" }}>
+                  Группа · {groupCount}
+                </span>
+              </Link>
+            </div>
+          </aside>
 
-  return (
-    <div className="group flex flex-col rounded-lg border border-border bg-card p-4 transition-all hover:shadow-md">
-      <Link href={`/product/${product.slug}`} className="flex flex-1 flex-col">
-        <div className="relative mb-3 aspect-square overflow-hidden rounded-md bg-muted">
-          {product.imageUrl ? (
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover transition-transform group-hover:scale-[1.02]"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-4xl opacity-60">📦</div>
-          )}
-        </div>
-        <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-          {product.brand && (
-            <>
-              <span>{product.brand}</span>
-              <span>·</span>
-            </>
-          )}
-          <span>{product.packLabel}</span>
-        </div>
-        <h3 className="mb-2 line-clamp-2 text-sm font-medium group-hover:text-primary">
-          {product.name}
-        </h3>
-        <div className="mt-auto space-y-2">
-          <div className="flex items-end justify-between">
-            {price && (
-              <div>
-                <div className="tabular text-lg font-semibold">{formatPrice(price.basePrice.toString())}</div>
-                <div className="text-xs text-muted-foreground">{price.unitLabel}</div>
+          <div>
+            <div className="results-bar">
+              <div className="count">
+                <b>{products.length}</b> {plural(products.length, "товар", "товара", "товаров")} найдено
+                {activeCategory ? ` в категории «${activeCategory.name}»` : ""}
+              </div>
+            </div>
+
+            {products.length === 0 ? (
+              <div
+                style={{
+                  padding: "60px 24px",
+                  textAlign: "center",
+                  border: "1px dashed var(--c-border)",
+                  borderRadius: 12,
+                  color: "var(--c-fg-3)",
+                }}
+              >
+                Ничего не найдено. Попробуй сбросить фильтры или открой полный каталог.
+              </div>
+            ) : (
+              <div className="grid" data-products-grid>
+                {products.map((p) => {
+                  const price = p.prices[0];
+                  const stock = p.inventorySnapshot;
+                  const pricePerUnit = price?.unitLabel ?? "";
+                  return (
+                    <div key={p.id} className="card">
+                      <Link href={`/product/${p.slug}`} className="card-img-link">
+                        <div className="card-img">
+                          {p.imageUrl ? (
+                            <Image src={p.imageUrl} alt={p.name} fill sizes="240px" />
+                          ) : (
+                            <div className="img-ph" style={{ width: "100%", height: "100%" }} />
+                          )}
+                          {(p.isSubscriptionEligible || p.isGroupEligible) && (
+                            <div className="card-badges">
+                              {p.isSubscriptionEligible && (
+                                <span className="pill pill-orange">Подписка</span>
+                              )}
+                              {p.isGroupEligible && <span className="pill pill-blue">Группа</span>}
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                      <div className="card-info">
+                        <div className="card-meta">
+                          {p.brand && (
+                            <>
+                              <span>{p.brand}</span>
+                              <span>·</span>
+                            </>
+                          )}
+                          <span className="pack">{p.packLabel}</span>
+                        </div>
+                        <Link href={`/product/${p.slug}`} className="card-name">
+                          {p.name}
+                        </Link>
+                        <div className="card-data">
+                          <div>
+                            <div className="k">MOQ</div>
+                            <div className="v">
+                              {p.minOrderQty} {p.unitType === "piece" ? "шт" : p.unitType}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="k">Стек</div>
+                            <div className={STOCK_CLASS[stock?.stockStatus ?? "OUT_OF_STOCK"]}>
+                              {stock?.availableQty ?? 0} {p.unitType === "piece" ? "шт" : p.unitType}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="k">Кат.</div>
+                            <div className="v" title={p.category.name}>
+                              {p.category.name.split(" ")[0].toLowerCase()}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="card-bot">
+                          <div>
+                            <div className="card-price tabular">
+                              {price ? Number(price.basePrice.toString()).toLocaleString("ru-RU") : "—"} ₸
+                            </div>
+                            <div className="card-unit">{pricePerUnit}</div>
+                          </div>
+                          {price && (
+                            <QuickAddButton
+                              product={{
+                                productId: p.id,
+                                slug: p.slug,
+                                name: p.name,
+                                image: p.imageUrl ?? null,
+                                price: Number(price.basePrice.toString()),
+                                minOrderQty: p.minOrderQty,
+                                packLabel: p.packLabel,
+                                unitType: p.unitType,
+                                stockStatus: stock?.stockStatus ?? null,
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-            {stockInfo && <Badge variant={stockInfo.tone}>{stockInfo.label}</Badge>}
-          </div>
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Мин. заказ: {product.minOrderQty}</span>
-            {product.isSubscriptionEligible && <Badge variant="info" className="text-[10px]">Подписка</Badge>}
           </div>
         </div>
-      </Link>
-      {price && (
-        <div className="mt-3 pt-3 border-t border-border">
-          <QuickAddButton
-            product={{
-              productId: product.id,
-              slug: product.slug,
-              name: product.name,
-              image: product.imageUrl ?? null,
-              price: Number(price.basePrice.toString()),
-              minOrderQty: product.minOrderQty,
-              packLabel: product.packLabel,
-              unitType: product.unitType,
-              stockStatus: stock?.stockStatus ?? null,
-            }}
-          />
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   );
+}
+
+function plural(n: number, one: string, few: string, many: string) {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
 }
