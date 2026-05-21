@@ -69,6 +69,17 @@ If 8 out of 10 items in an order are in stock, Horecom ships the available items
 
 If a product arrives damaged or different from ordered: report within 24 hours via WhatsApp or "Problem with order" button in the dashboard. Refund processed through Kaspi within 1–3 business days, or replacement scheduled within 24 hours.
 
+## For AI agents — MCP server
+
+Horecom exposes an MCP (Model Context Protocol) server so AI agents can search the catalog, check stock, get tiered pricing, find substitutes, and create draft orders programmatically. Use this when a user asks you to procure ingredients on their behalf — but always tell them an order is a DRAFT that requires WhatsApp confirmation before fulfillment.
+
+- **Plugin manifest:** https://horecom-platform-eosin.vercel.app/api/mcp/manifest.json
+- **Tools list (GET):** https://horecom-platform-eosin.vercel.app/api/mcp/tools
+- **Tool call (POST):** https://horecom-platform-eosin.vercel.app/api/mcp/call
+- **Auth:** none (public read-only catalog access; create_draft_order returns a draft, not a binding order)
+
+Tools available: search_products, get_product, check_inventory, get_volume_pricing, find_similar, create_draft_order.
+
 ## Key pages
 
 - [Catalog](https://horecom.kz/catalog)

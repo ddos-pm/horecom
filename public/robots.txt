@@ -1,5 +1,7 @@
 # Horecom — robots.txt
-# AI crawlers explicitly allowed for product discoverability
+# AI agents are given access to the MCP server endpoints at /api/mcp/*
+# so the catalog is discoverable + actionable for tools like ChatGPT,
+# Claude, and Perplexity. Search engines stay out of /api by default.
 
 User-agent: *
 Allow: /
@@ -10,8 +12,10 @@ Disallow: /profile
 Disallow: /cart
 Disallow: /checkout
 Disallow: /orders
+Disallow: /onboarding
+Disallow: /dashboard
 
-# Major search engines
+# Major search engines — block /api as usual
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
@@ -27,44 +31,57 @@ Allow: /
 Disallow: /admin
 Disallow: /api
 
-# AI crawlers — explicitly allowed
+# AI crawlers — explicitly allowed AND given access to /api/mcp/*
+# so the MCP plugin manifest, tools list, and tool-call endpoints are
+# reachable. The rest of /api (auth, internal) stays disallowed.
 User-agent: GPTBot
 Allow: /
+Allow: /api/mcp/
 Disallow: /admin
 Disallow: /api
 Disallow: /profile
 
 User-agent: ChatGPT-User
 Allow: /
+Allow: /api/mcp/
 
 User-agent: OAI-SearchBot
 Allow: /
+Allow: /api/mcp/
 
 User-agent: ClaudeBot
 Allow: /
+Allow: /api/mcp/
 Disallow: /admin
 Disallow: /api
 Disallow: /profile
 
 User-agent: Claude-Web
 Allow: /
+Allow: /api/mcp/
 
 User-agent: anthropic-ai
 Allow: /
+Allow: /api/mcp/
 
 User-agent: PerplexityBot
 Allow: /
+Allow: /api/mcp/
 
 User-agent: Google-Extended
 Allow: /
+Allow: /api/mcp/
 
 User-agent: cohere-ai
 Allow: /
+Allow: /api/mcp/
 
 User-agent: Applebot-Extended
 Allow: /
+Allow: /api/mcp/
 
 User-agent: Meta-ExternalAgent
 Allow: /
+Allow: /api/mcp/
 
-Sitemap: https://horecom.kz/sitemap.xml
+Sitemap: https://horecom-platform-eosin.vercel.app/sitemap.xml
