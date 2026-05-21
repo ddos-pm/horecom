@@ -122,6 +122,13 @@ export function MarketingFooter() {
           <Link href="/privacy">Конфиденциальность</Link>
           <span aria-hidden="true">·</span>
           <Link href="/delivery-and-payment">Оферта</Link>
+          <span aria-hidden="true">·</span>
+          <a
+            href="/llms.txt"
+            title="Описание каталога и MCP server для AI-агентов"
+          >
+            Для AI-агентов
+          </a>
         </span>
       </div>
     </footer>
