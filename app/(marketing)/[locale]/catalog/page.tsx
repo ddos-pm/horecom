@@ -51,10 +51,15 @@ export default async function CatalogPage({
         ...(groupOnly ? { isGroupEligible: true } : {}),
         ...(query
           ? {
+              // Search across the AI-enriched fields too — a query like
+              // "для макарон" hits products whose useCases mentions the
+              // dish even when the SKU title doesn't.
               OR: [
                 { name: { contains: query, mode: "insensitive" as const } },
                 { brand: { contains: query, mode: "insensitive" as const } },
                 { sku: { contains: query, mode: "insensitive" as const } },
+                { descriptionExtended: { contains: query, mode: "insensitive" as const } },
+                { useCases: { contains: query, mode: "insensitive" as const } },
               ],
             }
           : {}),
