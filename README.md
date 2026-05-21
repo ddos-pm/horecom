@@ -11,22 +11,26 @@ B2B procurement platform for HoReCa businesses in Central Asia.
 ✅ **Mobile-first frontend** на Next.js 15 + Tailwind v3 + shadcn-style components
 ✅ **Company-centric data model** в Prisma (закрыто 4 из 13 gap'ов из synthesis-документа)
 ✅ **Segment-first home page** с тремя сегментами на одном лендинге (S1/S2/S3) — то чего не хватало Tilda
-✅ **Catalog + Product pages** с реальными SKU из текущего Tilda-сайта
+✅ **Catalog + Product pages** — 189 SKU из текущего Tilda, AI-enriched descriptions / use-cases / storage info на каждом PDP
 ✅ **Trust Layer pages**: FAQ (с FAQPage JSON-LD), How ordering works, Subscription, Group Buying, Delivery
-✅ **AI Discoverability layer**: `/llms.txt` (dynamic), `/robots.txt` с AI-ботами, `sitemap.xml`, Organization/WebSite/Product/Breadcrumb/FAQ JSON-LD
-✅ **Seed data** с реальными категориями и топ-SKU из Tilda
-✅ **WhatsApp templates** (DRAFT state, готовы к отправке в Meta)
+✅ **AI Discoverability**: `/llms.txt` (динамический, упоминает MCP), `/robots.txt` пускает AI-боты на `/api/mcp/`, `sitemap.xml`, Product+Offer+Breadcrumb+ItemList+FAQ+Organization+WebSite JSON-LD
+✅ **MCP server** на `/api/mcp/manifest.json` (+ `/.well-known/ai-plugin.json` alias) с 6 tools: search_products, get_product, check_inventory, get_volume_pricing, find_similar, create_draft_order. ILIKE на enriched useCases — запрос «для макарон» возвращает 21 SKU.
+✅ **Cart / Checkout / Orders** — Zustand cart, `/api/orders` server action создаёт Order с status=CREATED, snapshot цен и MOQ-валидация
+✅ **Subscription request flow** — авторизованный пользователь создаёт SubscriptionPlan (status=REVIEW_REQUIRED) через server action
+✅ **Subscription cron** — Vercel Cron @ 04:00 UTC сканирует ACTIVE planы и создаёт UpcomingSubscriptionOrder drafts с snapshot прайса
+✅ **Auth** — Supabase email magic-link (`/login`), session middleware, защищены `/cart /checkout /orders /profile /dashboard /admin /onboarding`
+✅ **Sentry scaffolding** — instrumentation-client.ts + global-error.tsx; ждёт DSN
+✅ **WhatsApp templates** (DRAFT state в DB, готовы к отправке в Meta через 360dialog)
 
 ## Что НЕ реализовано в этом скелете
 
-🔄 OTP-аутентификация — нужен `WHATSAPP_API_KEY` от 360dialog
-🔄 Cart/Checkout логика — placeholder кнопки
-🔄 Subscription workspace — landing page готов, dashboard нет
+🔄 WhatsApp OTP — нужен 360dialog API key (Supabase email magic-link работает как V0 fallback)
+🔄 Реальная отправка email/WhatsApp — stub'ы в `lib/email.ts` и в cron handler; готовы под Resend/360dialog
+🔄 Semantic search via embeddings (find_similar) — pgvector enabled, схема готова, ждёт OpenAI billing
 🔄 Group Buy module — V1.5
 🔄 Admin panel — V1 Sprint 5
 🔄 Kaspi Pay integration — нужны API credentials
 🔄 AmoCRM webhooks — нужны credentials
-🔄 Predictive replenishment cron — после первых 2 успешных доставок на реальных данных
 
 ## Быстрый старт
 
