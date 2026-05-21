@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { MarketingHeader } from "@/components/marketing/header";
+import { MarketingFooter } from "@/components/marketing/footer";
 import { JsonLd, ORG_JSON_LD, WEBSITE_JSON_LD } from "@/components/json-ld";
 
 const inter = Inter({
@@ -35,6 +35,11 @@ export const metadata: Metadata = {
     title: "Horecom — оптовый магазин ингредиентов для кондитеров и HoReCa",
     description:
       "B2B-платформа закупок для кондитеров и HoReCa в Центральной Азии. Подписка, оптовые цены, доставка по Астане.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Horecom" }],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   alternates: {
     canonical: "https://horecom.kz",
@@ -54,9 +59,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd data={WEBSITE_JSON_LD} />
       </head>
       <body className="min-h-screen flex flex-col">
-        <Header />
+        <MarketingHeader />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <MarketingFooter />
       </body>
     </html>
   );

@@ -1,9 +1,10 @@
 /**
- * Horecom — Seed Data
- * 
- * Categories: from existing Tilda site (horecom.kz)
- * Top SKUs: from Tilda views data (April 2025 – May 2026)
- * 
+ * Horecom — Seed Data (v2: 190 real SKUs from Tilda CSV export)
+ *
+ * Source: store-96425-202605201202.csv (Tilda export, May 20, 2026)
+ * Photos: hosted on Tilda CDN — works as long as Tilda subscription active.
+ *         Migrate to Cloudinary before Tilda subscription ends.
+ *
  * Run: pnpm db:seed
  */
 
@@ -15,296 +16,46 @@ import {
   NotificationKind,
   TemplateApprovalStatus,
 } from "@prisma/client";
+import productsData from "./products.json";
 
 const prisma = new PrismaClient();
 
 // ============================================================
-// CATEGORIES (from current horecom.kz Tilda)
+// CATEGORIES & PRODUCTS — loaded from products.json
 // ============================================================
 
-const CATEGORIES = [
-  { name: "Шоколад и глазури", nameKz: "Шоколад және глазурьдер", slug: "chocolate-glazes", sortOrder: 1 },
-  { name: "Бакалея", nameKz: "Бакалея", slug: "bakery-staples", sortOrder: 2 },
-  { name: "Молочная продукция", nameKz: "Сүт өнімдері", slug: "dairy", sortOrder: 3 },
-  { name: "Наполнители и начинки", nameKz: "Толтырғыштар", slug: "fillings", sortOrder: 4 },
-  { name: "Ингредиенты и сырьё", nameKz: "Ингредиенттер", slug: "ingredients", sortOrder: 5 },
-  { name: "Посыпки", nameKz: "Себіндер", slug: "sprinkles", sortOrder: 6 },
-  { name: "Красители пищевые", nameKz: "Тағамдық бояғыштар", slug: "food-colorings", sortOrder: 7 },
-  { name: "Замороженная продукция", nameKz: "Мұздатылған өнімдер", slug: "frozen", sortOrder: 8 },
-  { name: "Соусы и специи", nameKz: "Соустар және дәмдеуіштер", slug: "sauces-spices", sortOrder: 9 },
-  { name: "Пергамент, фольга и плёнка", nameKz: "Пергамент және фольга", slug: "parchment-foil", sortOrder: 10 },
-  { name: "Упаковка", nameKz: "Қаптама", slug: "packaging", sortOrder: 11 },
-];
+interface CategoryDef {
+  name: string;
+  slug: string;
+  nameKz: string;
+  storage: string;
+}
+
+interface ProductDef {
+  sku: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  brand: string | null;
+  categorySlug: string;
+  imageUrl: string;
+  storageType: string;
+  unitType: string;
+  packLabel: string;
+  minOrderQty: number;
+  basePrice: number;
+  unitLabel: string;
+  stock: number;
+  isSubscriptionEligible: boolean;
+  isGroupEligible: boolean;
+  tildaUid: string;
+}
+
+const CATEGORIES = productsData.categories as CategoryDef[];
+const PRODUCTS = productsData.products as ProductDef[];
 
 // ============================================================
-// PRODUCTS (top viewed on Tilda + extras to fill catalog)
-// ============================================================
-
-const PRODUCTS = [
-  // Top viewed (real Tilda data)
-  {
-    sku: "HC-DRAJ-001",
-    name: "Драже зерновое в глазури 6-8 мм, 500 г",
-    brand: "Корпус-Групп",
-    categorySlug: "sprinkles",
-    description: "Зерновое драже в шоколадной глазури для декора тортов и десертов. Размер 6-8 мм. Упаковка 500 г.",
-    unitType: "piece",
-    packLabel: "500 г",
-    minOrderQty: 2,
-    basePrice: 2400,
-    unitLabel: "₸/упак",
-    stock: 48,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-DRAJ-002",
-    name: "Драже зерновое в цветной кондитерской глазури, 500 г",
-    brand: "Корпус-Групп",
-    categorySlug: "sprinkles",
-    description: "Цветное драже для декора кондитерских изделий. Микс цветов. Упаковка 500 г.",
-    unitType: "piece",
-    packLabel: "500 г",
-    minOrderQty: 2,
-    basePrice: 2600,
-    unitLabel: "₸/упак",
-    stock: 32,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-MUKA-RJ-25",
-    name: "Мука ржаная, 25 кг",
-    brand: "Алтайская",
-    categorySlug: "bakery-staples",
-    description: "Мука ржаная хлебопекарная. Мешок 25 кг. Для производства ржаного и заварного хлеба.",
-    unitType: "kg",
-    packLabel: "25 кг",
-    minOrderQty: 1,
-    basePrice: 8500,
-    wholesaleThreshold: 4,
-    wholesalePrice: 7900,
-    unitLabel: "₸/мешок",
-    stock: 24,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-MUKA-GR-25",
-    name: "Мука гречневая, 25 кг",
-    brand: "Алтайская",
-    categorySlug: "bakery-staples",
-    description: "Мука гречневая. Мешок 25 кг. Для безглютеновой выпечки и блинов.",
-    unitType: "kg",
-    packLabel: "25 кг",
-    minOrderQty: 1,
-    basePrice: 14500,
-    wholesaleThreshold: 4,
-    wholesalePrice: 13800,
-    unitLabel: "₸/мешок",
-    stock: 12,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-SG-VOST-1",
-    name: "Сгущёнка-варёнка Восточная, 1 кг",
-    brand: "Восточная",
-    categorySlug: "fillings",
-    description: "Варёное сгущённое молоко. Упаковка 1 кг. Для начинок, кремов, эклеров.",
-    unitType: "kg",
-    packLabel: "1 кг",
-    minOrderQty: 6,
-    basePrice: 1850,
-    wholesaleThreshold: 24,
-    wholesalePrice: 1720,
-    unitLabel: "₸/банка",
-    stock: 96,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-FILO-340",
-    name: "Тесто фило, 340 г",
-    brand: "Antico",
-    categorySlug: "frozen",
-    description: "Тонкое слоёное тесто фило. Упаковка 340 г. Хранение замороженное.",
-    unitType: "piece",
-    packLabel: "340 г",
-    minOrderQty: 6,
-    basePrice: 1290,
-    unitLabel: "₸/упак",
-    stock: 8,
-    isSubscriptionEligible: true,
-    isGroupEligible: false,
-    storageType: StorageType.FROZEN,
-  },
-  {
-    sku: "HC-PUR-MANGO",
-    name: "Пюре манго Andros, 1 кг",
-    brand: "Andros",
-    categorySlug: "fillings",
-    description: "Фруктовое пюре манго без сахара. Упаковка 1 кг. Для муссов, прослоек, начинок.",
-    unitType: "kg",
-    packLabel: "1 кг",
-    minOrderQty: 2,
-    basePrice: 3800,
-    wholesaleThreshold: 12,
-    wholesalePrice: 3600,
-    unitLabel: "₸/кг",
-    stock: 18,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.REFRIGERATED,
-  },
-  {
-    sku: "HC-CHE-KALE",
-    name: "Сыр «Сир Кале» сливочный 74%, 500 г",
-    brand: "Сир Кале",
-    categorySlug: "dairy",
-    description: "Сыр сливочный 74% жирности. Упаковка 500 г. Для крем-чиз кремов, чизкейков.",
-    unitType: "kg",
-    packLabel: "500 г",
-    minOrderQty: 4,
-    basePrice: 2750,
-    wholesaleThreshold: 20,
-    wholesalePrice: 2600,
-    unitLabel: "₸/упак",
-    stock: 36,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.REFRIGERATED,
-  },
-  // Additional realistic SKUs to fill catalog
-  {
-    sku: "HC-CHOC-BC-54",
-    name: "Шоколад Barry Callebaut 54% тёмный, 2.5 кг",
-    brand: "Barry Callebaut",
-    categorySlug: "chocolate-glazes",
-    description: "Тёмный шоколад в каплях, какао 54%. Профессиональная фасовка 2.5 кг.",
-    unitType: "kg",
-    packLabel: "2.5 кг",
-    minOrderQty: 1,
-    basePrice: 24500,
-    wholesaleThreshold: 4,
-    wholesalePrice: 23200,
-    unitLabel: "₸/упак",
-    stock: 14,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-CHOC-CL-MILK",
-    name: "Шоколад Callebaut молочный 33.6%, 2.5 кг",
-    brand: "Callebaut",
-    categorySlug: "chocolate-glazes",
-    description: "Молочный шоколад в каплях, какао 33.6%. Профессиональная фасовка 2.5 кг.",
-    unitType: "kg",
-    packLabel: "2.5 кг",
-    minOrderQty: 1,
-    basePrice: 22800,
-    wholesaleThreshold: 4,
-    wholesalePrice: 21500,
-    unitLabel: "₸/упак",
-    stock: 10,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-CR-LACT-35",
-    name: "Сливки Lactel 35%, 1 л",
-    brand: "Lactel",
-    categorySlug: "dairy",
-    description: "Сливки питьевые 35% жирности. УВТ-обработка. Упаковка 1 л.",
-    unitType: "l",
-    packLabel: "1 л",
-    minOrderQty: 6,
-    basePrice: 1450,
-    unitLabel: "₸/л",
-    stock: 72,
-    isSubscriptionEligible: true,
-    isGroupEligible: false,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-MAS-FIL",
-    name: "Мастика сахарная Saracino белая, 1 кг",
-    brand: "Saracino",
-    categorySlug: "ingredients",
-    description: "Профессиональная сахарная мастика для покрытия тортов и моделирования. Белая.",
-    unitType: "kg",
-    packLabel: "1 кг",
-    minOrderQty: 1,
-    basePrice: 4900,
-    unitLabel: "₸/кг",
-    stock: 28,
-    isSubscriptionEligible: false,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-PARCH-50",
-    name: "Пергамент в рулоне 50 м",
-    brand: "Hozplast",
-    categorySlug: "parchment-foil",
-    description: "Силиконизированный пергамент. Ширина 38 см, длина 50 м.",
-    unitType: "piece",
-    packLabel: "1 рулон",
-    minOrderQty: 2,
-    basePrice: 1980,
-    wholesaleThreshold: 12,
-    wholesalePrice: 1850,
-    unitLabel: "₸/рулон",
-    stock: 65,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-DYE-AME-RED",
-    name: "Краситель гелевый AmeriColor Red, 130 г",
-    brand: "AmeriColor",
-    categorySlug: "food-colorings",
-    description: "Профессиональный гелевый краситель для крема, мастики, теста. Цвет: красный.",
-    unitType: "piece",
-    packLabel: "130 г",
-    minOrderQty: 1,
-    basePrice: 3200,
-    unitLabel: "₸/шт",
-    stock: 22,
-    isSubscriptionEligible: false,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-  {
-    sku: "HC-BOX-25",
-    name: "Коробка для торта 25×25×15 см, белая",
-    brand: "Pak-Pro",
-    categorySlug: "packaging",
-    description: "Коробка картонная для торта с прозрачным окошком. Белая. 25×25×15 см.",
-    unitType: "piece",
-    packLabel: "1 шт",
-    minOrderQty: 10,
-    basePrice: 580,
-    wholesaleThreshold: 50,
-    wholesalePrice: 530,
-    unitLabel: "₸/шт",
-    stock: 240,
-    isSubscriptionEligible: true,
-    isGroupEligible: true,
-    storageType: StorageType.AMBIENT,
-  },
-];
-
-// ============================================================
-// WHATSAPP TEMPLATES (to be submitted to Meta)
+// WHATSAPP TEMPLATES (to be submitted to Meta for approval)
 // ============================================================
 
 const WA_TEMPLATES = [
@@ -363,42 +114,29 @@ const WA_TEMPLATES = [
 // SEED
 // ============================================================
 
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[а-я]/g, (c) => {
-      const map: Record<string, string> = {
-        а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh",
-        з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o",
-        п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts",
-        ч: "ch", ш: "sh", щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
-      };
-      return map[c] ?? c;
-    })
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 async function main() {
-  console.log("🌱 Seeding Horecom database…");
+  console.log("🌱 Seeding Horecom (v2: 190 real SKUs from Tilda export)…");
 
   // Categories
-  console.log("→ Categories");
-  for (const cat of CATEGORIES) {
+  console.log(`→ Categories (${CATEGORIES.length})`);
+  for (const [idx, cat] of CATEGORIES.entries()) {
     await prisma.category.upsert({
       where: { slug: cat.slug },
-      update: cat,
-      create: cat,
+      update: { name: cat.name, nameKz: cat.nameKz, sortOrder: idx },
+      create: { name: cat.name, nameKz: cat.nameKz, slug: cat.slug, sortOrder: idx },
     });
   }
 
   // Products + Prices + InventorySnapshots
-  console.log("→ Products");
+  console.log(`→ Products (${PRODUCTS.length})`);
+  let done = 0;
   for (const p of PRODUCTS) {
     const category = await prisma.category.findUnique({ where: { slug: p.categorySlug } });
-    if (!category) throw new Error(`Category ${p.categorySlug} not found`);
+    if (!category) {
+      console.warn(`⚠️  Skipping ${p.sku}: category ${p.categorySlug} not found`);
+      continue;
+    }
 
-    const slug = slugify(p.name);
     const stockStatus: StockStatus =
       p.stock === 0 ? StockStatus.OUT_OF_STOCK : p.stock < 10 ? StockStatus.LOW_STOCK : StockStatus.IN_STOCK;
 
@@ -406,11 +144,12 @@ async function main() {
       where: { sku: p.sku },
       update: {
         name: p.name,
-        slug,
+        slug: p.slug,
         description: p.description,
         brand: p.brand,
+        imageUrl: p.imageUrl,
         categoryId: category.id,
-        storageType: p.storageType,
+        storageType: p.storageType as StorageType,
         unitType: p.unitType,
         packLabel: p.packLabel,
         minOrderQty: p.minOrderQty,
@@ -420,11 +159,12 @@ async function main() {
       create: {
         sku: p.sku,
         name: p.name,
-        slug,
+        slug: p.slug,
         description: p.description,
         brand: p.brand,
+        imageUrl: p.imageUrl,
         categoryId: category.id,
-        storageType: p.storageType,
+        storageType: p.storageType as StorageType,
         unitType: p.unitType,
         packLabel: p.packLabel,
         minOrderQty: p.minOrderQty,
@@ -440,8 +180,6 @@ async function main() {
         productId: product.id,
         basePrice: p.basePrice,
         unitLabel: p.unitLabel,
-        wholesaleThreshold: p.wholesaleThreshold,
-        wholesalePrice: p.wholesalePrice,
       },
     });
 
@@ -460,10 +198,13 @@ async function main() {
         source: InventoryUpdateSource.MANUAL_ADMIN,
       },
     });
+
+    done++;
+    if (done % 50 === 0) console.log(`  …${done}/${PRODUCTS.length}`);
   }
 
   // WhatsApp templates (DRAFT state — to be submitted to Meta)
-  console.log("→ WhatsApp templates");
+  console.log(`→ WhatsApp templates (${WA_TEMPLATES.length})`);
   for (const t of WA_TEMPLATES) {
     await prisma.whatsAppTemplate.upsert({
       where: { name: t.name },
@@ -478,10 +219,14 @@ async function main() {
     });
   }
 
+  console.log("");
   console.log("✅ Seed complete");
   console.log(`   ${CATEGORIES.length} categories`);
-  console.log(`   ${PRODUCTS.length} products`);
-  console.log(`   ${WA_TEMPLATES.length} WhatsApp templates (DRAFT)`);
+  console.log(`   ${done} products with real photos from Tilda CDN`);
+  console.log(`   ${WA_TEMPLATES.length} WhatsApp templates (DRAFT — submit to Meta)`);
+  console.log("");
+  console.log("ℹ️  Note: stock quantities are all 0 — co-founder to update via admin panel");
+  console.log("ℹ️  Note: brands detected for 5/190 products — manual enrichment needed");
 }
 
 main()

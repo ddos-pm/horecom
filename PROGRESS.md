@@ -1,9 +1,68 @@
-# Horecom V1 — Progress Tracker
+# Horecom — Progress Tracker
 
 > Living document. Update this every time something ships or unblocks.
 > Format: `[ ]` = todo, `[x]` = done, `[~]` = in progress, `[!]` = blocked
 
-## Sprint 0 — Foundation (DONE — May 19, 2026)
+> **V0 plan locked 2026-05-21:** `HORECOM_V0_BUILD_PLAN.md` is the single source of truth.
+> 9 этапов за ~8 рабочих дней. Defaults в плане non-negotiable.
+
+## V0 Plan — Этап 0: Brand kit + Supabase + Prisma (DONE — May 21, 2026)
+
+### Brand kit applied (from horecom-brand-kit/)
+- [x] Logos copied to `public/logos/` (full/horizontal/header/mark + favicon + apple-touch + og-image)
+- [x] `app/globals.css` + `tailwind.config.ts` → electric blue (#394AD4) + orange (#F18007) palette
+- [x] `lib/company.ts` created — single source of truth (individual entrepreneur (details on request), ИИН ***REMOVED***, IBAN, banking)
+- [x] `prisma/seed.ts` + `prisma/products.json` → 190 real SKUs from Tilda CSV export
+- [x] `components/marketing/{header,footer}.tsx` with new branding + split phones (WA-only + voice-only)
+- [x] `app/layout.tsx` — MarketingHeader/Footer imports + openGraph.images + icons
+- [x] `app/privacy/page.tsx` — ТОО → individual entrepreneur (details on request) via `COMPANY` import
+- [x] Old `components/header.tsx` and `components/footer.tsx` deleted
+
+### Supabase + Prisma
+- [x] Supabase project `gwalkelamvtdoamqnnle` provisioned
+- [x] `.env.local` + `.env` populated (DATABASE_URL=DIRECT_URL on direct connection 5432; switch to pooler on Vercel deploy)
+- [x] `prisma/schema.prisma` datasource updated with `directUrl`
+- [x] `prisma migrate dev --name initial` → migration `20260521000350_initial` applied
+- [x] `prisma.seed` block added to `package.json`
+- [x] `npm run db:seed` succeeded: 11 categories, 190 products, 6 WhatsApp templates (DRAFT)
+
+### Verification
+- [x] `npm install --legacy-peer-deps` clean
+- [x] `npm run dev` → HTTP 200 on /, /catalog, /product/[slug]
+- [x] Home renders real categories + individual entrepreneur (details on request) + WA phone
+- [x] /catalog renders 190 unique product links
+- [x] PDP renders product name + SKU + ₸ symbol
+- [x] `npm run build` passes (11 routes, 7 static + 4 dynamic)
+
+### Known follow-ups (not blocking)
+- [ ] Switch `DATABASE_URL` to Transaction Pooler (port 6543) on Vercel deploy — region currently unknown
+- [ ] Rotate Supabase secret key after V0 ships — leaked once in session chat
+- [ ] Stock quantities = 0 for all 190 products — менеджер to set via admin panel (Этап 6)
+- [ ] Brands detected for only 5/190 products — manual enrichment via admin (Этап 6)
+
+## V0 Plan — Этапы 1-9: pending
+
+- [ ] **Этап 1** — Route groups (marketing) и (app) (1 день)
+- [ ] **Этап 2** — Auth: Supabase magic link + onboarding (1 день)
+- [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
+- [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
+- [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
+- [ ] **Этап 6** — Минимальная админка (1.5 дня)
+- [ ] **Этап 7** — Локализация RU/KZ для (marketing) (1 день)
+- [ ] **Этап 8** — Pre-deploy polish (0.5 дня)
+- [ ] **Этап 9** — Deploy на Vercel + v0.0.1 tag (15 мин)
+
+## Blockers / external dependencies
+
+- [!] **GitHub push** to `ddos-pm/horecom` blocked — этот Mac авторизован как `Sariev-Alizhan`. Нужен `gh auth login` под co-founderа (см. memory). Локальные коммиты накапливаются, push сделаем когда auth разрулим.
+- [~] **WhatsApp Business API approval (360dialog)** — нужно для перехода V0→V1 (auth + transactional). НЕ блокирует V0.
+- [~] **Kaspi Pay Business API approval** — нужно для перехода V0→V1 (online payments). НЕ блокирует V0.
+
+---
+
+## Historic context: original V1 Sprint plan (May 19, 2026 — superseded by V0 plan)
+
+### Sprint 0 — Foundation (DONE — May 19, 2026)
 
 ### Scaffolding
 - [x] Next.js 15 + React 19 RC + TypeScript project initialized

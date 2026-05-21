@@ -2,38 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Horecom Brand Tokens (May 2026 — derived from official logo)
+ * 
+ * Primary:    Electric Blue   #394AD4   HSL(233, 64%, 53%)
+ * Accent:     Brand Orange    #F18007   HSL(31, 96%, 48%)
+ * Background: Pure Black      #000000   (for marketing hero/footer)
+ * 
+ * Use blue for: links, primary CTAs on light bg, headings emphasis, badges
+ * Use orange for: secondary CTAs, attention badges (Subscription, Group),
+ *                 active filters, success states tied to the brand
+ * Use black for: marketing hero/dark sections, contrast pairing
+ */
+
 @layer base {
   :root {
-    /* Base — neutral B2B operational tone */
-    --background: 210 20% 98%;          /* #F8FAFC */
+    /* Surfaces */
+    --background: 0 0% 100%;            /* #FFFFFF */
     --foreground: 222 47% 11%;          /* #0F172A */
-    --card: 0 0% 100%;                  /* #FFFFFF */
+    --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --muted: 210 40% 96%;               /* #F1F5F9 */
     --muted-foreground: 215 16% 47%;
     --border: 214 32% 91%;              /* #E2E8F0 */
     --input: 214 32% 91%;
-    --ring: 173 80% 26%;
 
-    /* Primary — green for operational trust */
-    --primary: 168 76% 25%;             /* #0F766E teal-700 */
+    /* Brand: electric blue (extracted from logo) */
+    --primary: 233 64% 53%;             /* #394AD4 — wordmark blue */
     --primary-foreground: 0 0% 100%;
+    --ring: 233 64% 53%;
 
+    /* Brand: orange (extracted from logo) */
+    --accent: 31 96% 48%;               /* #F18007 — bird orange */
+    --accent-foreground: 0 0% 100%;
+
+    /* Secondary surface */
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
 
-    --accent: 168 76% 25%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 72% 51%;           /* #B91C1C */
-    --destructive-foreground: 0 0% 100%;
+    /* Marketing dark surface — for hero, footer */
+    --brand-dark: 0 0% 0%;              /* #000000 */
+    --brand-dark-foreground: 0 0% 100%;
 
     /* Semantic */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
     --success: 142 70% 30%;             /* #15803D */
-    --warning: 33 91% 35%;              /* #B45309 */
-    --info: 224 75% 47%;                /* #1D4ED8 */
+    --warning: 33 91% 35%;
+    --info: 233 64% 53%;                /* same as primary brand */
 
-    --radius: 0.625rem;                 /* 10px — inputs/buttons */
+    --radius: 0.625rem;
   }
 
   * {
@@ -60,9 +78,23 @@
     @apply mx-auto max-w-6xl px-4 sm:px-6;
   }
   
-  /* Min tap target 44×44 for mobile */
   .tap-target {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Marketing dark hero section */
+  .surface-dark {
+    @apply bg-black text-white;
+  }
+  
+  /* Brand accent text — orange on important emphasis */
+  .text-brand-accent {
+    color: hsl(var(--accent));
+  }
+  
+  /* Brand primary — blue */
+  .text-brand-primary {
+    color: hsl(var(--primary));
   }
 }
