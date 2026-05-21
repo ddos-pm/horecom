@@ -155,9 +155,43 @@
 - Email уведомления — только console.log (Resend integration в V1)
 - Substitution flow в админке без email клиенту — менеджер связывается через WhatsApp (V1)
 
-## V0 Plan — Этапы 4-9: pending
+## V0 Plan — Этап 4: Личный кабинет + Профиль + адреса (DONE — May 21, 2026)
 
-- [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
+### /dashboard
+- [x] `dashboard/page.tsx` — server component, читает companyName, last order, active subscription, последние 5 заказов
+- [x] 3 карточки: LastOrderCard (с CTA "Открыть" или "Сделать первый") / SubscriptionCard (status + nextDelivery или CTA "Подключить") / CartCard (client, Zustand-aware)
+- [x] Last 5 orders inline list + "Все заказы →"
+- [x] Welcome toast (?welcome=true) после онбординга
+
+### /profile (3 секции)
+- [x] CompanyForm (client + useTransition) — name, БИН/ИИН, segment (read-only с пояснением), substitutionPreference (select)
+- [x] AddressList (client) — список + Add/Edit/Delete/SetDefault + модалка-редактор
+- [x] ContactForm (client) — email (read-only из Supabase), name, phone
+
+### actions.ts
+- [x] `updateCompany` — Zod, обновляет name/binOrIin/substitutionPreference
+- [x] `updateContact` — Zod, обновляет User.name/phone
+- [x] `upsertAddress` — create or update (с проверкой ownership)
+- [x] `deleteAddress` — guard: если адрес используется в заказах → 400; авто-promote другого как default если удалён default
+- [x] `setDefaultAddress` — транзакция: всем false, выбранному true
+- [x] revalidatePath после каждой мутации (/profile + /dashboard + /checkout)
+
+### /subscription/manage
+- [x] Server-rendered, по companyId
+- [x] Empty state с CTA "Оформить подписку"
+- [x] List planов: cadence badge + status badge + nextDeliveryDate + items с defaultQty
+- [x] Info banner про ручную обработку в V0 + ссылка "Подать ещё запрос"
+
+### Verification
+- [x] `npm run build` clean (26 routes, /dashboard 3.03 kB, /profile 4.75 kB)
+- [x] Server actions используют revalidatePath, без full refetch
+
+### Limitations (V0)
+- Address.createdAt отсутствует в schema → orderBy уюзаем `[isDefault desc, id asc]` (cuid примерно time-sortable). Если потребуется истинная сортировка по времени — миграция в V1.
+
+## V0 Plan — Этапы 5-9: pending
+
+- [ ] **Этап 5** — Subscription request + Group Buy waitlist формы (0.5 дня)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
