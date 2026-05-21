@@ -323,6 +323,37 @@
 ### Verification
 - [x] `npm run build` clean
 
+## Этап 1.5 — Интеграция v2 дизайна от Claude Design (PARTIAL — May 21, 2026)
+
+> Из `design-final-clean/INTEGRATION_BRIEF.md` (вставка между Этапом 1 и Этапом 2 по `HORECOM_V0_BUILD_PLAN.md`). Бриф 7 шагов. По времени в одной сессии — выполнены критичные 4, остальные оставлены под V1 follow-up (см. ниже).
+
+### Done в этой сессии
+- [x] **Шаг 1 — CSS tokens.** `app/globals.css` обновлён под v2: `--c-blue / --c-orange / --c-bg-soft #FAFAF9 / --r-* / --f-display Inter Tight / --f-text Inter`, утилитарные классы `.btn .btn-primary .btn-orange .btn-ghost / .pill / .live-dot / .card-x / .input-x / .t-eyebrow / .h1 .h2 .h3 .h4 / .container-x / .img-cover / show-md / show-mobile / dark-surface`. HSL-токены оставлены как мостик для shadcn-кнопок/бейджей.
+- [x] **Inter Tight шрифт** подключён через `next/font/google` в `app/layout.tsx`, проброшен в CSS через `--f-display` / `--f-text` переменные.
+- [x] **Шаг 2 — Layout shell:**
+  - `components/marketing/header.tsx` — server component, single-bar header (logo, nav `show-md`, search `show-md`, login, cart, hamburger `show-mobile`)
+  - `components/marketing/mobile-drawer.tsx` — `"use client"`, useState/useEffect для open/close, Escape-key, body scroll lock, search + nav + контакты
+  - `components/marketing/footer.tsx` — 4-колоночный footer на чёрном фоне с COMPANY data
+  - `components/marketing/status-strip.tsx` — server component с live `prisma.order.count` + `product.count`; mobile 2 метрики / desktop 5
+  - все стили `.hc-*` добавлены в `app/globals.css` (~250 строк новых)
+- [x] **Шаг 3 — Главная.** `app/(marketing)/[locale]/page.tsx` перенесена 1:1 из `home.html` body:
+  - hero (status strip + h1 «Без звонков» + product card preview из БД) → trust strip (5 чисел + бренд-полоса) → segment cards (S1/S2/S3) → categories grid (11 из БД + Весь каталог tile) → featured products (8 из БД) → operations band (flow + 4 operational seriousness items) → proof (testimonial Анары + 4 stats) → final CTA
+  - `home.css` (~640 строк) extracted из `home.html` `<style>` блока + дополнения для transparent WA-buttons, cats-head, ops-eyebrow, cat-dark
+  - Все ссылки через `Link` из `@/i18n/routing` (locale-aware), DB-данные через Prisma
+- [x] **Шаг 7 — Mobile kbd hide.** `.kbd-shortcut { display: none }` под `@media (max-width: 767.98px)` в globals.css.
+- [x] **Логотипы** обновлены из v2 (`logo-horizontal.png`, `logo-horizontal-transparent.png`, `logo-mark.png`)
+- [x] **Build clean:** 32 routes, middleware 122 kB
+
+### Deferred to V1 follow-up
+- [ ] **Шаг 4 — Каталог по v2.** Текущая страница `app/(marketing)/[locale]/catalog/page.tsx` функциональна (QuickAddButton, поиск из URL, рендер из БД), но не имеет v2-layout (sidebar filters, view toggle, sort dropdown). HTML `catalog.html` (1021 строка) → переписать с client-component `catalog-client.tsx` + URL-driven фильтры + sort.
+- [ ] **Шаг 5 — PDP по v2.** Текущая `app/(marketing)/[locale]/product/[slug]/page.tsx` работает (AddToCartButton, JSON-LD, volume tiers), но не имеет v2-layout (photo gallery slider, расширенная volume tier table). HTML `product.html` (821 строка) → перенести.
+- [ ] **Шаг 6 — Subscription + Group Buying landing по v2.** Текущие лендинги функциональны (форма-запрос, waitlist), но не имеют v2-визуала (predictive chart с Кофейней «Куст» в subscription; live-group card с countdown в group-buying). HTML `subscription.html` (955) + `group-buying.html` (944) → перенести SVG charts + countdown widget.
+
+### Source design package
+- `design-final-clean/horecom/*.html` — все 5 mockups + assets/{tokens.css, layout.js, catalog.js, logos}
+- `design-final-clean/INTEGRATION_BRIEF.md` — бриф с пошаговой инструкцией
+- Папка в `.gitignore` — на диске, не в репо (484KB статики мокапов).
+
 ## V0 Plan — Этап 9: Deploy на Vercel (READY — May 21, 2026)
 
 ### Что подготовлено в коде

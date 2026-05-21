@@ -1,83 +1,47 @@
-import Image from "next/image";
-import { Search, ShoppingCart, Phone, MessageCircle } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { Search, ShoppingCart } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
-import { COMPANY } from "@/lib/company";
-import { LanguageSwitcher } from "./language-switcher";
+import { MobileDrawer } from "./mobile-drawer";
 
-export async function MarketingHeader() {
-  const t = await getTranslations("header");
-
+export function MarketingHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-      {/* Top utility bar with phones — visible on desktop */}
-      <div className="hidden border-b border-border bg-muted/50 md:block">
-        <div className="container-tight flex h-9 items-center justify-end gap-6 text-xs text-muted-foreground">
-          <a
-            href={COMPANY.whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 hover:text-foreground"
-          >
-            <MessageCircle className="h-3.5 w-3.5 text-brand-orange" />
-            <span>{COMPANY.phoneWhatsAppDisplay}</span>
-            <span className="text-muted-foreground">· {t("phoneWhatsApp")}</span>
-          </a>
-          <a
-            href={`tel:${COMPANY.phoneCallback}`}
-            className="inline-flex items-center gap-1.5 hover:text-foreground"
-          >
-            <Phone className="h-3.5 w-3.5 text-brand-blue" />
-            <span>{COMPANY.phoneCallbackDisplay}</span>
-            <span className="text-muted-foreground">· {t("phoneVoice")}</span>
-          </a>
-          <LanguageSwitcher />
-        </div>
-      </div>
+    <>
+      <header className="hc-header">
+        <div className="container-x hc-main">
+          <MobileDrawer />
 
-      {/* Main bar */}
-      <div className="container-tight flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="flex items-center" aria-label="Horecom">
-          <Image
-            src="/logos/logo-horizontal.png"
-            alt="Horecom"
-            width={160}
-            height={86}
-            priority
-            className="h-9 w-auto"
-          />
-        </Link>
+          <Link href="/" className="hc-logo" aria-label="Horecom — главная">
+            <img src="/logos/logo-horizontal-transparent.png" alt="Horecom" className="logo-img" />
+          </Link>
 
-        <div className="hidden flex-1 md:flex md:max-w-xl">
-          <form action="/catalog" method="get" className="relative w-full">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <nav className="hc-nav show-md">
+            <Link href="/catalog">Каталог</Link>
+            <Link href="/subscription">Подписка</Link>
+            <Link href="/group-buying">
+              Группа <span className="hc-nav-flag">V1.5</span>
+            </Link>
+          </nav>
+
+          <form action="/catalog" method="get" className="hc-search show-md" role="search">
+            <Search className="h-4 w-4" />
             <input
               type="search"
               name="q"
-              placeholder={t("searchPlaceholder")}
-              className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              placeholder="Barry Callebaut, мука 25 кг, пюре манго…"
+              aria-label="Поиск"
             />
+            <kbd className="kbd-shortcut">⌘K</kbd>
           </form>
-        </div>
 
-        <nav className="flex items-center gap-2">
-          <Link href="/catalog" className="hidden md:inline-flex">
-            <Button variant="ghost">{t("nav.catalog")}</Button>
-          </Link>
-          <Link href="/subscription" className="hidden lg:inline-flex">
-            <Button variant="ghost">{t("nav.subscription")}</Button>
-          </Link>
-          <a href="/login">
-            <Button variant="outline" size="sm">{t("login")}</Button>
-          </a>
-          <a href="/cart">
-            <Button variant="default" size="icon" aria-label={t("cart")}>
+          <div className="hc-actions">
+            <a href="/login" className="hc-login show-md">
+              Войти
+            </a>
+            <a href="/cart" className="hc-cart" aria-label="Корзина">
               <ShoppingCart className="h-5 w-5" />
-            </Button>
-          </a>
-        </nav>
-      </div>
-    </header>
+            </a>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }
