@@ -7,10 +7,12 @@ import { QuickAddButton } from "@/components/cart/quick-add-button";
 import { formatUnit } from "@/lib/units";
 import "./catalog.css";
 
-// ISR — base /catalog (no filters) is cached for 5 min and refreshes in the
-// background. Filtered URLs (?category=…&subscription=true&q=…) bypass the
-// static cache automatically because of dynamic searchParams access.
-export const revalidate = 300;
+// Catalog is filter-heavy (category, q, subscription, group). Marking it
+// `revalidate` made the Next 15 router cache reuse the base /catalog RSC
+// when soft-navigating to filtered URLs — sidebar clicks looked like
+// no-ops. Force dynamic: each navigation gets a fresh server render keyed
+// to the exact searchParams.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Каталог · опт ингредиентов для кондитерских и HoReCa",
