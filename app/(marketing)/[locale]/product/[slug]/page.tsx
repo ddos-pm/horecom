@@ -337,22 +337,45 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </div>
 
       <div className="container-x pdp-below">
-        {product.description && (
+        {(product.description ||
+          product.descriptionExtended ||
+          product.useCases ||
+          product.composition) && (
           <section className="pdp-sec">
             <div className="show-md-grid">
               <div>
                 <h2>Описание</h2>
                 <div className="pdp-desc">
-                  <p>{product.description}</p>
+                  {product.descriptionExtended ? (
+                    <p>{product.descriptionExtended}</p>
+                  ) : product.description ? (
+                    <p>{product.description}</p>
+                  ) : null}
+                  {product.useCases && (
+                    <div className="pdp-use" style={{ marginTop: 16 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--c-fg-2)", marginBottom: 6 }}>
+                        Когда использовать
+                      </h3>
+                      <p style={{ color: "var(--c-fg-2)" }}>{product.useCases}</p>
+                    </div>
+                  )}
+                  {product.composition && (
+                    <div className="pdp-comp" style={{ marginTop: 16 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--c-fg-2)", marginBottom: 6 }}>
+                        Состав
+                      </h3>
+                      <p style={{ color: "var(--c-fg-2)" }}>{product.composition}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
                 <h2>Характеристики</h2>
                 <div className="specs">
-                  {product.brand && (
+                  {(product.brandResolved ?? product.brand) && (
                     <div className="spec">
                       <span className="k">Бренд</span>
-                      <span className="v">{product.brand}</span>
+                      <span className="v">{product.brandResolved ?? product.brand}</span>
                     </div>
                   )}
                   <div className="spec">
@@ -365,7 +388,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   </div>
                   <div className="spec">
                     <span className="k">Хранение</span>
-                    <span className="v">{storageLabel(product.storageType)}</span>
+                    <span className="v">{product.storageInfo ?? storageLabel(product.storageType)}</span>
                   </div>
                   <div className="spec">
                     <span className="k">Мин. заказ</span>
