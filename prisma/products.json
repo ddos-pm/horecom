@@ -1722,25 +1722,6 @@
       "tildaUid": "168990507744"
     },
     {
-      "sku": "HC-FOOD-0088",
-      "name": "Copy: DECOL 7г белый жирорастворимый",
-      "slug": "copy-decol-7g-belyy-zhirorastvorimyy",
-      "description": "Краситель на масляной основе",
-      "brand": null,
-      "categorySlug": "food-colorings",
-      "imageUrl": "https://static.tildacdn.com/stor6266-6533-4036-b136-623639313232/80d2a4a9b1e77602ed44f8807b362a1b.webp",
-      "storageType": "AMBIENT",
-      "unitType": "piece",
-      "packLabel": "7 г",
-      "minOrderQty": 2,
-      "basePrice": 550.0,
-      "unitLabel": "₸/упак",
-      "stock": 0,
-      "isSubscriptionEligible": true,
-      "isGroupEligible": false,
-      "tildaUid": "928073625504"
-    },
-    {
       "sku": "HC-FOOD-0089",
       "name": "DECOL 5г черный жирорастворимый",
       "slug": "decol-5g-chernyy-zhirorastvorimyy",

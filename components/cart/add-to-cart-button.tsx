@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/lib/cart-store";
+import { formatUnit } from "@/lib/units";
 
 type Props = {
   product: Omit<CartItem, "quantity"> & { stockStatus?: string | null };
@@ -25,7 +26,7 @@ export function AddToCartButton({ product }: Props) {
   function add() {
     addItem({ ...product, quantity: qty });
     toast.success("Добавлено в корзину", {
-      description: `${product.name} · ${qty} ${product.unitType === "piece" ? "шт" : product.unitType}`,
+      description: `${product.name} · ${qty} ${formatUnit(product.unitType)}`,
     });
   }
 

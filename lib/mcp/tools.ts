@@ -108,21 +108,64 @@ function productToCard(p: {
 // ────────────────────────────────────────────────────────────────────
 // Tool handlers
 
+/**
+ * Build search "stems" so Russian morphology queries like "сгущёнка" still
+ * match stored "Сгущённое молоко". Handles three problem cases:
+ *   1) Declension: "сгущёнка" → also search prefix "сгущ" so it matches
+ *      "Сгущённое" / "сгущёнки" / "сгущёнкой".
+ *   2) ё↔е spelling: DB might store "сгущенное" without ё, query uses "сгущёнка"
+ *      with ё. We add both transliterations.
+ *   3) Multi-word queries: also OR each individual word so "Barry Callebaut"
+ *      finds anything containing "Callebaut" alone.
+ *
+ * Cheaper than enabling pg_trgm + russian dictionary; good enough for V0.
+ */
+function buildSearchStems(query: string): string[] {
+  const stems = new Set<string>();
+  const q = query.trim();
+  if (!q) return [];
+
+  // Add ё↔е variants of the full query.
+  const variants = new Set([q, q.replace(/ё/g, "е"), q.replace(/е/g, "ё")]);
+
+  for (const v of variants) {
+    stems.add(v);
+    // Prefix stem (70% of length, min 4 chars) for noun declensions.
+    if (!v.includes(" ") && v.length > 5) {
+      const cut = Math.max(4, Math.floor(v.length * 0.6));
+      stems.add(v.slice(0, cut));
+      // Also ё/е variants of the stem.
+      stems.add(v.slice(0, cut).replace(/ё/g, "е"));
+      stems.add(v.slice(0, cut).replace(/е/g, "ё"));
+    }
+    // Per-word stems for multi-word queries.
+    if (v.includes(" ")) {
+      v.split(/\s+/)
+        .filter((w) => w.length >= 3)
+        .forEach((w) => stems.add(w));
+    }
+  }
+  return [...stems];
+}
+
 export async function searchProducts(input: z.infer<typeof searchProductsSchema>) {
   const q = input.query.trim();
+  const stems = buildSearchStems(q);
+  type StringFilter = { contains: string; mode: "insensitive" };
+  type FieldOr = { OR: Array<{ name?: StringFilter; brand?: StringFilter; sku?: StringFilter; description?: StringFilter }> };
+  const stemOr: FieldOr[] = stems.map((s) => ({
+    OR: [
+      { name: { contains: s, mode: "insensitive" } },
+      { brand: { contains: s, mode: "insensitive" } },
+      { sku: { contains: s, mode: "insensitive" } },
+      { description: { contains: s, mode: "insensitive" } },
+    ],
+  }));
+
   const where = {
     isActive: true,
     AND: [
-      q
-        ? {
-            OR: [
-              { name: { contains: q, mode: "insensitive" as const } },
-              { brand: { contains: q, mode: "insensitive" as const } },
-              { sku: { contains: q, mode: "insensitive" as const } },
-              { description: { contains: q, mode: "insensitive" as const } },
-            ],
-          }
-        : {},
+      q ? { OR: stemOr.flatMap((f) => f.OR) } : {},
       input.category ? { category: { slug: input.category } } : {},
       input.brand ? { brand: { equals: input.brand, mode: "insensitive" as const } } : {},
       input.in_stock_only ? { inventorySnapshot: { availableQty: { gt: 0 } } } : {},

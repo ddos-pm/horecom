@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 import { StatusStrip } from "@/components/marketing/status-strip";
+import { formatUnit } from "@/lib/units";
 import "./home.css";
 
 export const dynamic = "force-dynamic";
@@ -182,7 +183,7 @@ export default async function HomePage() {
                   <div>
                     <div className="k">В наличии</div>
                     <div className="v green">
-                      {featured[0]?.inventorySnapshot?.availableQty ?? 47} {featured[0]?.unitType ?? "кг"}
+                      {featured[0]?.inventorySnapshot?.availableQty ?? 47} {formatUnit(featured[0]?.unitType) || "кг"}
                     </div>
                   </div>
                   <div>
@@ -418,7 +419,7 @@ export default async function HomePage() {
                       {stock && stock.availableQty > 0 && (
                         <div className={`prod-stock${stock.stockStatus === "LOW_STOCK" ? " low" : ""}`}>
                           <span className="live-dot" />
-                          {stock.availableQty} {p.unitType === "piece" ? "шт" : p.unitType}
+                          {stock.availableQty} {formatUnit(p.unitType)}
                         </div>
                       )}
                     </div>

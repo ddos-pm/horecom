@@ -4,6 +4,7 @@ import { Search, Filter, ArrowDownUp, Grid3x3, List, ChevronDown } from "lucide-
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { QuickAddButton } from "@/components/cart/quick-add-button";
+import { formatUnit } from "@/lib/units";
 import "./catalog.css";
 
 export const dynamic = "force-dynamic";
@@ -309,13 +310,13 @@ export default async function CatalogPage({
                           <div>
                             <div className="k">MOQ</div>
                             <div className="v">
-                              {p.minOrderQty} {p.unitType === "piece" ? "шт" : p.unitType}
+                              {p.minOrderQty} {formatUnit(p.unitType)}
                             </div>
                           </div>
                           <div>
                             <div className="k">Стек</div>
                             <div className={STOCK_CLASS[stock?.stockStatus ?? "OUT_OF_STOCK"]}>
-                              {stock?.availableQty ?? 0} {p.unitType === "piece" ? "шт" : p.unitType}
+                              {stock?.availableQty ?? 0} {formatUnit(p.unitType)}
                             </div>
                           </div>
                           <div>

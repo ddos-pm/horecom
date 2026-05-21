@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { JsonLd } from "@/components/json-ld";
 import { COMPANY } from "@/lib/company";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { formatUnit } from "@/lib/units";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -78,7 +79,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const stock = product.inventorySnapshot;
   const stockKey = stock?.stockStatus ?? "OUT_OF_STOCK";
   const stockMeta = STOCK_PILL[stockKey] ?? STOCK_PILL.OUT_OF_STOCK;
-  const unitWord = product.unitType === "piece" ? "шт" : product.unitType;
+  const unitWord = formatUnit(product.unitType);
 
   const images = [product.imageUrl, ...product.imageUrls].filter(Boolean) as string[];
   const fallbackImage = ["/logos/logo-mark.png"];
