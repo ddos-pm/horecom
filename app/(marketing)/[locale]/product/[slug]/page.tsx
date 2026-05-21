@@ -1,16 +1,16 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import type { Metadata } from "next";
-import { ArrowLeft, MessageCircle, RefreshCcw, Users, ShieldCheck } from "lucide-react";
+import { ShieldCheck, FileText, Clock, RefreshCcw, MessageCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/routing";
 import { JsonLd } from "@/components/json-ld";
-import { formatPrice, stockStatusInfo } from "@/lib/utils";
+import { COMPANY } from "@/lib/company";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { Gallery } from "./gallery";
+import "./product.css";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -26,22 +26,39 @@ export async function generateMetadata({
 
   return {
     title: product.name,
-    description: `${product.brand ?? ""} ${product.packLabel}. ${product.description ?? ""}. Оптовая цена в Horecom.`.trim(),
+    description:
+      `${product.brand ?? ""} ${product.packLabel}. ${product.description ?? ""}. Оптовая цена в Horecom.`.trim(),
     openGraph: {
       title: product.name,
       description: product.description ?? "",
       type: "website",
-      url: `https://horecom.kz/product/${product.slug}`,
+      url: `https://horecom.kz/ru/product/${product.slug}`,
+      images: product.imageUrl ? [product.imageUrl] : [],
     },
-    alternates: { canonical: `https://horecom.kz/product/${product.slug}` },
+    alternates: { canonical: `https://horecom.kz/ru/product/${product.slug}` },
   };
 }
 
-function stockStatusToSchema(s?: string) {
+function stockStatusToSchema(s?: string | null) {
   if (s === "IN_STOCK") return "https://schema.org/InStock";
   if (s === "LOW_STOCK") return "https://schema.org/LimitedAvailability";
   return "https://schema.org/OutOfStock";
 }
+
+function storageLabel(s: string) {
+  return (
+    { AMBIENT: "Обычная температура", REFRIGERATED: "Холодильник", FROZEN: "Заморозка" } as Record<
+      string,
+      string
+    >
+  )[s] ?? s;
+}
+
+const STOCK_PILL: Record<string, { cls: string; label: (qty: number, unit: string) => string }> = {
+  IN_STOCK: { cls: "pill pill-green", label: (q, u) => `В наличии · ${q} ${u}` },
+  LOW_STOCK: { cls: "pill pill-amber", label: (q, u) => `Заканчивается · ${q} ${u}` },
+  OUT_OF_STOCK: { cls: "pill pill-red", label: () => "Под заказ" },
+};
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -50,33 +67,64 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     where: { slug },
     include: {
       category: true,
-      prices: { take: 1, orderBy: { createdAt: "desc" } },
+      prices: { orderBy: { createdAt: "desc" } },
       inventorySnapshot: true,
     },
   });
 
   if (!product || !product.isActive) notFound();
 
-  const price = product.prices[0];
+  const basePrice = product.prices[0];
   const stock = product.inventorySnapshot;
-  const stockInfo = stock ? stockStatusInfo(stock.stockStatus) : null;
+  const stockKey = stock?.stockStatus ?? "OUT_OF_STOCK";
+  const stockMeta = STOCK_PILL[stockKey] ?? STOCK_PILL.OUT_OF_STOCK;
+  const unitWord = product.unitType === "piece" ? "шт" : product.unitType;
 
-  // JSON-LD Product schema for AI/SEO
+  const images = [product.imageUrl, ...product.imageUrls].filter(Boolean) as string[];
+  const fallbackImage = ["/logos/logo-mark.png"];
+  const galleryImages = images.length > 0 ? images : fallbackImage;
+
+  // Related products (same category, exclude self)
+  const related = await prisma.product.findMany({
+    where: { categoryId: product.categoryId, id: { not: product.id }, isActive: true },
+    take: 4,
+    orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
+    include: { prices: { take: 1, orderBy: { createdAt: "desc" } } },
+  });
+
+  // Volume tiers (synthesise simple ladder from base + wholesale fields)
+  const tiers: { min: number; price: number; perUnit: number | null; saving: number | null; current?: boolean }[] = [];
+  if (basePrice) {
+    const base = Number(basePrice.basePrice);
+    tiers.push({ min: 1, price: base, perUnit: null, saving: null, current: true });
+    if (basePrice.wholesaleThreshold && basePrice.wholesalePrice) {
+      const wholesale = Number(basePrice.wholesalePrice);
+      tiers.push({
+        min: basePrice.wholesaleThreshold,
+        price: wholesale,
+        perUnit: null,
+        saving: Math.round(((base - wholesale) / base) * 1000) / 10,
+      });
+    }
+  }
+
+  // JSON-LD
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": `https://horecom.kz/product/${product.slug}#product`,
+    "@id": `https://horecom.kz/ru/product/${product.slug}#product`,
     name: product.name,
     description: product.description,
     sku: product.sku,
     ...(product.brand && { brand: { "@type": "Brand", name: product.brand } }),
     category: product.category.name,
-    ...(price && {
+    image: galleryImages,
+    ...(basePrice && {
       offers: {
         "@type": "Offer",
-        url: `https://horecom.kz/product/${product.slug}`,
-        priceCurrency: price.currency,
-        price: price.basePrice.toString(),
+        url: `https://horecom.kz/ru/product/${product.slug}`,
+        priceCurrency: basePrice.currency,
+        price: basePrice.basePrice.toString(),
         availability: stockStatusToSchema(stock?.stockStatus),
         seller: { "@id": "https://horecom.kz/#organization" },
         eligibleQuantity: {
@@ -88,190 +136,307 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     }),
   };
 
-  // Breadcrumb
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Главная", item: "https://horecom.kz" },
-      { "@type": "ListItem", position: 2, name: "Каталог", item: "https://horecom.kz/catalog" },
+      { "@type": "ListItem", position: 1, name: "Главная", item: "https://horecom.kz/ru" },
+      { "@type": "ListItem", position: 2, name: "Каталог", item: "https://horecom.kz/ru/catalog" },
       {
         "@type": "ListItem",
         position: 3,
         name: product.category.name,
-        item: `https://horecom.kz/catalog?category=${product.category.id}`,
+        item: `https://horecom.kz/ru/catalog?category=${product.category.slug}`,
       },
       { "@type": "ListItem", position: 4, name: product.name },
     ],
   };
+
+  const waText = `Здравствуйте, интересует ${product.name} (${product.sku})`;
+  const waLink = `${COMPANY.whatsappLink}&text=${encodeURIComponent(waText)}`;
 
   return (
     <>
       <JsonLd data={productJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
-      <div className="container-tight py-6">
-        {/* Breadcrumb nav */}
-        <nav className="mb-4 text-sm text-muted-foreground">
-          <Link href="/catalog" className="inline-flex items-center gap-1 hover:text-foreground">
-            <ArrowLeft className="h-3 w-3" />
-            Назад к каталогу
+      <div className="container-x pdp-wrap">
+        <nav className="breadcrumb" aria-label="Хлебные крошки">
+          <Link href="/">Главная</Link>
+          <span className="sep">/</span>
+          <Link href="/catalog">Каталог</Link>
+          <span className="sep">/</span>
+          <Link href={{ pathname: "/catalog", query: { category: product.category.slug } }}>
+            {product.category.name}
           </Link>
+          <span className="sep">/</span>
+          <span className="curr">{product.name}</span>
         </nav>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Image */}
-          <div>
-            <div className="flex aspect-square items-center justify-center rounded-lg border border-border bg-muted">
-              <span className="text-8xl opacity-50">📦</span>
+        <div className="pdp">
+          <Gallery
+            images={galleryImages}
+            alt={product.name}
+            badges={
+              <>
+                {product.isSubscriptionEligible && <span className="pill pill-orange">Подписка</span>}
+                {product.isGroupEligible && <span className="pill pill-blue">Группа</span>}
+              </>
+            }
+          />
+
+          <div className="pdp-info">
+            <div className="pdp-brand">
+              {product.brand && (
+                <>
+                  <span className="b">{product.brand}</span>
+                  <span>·</span>
+                </>
+              )}
+              <span>{product.category.name}</span>
+              <span className="sku">{product.sku}</span>
             </div>
-          </div>
 
-          {/* Info */}
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-              {product.brand && <span>{product.brand}</span>}
-              {product.brand && <span>·</span>}
-              <span>SKU: {product.sku}</span>
+            <h1 className="pdp-name">{product.name}</h1>
+
+            <div className="pdp-badges">
+              <span className={stockMeta.cls}>{stockMeta.label(stock?.availableQty ?? 0, unitWord)}</span>
+              {product.isSubscriptionEligible && <span className="pill pill-orange">Доступна подписка</span>}
+              {product.isGroupEligible && <span className="pill pill-blue">Доступна группа</span>}
+              {product.storageType !== "AMBIENT" && (
+                <span className="pill pill-outline">{storageLabel(product.storageType)}</span>
+              )}
             </div>
 
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {stockInfo && <Badge variant={stockInfo.tone}>{stockInfo.label}</Badge>}
-              {product.isSubscriptionEligible && <Badge variant="info">Доступна подписка</Badge>}
-              {product.isGroupEligible && <Badge variant="secondary">Доступна группа</Badge>}
-            </div>
-
-            {price && (
-              <div className="mt-6 rounded-lg border border-border bg-card p-5">
-                <div className="flex items-baseline gap-3">
-                  <span className="tabular text-3xl font-bold">{formatPrice(price.basePrice.toString())}</span>
-                  <span className="text-sm text-muted-foreground">{price.unitLabel}</span>
+            {basePrice && (
+              <div className="price-block">
+                <div className="price-head">
+                  <div className="main">
+                    <span className="amount tabular">
+                      {Number(basePrice.basePrice).toLocaleString("ru-RU")} ₸
+                    </span>
+                    <span className="per">/ {product.packLabel}</span>
+                  </div>
                 </div>
 
-                {/* Volume tiers (Pack 1 idea) */}
-                {price.wholesaleThreshold && price.wholesalePrice && (
-                  <div className="mt-4 rounded-md bg-success/5 p-3 text-sm ring-1 ring-success/20">
-                    <div className="font-medium text-success">
-                      От {price.wholesaleThreshold} {product.unitType === "piece" ? "шт" : product.unitType}:{" "}
-                      <span className="tabular">{formatPrice(price.wholesalePrice.toString())}</span>{" "}
-                      {price.unitLabel}
+                {tiers.length > 1 && (
+                  <div className="tiers">
+                    <div className="tier-head">
+                      <div>От количества</div>
+                      <div>Цена за упак</div>
+                      <div>Экономия</div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Сэкономьте{" "}
-                      {formatPrice(
-                        (Number(price.basePrice) - Number(price.wholesalePrice)).toString()
-                      )}{" "}
-                      на каждой единице
-                    </div>
+                    {tiers.map((t, i) => (
+                      <div key={i} className={`tier-row${t.current ? " active" : ""}`}>
+                        <div className="qty">
+                          {t.current
+                            ? `1–${(tiers[1]?.min ?? 4) - 1} шт `
+                            : `от ${t.min} шт`}
+                          {t.current && <span className="badge">Сейчас</span>}
+                        </div>
+                        <div>{t.price.toLocaleString("ru-RU")} ₸</div>
+                        <div className={t.saving ? "save" : ""}>{t.saving ? `−${t.saving}%` : "—"}</div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                <div className="mt-4 flex flex-col gap-3">
+                <div className="price-cta">
                   <AddToCartButton
                     product={{
                       productId: product.id,
                       slug: product.slug,
                       name: product.name,
                       image: product.imageUrl,
-                      price: Number(price.basePrice),
+                      price: Number(basePrice.basePrice),
                       minOrderQty: product.minOrderQty,
                       packLabel: product.packLabel,
                       unitType: product.unitType,
-                      stockStatus: product.inventorySnapshot?.stockStatus ?? null,
+                      stockStatus: stock?.stockStatus ?? null,
                     }}
                   />
                   <a
-                    href={`https://api.whatsapp.com/send/?phone=77078607779&text=${encodeURIComponent(
-                      `Здравствуйте! Интересует ${product.name} (${product.sku})`
-                    )}`}
+                    href={waLink}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="wa-cta"
                   >
-                    <Button size="lg" variant="outline" className="w-full">
-                      <MessageCircle className="h-4 w-4" />
-                      Спросить в WhatsApp
-                    </Button>
+                    <MessageCircle className="h-4 w-4" style={{ color: "#25D366" }} />
+                    WhatsApp
                   </a>
                 </div>
 
-                <div className="mt-3 text-xs text-muted-foreground">
-                  Минимальный заказ: {product.minOrderQty} {product.unitType === "piece" ? "шт" : product.unitType}.
-                  Общий минимум заказа в Horecom — 5 000 ₸.
+                <div className="moq-note">
+                  <b>Минимальный заказ:</b> {product.minOrderQty} {unitWord} · Общий минимум по сайту — 5 000 ₸ ·
+                  Бесплатная доставка от 30 000 ₸
                 </div>
               </div>
             )}
 
-            {/* Quick facts */}
-            <div className="mt-6 space-y-3 text-sm">
-              <Fact label="Категория" value={product.category.name} />
-              <Fact label="Бренд" value={product.brand ?? "—"} />
-              <Fact label="Фасовка" value={product.packLabel} />
-              <Fact label="Тип хранения" value={storageTypeLabel(product.storageType)} />
-              {stock && <Fact label="Доступно" value={`${stock.availableQty} ${product.unitType === "piece" ? "шт" : product.unitType}`} />}
+            <div className="ops">
+              <div>
+                <div className="k">В наличии</div>
+                <div className={`v ${stockKey === "IN_STOCK" ? "green" : stockKey === "LOW_STOCK" ? "amber" : "red"} live`}>
+                  {stock?.availableQty ?? 0} {unitWord}
+                </div>
+                <div className="sub">обновлено {stock?.updatedAt ? new Date(stock.updatedAt).toLocaleString("ru-RU") : "—"}</div>
+              </div>
+              <div>
+                <div className="k">Доставка</div>
+                <div className="v">завтра до 12:00</div>
+                <div className="sub">самовывоз сегодня после 14:00</div>
+              </div>
             </div>
 
-            {/* Description */}
-            {product.description && (
-              <div className="mt-6">
-                <h2 className="mb-2 text-sm font-semibold">Описание</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
+            <div className="trust-line">
+              <div className="trust-row">
+                <div className="ic">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div>
+                  <b>Без молчаливой замены.</b> Если на складе закончится — предложим аналог в WhatsApp с
+                  разницей в цене и подождём «ок».
+                </div>
               </div>
-            )}
+              <div className="trust-row">
+                <div className="ic">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <div>
+                  <b>Документы для бухгалтерии</b> приходят на email сразу после оплаты: счёт-фактура,
+                  накладная, договор.
+                </div>
+              </div>
+              <div className="trust-row">
+                <div className="ic">
+                  <Clock className="h-4 w-4" />
+                </div>
+                <div>
+                  <b>Отгрузки каждые 3 часа.</b> Заказы до 14:00 — сегодня. После 14:00 — завтра утром.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Value props */}
-        <section className="mt-12 grid gap-4 rounded-lg border border-border bg-muted/30 p-6 md:grid-cols-3">
-          <ValueProp
-            icon={<ShieldCheck className="h-5 w-5" />}
-            title="Без молчаливой замены"
-            text="Если товара нет, мы предложим замену в WhatsApp и подождём вашего ответа."
-          />
-          {product.isSubscriptionEligible && (
-            <ValueProp
-              icon={<RefreshCcw className="h-5 w-5" />}
-              title="Регулярная подписка"
-              text="Настройте график доставки, мы напомним за день до отгрузки."
-            />
-          )}
-          {product.isGroupEligible && (
-            <ValueProp
-              icon={<Users className="h-5 w-5" />}
-              title="Групповая закупка"
-              text="Объединитесь с другими кондитерами для оптовой цены без больших объёмов."
-            />
-          )}
+      <div className="container-x pdp-below">
+        {product.description && (
+          <section className="pdp-sec">
+            <div className="show-md-grid">
+              <div>
+                <h2>Описание</h2>
+                <div className="pdp-desc">
+                  <p>{product.description}</p>
+                </div>
+              </div>
+              <div>
+                <h2>Характеристики</h2>
+                <div className="specs">
+                  {product.brand && (
+                    <div className="spec">
+                      <span className="k">Бренд</span>
+                      <span className="v">{product.brand}</span>
+                    </div>
+                  )}
+                  <div className="spec">
+                    <span className="k">Категория</span>
+                    <span className="v">{product.category.name}</span>
+                  </div>
+                  <div className="spec">
+                    <span className="k">Фасовка</span>
+                    <span className="v">{product.packLabel}</span>
+                  </div>
+                  <div className="spec">
+                    <span className="k">Хранение</span>
+                    <span className="v">{storageLabel(product.storageType)}</span>
+                  </div>
+                  <div className="spec">
+                    <span className="k">Мин. заказ</span>
+                    <span className="v">
+                      {product.minOrderQty} {unitWord}
+                    </span>
+                  </div>
+                  <div className="spec">
+                    <span className="k">SKU</span>
+                    <span className="v">{product.sku}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="pdp-sec">
+          <h2>Если что-то пойдёт не так</h2>
+          <div className="policy">
+            <div className="pol-item">
+              <div className="ic">
+                <RefreshCcw className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="ttl">Замена — только с вашего «ок»</div>
+                <div className="txt">
+                  Если на складе не оказалось — предложим аналог в WhatsApp с разницей в цене. Без согласия не
+                  отправляем.
+                </div>
+              </div>
+            </div>
+            <div className="pol-item">
+              <div className="ic">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="ttl">Брак / пересорт</div>
+                <div className="txt">
+                  Сообщите в WhatsApp в течение 24 часов с фото — заменим или вернём деньги в течение 3 рабочих
+                  дней.
+                </div>
+              </div>
+            </div>
+            <div className="pol-item">
+              <div className="ic">
+                <Clock className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="ttl">Частичная отгрузка</div>
+                <div className="txt">
+                  Если в заказе чего-то не хватает — отправим что есть и допоставим остаток без дополнительной
+                  оплаты доставки.
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
+
+        {related.length > 0 && (
+          <section className="pdp-sec">
+            <h2>Часто покупают вместе</h2>
+            <div className="rel-grid">
+              {related.map((r) => {
+                const rp = r.prices[0];
+                return (
+                  <Link key={r.id} href={`/product/${r.slug}`} className="rel">
+                    <div className="img">
+                      {r.imageUrl && <Image src={r.imageUrl} alt={r.name} fill sizes="160px" />}
+                    </div>
+                    <div className="rel-info">
+                      <div className="m">
+                        {r.brand && <>{r.brand} · </>}
+                        {r.packLabel}
+                      </div>
+                      <div className="n">{r.name}</div>
+                      <div className="p">
+                        {rp ? Number(rp.basePrice).toLocaleString("ru-RU") : "—"} ₸
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </>
   );
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-4 border-b border-border pb-2">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}
-
-function ValueProp({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return (
-    <div className="flex gap-3">
-      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-        {icon}
-      </div>
-      <div>
-        <div className="text-sm font-semibold">{title}</div>
-        <div className="text-xs text-muted-foreground">{text}</div>
-      </div>
-    </div>
-  );
-}
-
-function storageTypeLabel(s: string) {
-  return { AMBIENT: "Обычная температура", REFRIGERATED: "Холодильник", FROZEN: "Заморозка" }[s] ?? s;
 }
