@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Users, ShieldCheck, Timer, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { COMPANY } from "@/lib/company";
 import { GroupBuyWaitlistForm } from "./waitlist-form";
+import { LiveCountdown } from "./countdown";
+import "./group-buying.css";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Групповые закупки — оптовые цены для самозанятых кондитеров",
   description:
-    "Объединяйтесь с другими кондитерами для оптовых цен без необходимости держать склад. Цена фиксируется при старте группы.",
+    "Объединяйтесь с 3–5 кондитерами и купите оптовый мешок муки или ведро шоколада — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
 };
 
 export default async function GroupBuyingPage() {
@@ -26,84 +27,333 @@ export default async function GroupBuyingPage() {
     orderBy: [{ isGroupEligible: "desc" }, { name: "asc" }],
   });
 
+  // Group ends 2d 14h 23m from now — countdown for the live group demo card.
+  const groupEndsAt = new Date(Date.now() + (2 * 86400 + 14 * 3600 + 23 * 60) * 1000).toISOString();
+
   return (
-    <div className="container-tight max-w-3xl py-8">
-      <Badge variant="info" className="mb-3">Запускаем в V1.5</Badge>
-      <h1 className="mb-3 text-2xl font-bold tracking-tight md:text-3xl">Групповые закупки</h1>
-      <p className="mb-8 text-lg text-muted-foreground">
-        Маленькие кондитерские и самозанятые мастера объединяются для покупки одного товара по оптовой
-        цене — без необходимости каждый раз заказывать тонну муки в одиночку.
-      </p>
+    <>
+      {/* === HERO === */}
+      <section className="gb-hero">
+        <div className="grid-bg" />
+        <div className="glow" />
 
-      <div className="mb-12 grid gap-4 sm:grid-cols-2">
-        <Feature
-          icon={<Users className="h-5 w-5" />}
-          title="Объединяете спрос"
-          text="Создаёте группу на нужный товар или присоединяетесь к существующей. Делитесь ссылкой в чатах."
-        />
-        <Feature
-          icon={<Timer className="h-5 w-5" />}
-          title="Дедлайн и порог"
-          text="Если до дедлайна набирается нужный объём — все получают оптовую цену."
-        />
-        <Feature
-          icon={<ShieldCheck className="h-5 w-5" />}
-          title="Цена защищена"
-          text="При создании группы цена фиксируется и не меняется, даже если поставщик поднимает прайс."
-        />
-        <Feature
-          icon={<RefreshCw className="h-5 w-5" />}
-          title="Если группа не собралась"
-          text="Никаких списаний. Можно купить по обычной цене, дождаться следующего окна или отказаться без штрафа."
-        />
-      </div>
+        <div className="gb-hero-top">
+          <div className="container-x">
+            <div className="gb-hero-top-inner">
+              <span className="pill">V1.5 · в&nbsp;пилоте</span>
+              <span>4 активные группы · 28 участников · средняя экономия −18%</span>
+              <span style={{ marginLeft: "auto" }} className="show-md">
+                Запуск Q3 2026 · вход в пилот по запросу
+              </span>
+            </div>
+          </div>
+        </div>
 
-      <section className="prose prose-slate max-w-none">
-        <h2>Как это работает</h2>
-        <ol>
-          <li>Найдите товар который продаётся в групповом режиме (отмечен «Доступна группа»)</li>
-          <li>Создайте новую группу или присоединитесь к открытой</li>
-          <li>Поделитесь ссылкой с другими кондитерами в WhatsApp / Telegram</li>
-          <li>Когда суммарный объём достигнет порога — оплата проходит по оптовой цене для всех</li>
-          <li>Доставка на адрес создателя группы (с разделением — в V2)</li>
-        </ol>
+        <div className="container-x gb-body">
+          <div className="gb-grid">
+            <div>
+              <h1>
+                Опт <em>на пятерых.</em>
+                <br />
+                Без склада
+                <br />у вас дома.
+              </h1>
 
-        <h2>Почему это работает</h2>
-        <p>
-          Большинство поставщиков ингредиентов в Казахстане отдают опт только от 4+ единиц. Для одной
-          небольшой кондитерской это означает либо переплачивать рознично, либо замораживать капитал в
-          складе на месяц. Групповые закупки решают эту проблему: 4 кондитера по 1 мешку = опт.
-        </p>
+              <p className="lede">
+                Объединитесь с 3–5 кондитерами и купите оптовый мешок муки или ведро шоколада — каждый получит
+                свою долю и оптовую цену. Цена защищена с момента создания группы.
+              </p>
 
-        <h2>Когда запускаем</h2>
-        <p>
-          Групповые закупки — часть V1.5. Сейчас мы готовим механику и подбираем 20–30 пилотных
-          участников из текущей базы (76 000 подписчиков в Instagram). Запишитесь на форму ниже — свяжемся
-          как только наберётся группа на интересующий вас товар.
-        </p>
+              <div className="ctas">
+                <a href="#waitlist" className="btn btn-orange btn-lg">
+                  Войти в пилот
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+                <a href="#how" className="btn btn-lg gb-ghost-btn">
+                  Как это работает
+                </a>
+              </div>
+
+              <div className="meta">
+                <span>
+                  <b>−18%</b> средняя экономия
+                </span>
+                <span>·</span>
+                <span>
+                  Цена защищена <b>при старте группы</b>
+                </span>
+                <span>·</span>
+                <span>
+                  Без рисков — <b>не собралась = вернули</b>
+                </span>
+              </div>
+            </div>
+
+            {/* LIVE GROUP CARD with live countdown */}
+            <div className="gb-card">
+              <div className="gb-card-head">
+                <div className="lt">
+                  <span className="live-dot" />
+                  <span className="nm">Группа активна</span>
+                </div>
+                <div className="sub">
+                  Создатель: <b style={{ color: "#fff" }}>@aselya.cakes</b>
+                </div>
+              </div>
+
+              <div className="gb-card-prod">
+                <div className="img">
+                  <img
+                    src="https://static.tildacdn.com/stor3839-3864-4833-b431-663732316462/75482454.webp"
+                    alt="Мука"
+                  />
+                </div>
+                <div>
+                  <div className="meta">Цесна · мешок 25 кг</div>
+                  <div className="nm">Мука ржаная, 25 кг</div>
+                  <div className="prices">
+                    <span className="strike">6 825 ₸</span>
+                    <span className="new">5 600 ₸</span>
+                    <span className="save">−18%</span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.5)",
+                      marginTop: 4,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    224 ₸/кг при цене в группе
+                  </div>
+                </div>
+              </div>
+
+              <div className="gb-progress">
+                <div className="gb-progress-row">
+                  <span className="lbl">Прогресс</span>
+                  <span className="val">4 / 6 чел</span>
+                </div>
+                <div className="gb-bar">
+                  <div className="fill" style={{ width: "67%" }} />
+                </div>
+                <div className="gb-progress-foot">
+                  <span>
+                    Нужно ещё <b style={{ color: "#fff" }}>2 человека</b>
+                  </span>
+                  <span>67% набрано</span>
+                </div>
+              </div>
+
+              <div className="avatars">
+                <div className="av-stack">
+                  <span className="av b">АС</span>
+                  <span className="av o">МК</span>
+                  <span className="av g">ДА</span>
+                  <span className="av p">АН</span>
+                  <span className="av placeholder">+</span>
+                  <span className="av placeholder">+</span>
+                </div>
+                <div className="av-info">
+                  <b>Asel, Мадина, Дана, Анара</b>
+                  <br />+ 2 свободных места
+                </div>
+              </div>
+
+              <LiveCountdown targetIso={groupEndsAt} />
+
+              <div className="gb-card-foot">
+                <a href="#waitlist" className="btn btn-orange btn-lg" style={{ width: "100%" }}>
+                  Присоединиться · 5 600 ₸
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <div className="mt-10">
-        <a href="#waitlist">
-          <Button size="lg">Записаться в пилот</Button>
-        </a>
-      </div>
+      {/* === HOW IT WORKS === */}
+      <section className="s" id="how">
+        <div className="container-x">
+          <div className="sec-head">
+            <div className="sec-eyebrow">Как это работает</div>
+            <h2>4 шага от поста в Instagram до оптовой цены.</h2>
+            <p className="sub">
+              Создайте группу или присоединитесь к существующей. Когда суммарный объём достигает порога — все
+              получают оптовую цену автоматически.
+            </p>
+          </div>
 
-      <div id="waitlist" className="mt-12 scroll-mt-20">
-        <GroupBuyWaitlistForm products={products} defaultEmail={user?.email ?? null} />
-      </div>
-    </div>
-  );
-}
+          <div className="steps">
+            {[
+              {
+                title: "Создайте группу",
+                txt: "Откройте товар с пометкой «Доступна группа». Укажите порог (4 / 6 / 8 человек) и срок — обычно 3–7 дней.",
+                mock: (
+                  <>
+                    Товар: <b>Мука ржаная 25 кг</b>
+                    <br />
+                    Цена в группе: <b>5 600 ₸</b>
+                    <br />
+                    Порог: <b>6 человек</b> · срок: <b>3 дня</b>
+                  </>
+                ),
+              },
+              {
+                title: "Поделитесь ссылкой",
+                txt: "Бросьте ссылку в Instagram stories, в WhatsApp-чат коллег, в Threads. Чем шире кинете — тем быстрее наберётся.",
+                mock: (
+                  <>
+                    Share: <b>horecom.kz/g/HC-0742</b>
+                    <br />
+                    Stories · WhatsApp · Threads
+                    <br />
+                    <b>Цена защищена</b> для тех кто уже вступил
+                  </>
+                ),
+              },
+              {
+                title: "Группа заполняется",
+                txt: "Кондитеры присоединяются и закрепляют за собой свою долю. Все видят прогресс и сколько ещё мест.",
+                mock: (
+                  <>
+                    Сейчас: <b>4 / 6 человек</b>
+                    <br />
+                    Свободно: <b>2 места</b>
+                    <br />
+                    До дедлайна: <b>2 дня 14 часов</b>
+                  </>
+                ),
+              },
+              {
+                title: "Опт активируется автоматически",
+                txt: "Когда порог достигнут — оплата проходит по оптовой цене. Доставка: к создателю группы или каждому раздельно (V2).",
+                mock: (
+                  <>
+                    ✓ Порог достигнут
+                    <br />
+                    ✓ Цена зафиксирована <b>5 600 ₸</b>
+                    <br />
+                    ✓ Отгрузка <b>четверг 10:00</b>
+                  </>
+                ),
+                successMock: true,
+              },
+            ].map((s, i) => (
+              <div key={s.title} className="step">
+                <div className="n">{String(i + 1).padStart(2, "0")}</div>
+                <h3>{s.title}</h3>
+                <div className="txt">{s.txt}</div>
+                <div
+                  className="mock"
+                  style={
+                    s.successMock
+                      ? {
+                          background: "var(--c-success-bg)",
+                          borderColor: "rgba(17,122,63,0.2)",
+                          color: "var(--c-success)",
+                        }
+                      : undefined
+                  }
+                >
+                  {s.mock}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-        {icon}
-      </div>
-      <div className="font-semibold">{title}</div>
-      <div className="mt-1 text-sm text-muted-foreground">{text}</div>
-    </div>
+      {/* === ECONOMICS / CALCULATOR === */}
+      <section className="s eco-band">
+        <div className="container-x">
+          <div className="eco-grid">
+            <div>
+              <div className="sec-eyebrow" style={{ color: "var(--c-orange)" }}>
+                Почему это работает
+              </div>
+              <h2>Поставщики дают опт от 4 единиц. Один кондитер столько не возьмёт.</h2>
+              <p className="sub">
+                Большинство брендов — Barry Callebaut, IRCA, Sicao — отдают оптовую цену только от 4+ мешков
+                или ведер. Для одной маленькой кондитерской это значит переплачивать рознично или замораживать
+                капитал в складе на месяц.
+              </p>
+              <p className="sub" style={{ marginTop: 12 }}>
+                Групповые закупки решают эту арифметику: четыре кондитера по одному мешку = опт. Каждый платит
+                свою долю, забирает свой объём, и никто не держит лишнее на полке.
+              </p>
+
+              <div className="eco-bigstats">
+                <div>
+                  <div className="bignum orange">−18%</div>
+                  <div className="lbl">средняя экономия</div>
+                </div>
+                <div>
+                  <div className="bignum">4–6</div>
+                  <div className="lbl">человек в группе</div>
+                </div>
+                <div>
+                  <div className="bignum">3 дня</div>
+                  <div className="lbl">типичный срок группы</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="calc">
+              <div className="calc-row head">
+                <span className="lbl">Сценарий: мука ржаная 25 кг</span>
+                <span className="lbl">за 1 мешок</span>
+              </div>
+              <div className="calc-row">
+                <div className="lbl">
+                  <b>Розничная цена</b>
+                  <span className="sm">если покупаете в одиночку</span>
+                </div>
+                <span className="val">6 825 ₸</span>
+              </div>
+              <div className="calc-row">
+                <div className="lbl">
+                  <b>Оптовая цена (от 4 шт)</b>
+                  <span className="sm">если вас 4–6 в группе</span>
+                </div>
+                <span className="val">5 600 ₸</span>
+              </div>
+              <div className="calc-row">
+                <div className="lbl">Экономия на 1 мешке</div>
+                <span className="val save">−1 225 ₸</span>
+              </div>
+              <div className="calc-row">
+                <div className="lbl">Если берёте 4 мешка / месяц</div>
+                <span className="val save">−4 900 ₸</span>
+              </div>
+              <div className="calc-row total">
+                <div className="lbl">
+                  <b>В год</b>
+                  <span className="sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    только на одной муке
+                  </span>
+                </div>
+                <span className="val">−58 800 ₸</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* === WAITLIST FORM (V0 functional piece) === */}
+      <section className="s" id="waitlist" style={{ scrollMarginTop: 80 }}>
+        <div className="container-x" style={{ maxWidth: 760 }}>
+          <div className="sec-head">
+            <div className="sec-eyebrow">Запись в пилот</div>
+            <h2>Запишитесь — соберём первую группу с вами.</h2>
+            <p className="sub">
+              Регистрируем интерес чтобы запустить первую группу с нужным количеством участников. Свяжемся
+              когда наберётся.
+            </p>
+          </div>
+          <GroupBuyWaitlistForm products={products} defaultEmail={user?.email ?? null} />
+        </div>
+      </section>
+    </>
   );
 }
