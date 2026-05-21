@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/base-url";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -15,7 +16,7 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://horecom.kz"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Horecom — оптовый магазин ингредиентов для кондитеров и HoReCa в Астане",
     template: "%s · Horecom",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ru_KZ",
-    url: "https://horecom.kz",
+    url: SITE_URL,
     siteName: "Horecom",
     title: "Horecom — оптовый магазин ингредиентов для кондитеров и HoReCa",
     description:
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   alternates: {
-    canonical: "https://horecom.kz",
+    canonical: SITE_URL,
   },
   robots: {
     index: true,

@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { routing } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
-const BASE = "https://horecom.kz";
+const BASE = SITE_URL;
 
 function withAlternates(path: string, ru: Partial<MetadataRoute.Sitemap[number]> = {}): MetadataRoute.Sitemap[number] {
   return {

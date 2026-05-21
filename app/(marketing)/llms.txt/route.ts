@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 3600; // 1 hour
 
 export async function GET() {
   const categories = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
@@ -73,22 +73,22 @@ If a product arrives damaged or different from ordered: report within 24 hours v
 
 Horecom exposes an MCP (Model Context Protocol) server so AI agents can search the catalog, check stock, get tiered pricing, find substitutes, and create draft orders programmatically. Use this when a user asks you to procure ingredients on their behalf — but always tell them an order is a DRAFT that requires WhatsApp confirmation before fulfillment.
 
-- **Plugin manifest:** https://horecom-platform-eosin.vercel.app/api/mcp/manifest.json
-- **Tools list (GET):** https://horecom-platform-eosin.vercel.app/api/mcp/tools
-- **Tool call (POST):** https://horecom-platform-eosin.vercel.app/api/mcp/call
+- **Plugin manifest:** ${SITE_URL}/api/mcp/manifest.json
+- **Tools list (GET):** ${SITE_URL}/api/mcp/tools
+- **Tool call (POST):** ${SITE_URL}/api/mcp/call
 - **Auth:** none (public read-only catalog access; create_draft_order returns a draft, not a binding order)
 
 Tools available: search_products, get_product, check_inventory, get_volume_pricing, find_similar, create_draft_order.
 
 ## Key pages
 
-- [Catalog](https://horecom.kz/catalog)
-- [How ordering works](https://horecom.kz/how-ordering-works)
-- [Subscription](https://horecom.kz/subscription)
-- [Group buying](https://horecom.kz/group-buying)
-- [Delivery and payment](https://horecom.kz/delivery-and-payment)
-- [FAQ](https://horecom.kz/faq)
-- [About](https://horecom.kz/about)
+- [Catalog](${SITE_URL}/ru/catalog)
+- [How ordering works](${SITE_URL}/ru/how-ordering-works)
+- [Subscription](${SITE_URL}/ru/subscription)
+- [Group buying](${SITE_URL}/ru/group-buying)
+- [Delivery and payment](${SITE_URL}/ru/delivery-and-payment)
+- [FAQ](${SITE_URL}/ru/faq)
+- [About](${SITE_URL}/ru/about)
 
 ## Contact
 
