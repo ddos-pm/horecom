@@ -78,15 +78,15 @@ export default async function CatalogPage({
   ]);
 
   const activeCategory = categorySlug ? categories.find((c) => c.slug === categorySlug) : null;
-  const subscriptionCount = await prisma.product
-    .count({ where: { isActive: true, isSubscriptionEligible: true } })
-    .catch(() => 0);
-  const groupCount = await prisma.product
-    .count({ where: { isActive: true, isGroupEligible: true } })
-    .catch(() => 0);
-  const inStockCount = await prisma.product
-    .count({ where: { isActive: true, inventorySnapshot: { availableQty: { gt: 0 } } } })
-    .catch(() => 0);
+  const [subscriptionCount, groupCount, inStockCount] = await Promise.all([
+    prisma.product
+      .count({ where: { isActive: true, isSubscriptionEligible: true } })
+      .catch(() => 0),
+    prisma.product.count({ where: { isActive: true, isGroupEligible: true } }).catch(() => 0),
+    prisma.product
+      .count({ where: { isActive: true, inventorySnapshot: { availableQty: { gt: 0 } } } })
+      .catch(() => 0),
+  ]);
 
   // ItemList JSON-LD — gives Google + AI crawlers a structured view of
   // the catalog grid. Position-keyed so order is preserved. Caps at the
