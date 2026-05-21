@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { QuickAddButton } from "@/components/cart/quick-add-button";
 import { CatalogSearchInput } from "@/components/marketing/catalog-search-input";
+import { JsonLd } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/base-url";
 import { formatUnit } from "@/lib/units";
 import "./catalog.css";
 
@@ -86,8 +88,25 @@ export default async function CatalogPage({
     .count({ where: { isActive: true, inventorySnapshot: { availableQty: { gt: 0 } } } })
     .catch(() => 0);
 
+  // ItemList JSON-LD — gives Google + AI crawlers a structured view of
+  // the catalog grid. Position-keyed so order is preserved. Caps at the
+  // rendered page size (200) to keep payload sane.
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: activeCategory ? `${activeCategory.name} · Horecom` : "Каталог Horecom",
+    numberOfItems: products.length,
+    itemListElement: products.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITE_URL}/ru/product/${p.slug}`,
+      name: p.name,
+    })),
+  };
+
   return (
     <>
+      <JsonLd data={itemListJsonLd} />
       <section className="cat-head">
         <div className="container-x cat-head-inner">
           <div className="breadcrumb">
