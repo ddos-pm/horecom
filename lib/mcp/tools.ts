@@ -151,14 +151,30 @@ function buildSearchStems(query: string): string[] {
 export async function searchProducts(input: z.infer<typeof searchProductsSchema>) {
   const q = input.query.trim();
   const stems = buildSearchStems(q);
+  // ILIKE'ing the AI-enriched fields (descriptionExtended, useCases) means
+  // a query like "для макарон" hits the right products even when the SKU
+  // name doesn't contain the use-case phrase. This is the cheap layer
+  // before pgvector embeddings come online — works on all 189/189 enriched
+  // products today.
   type StringFilter = { contains: string; mode: "insensitive" };
-  type FieldOr = { OR: Array<{ name?: StringFilter; brand?: StringFilter; sku?: StringFilter; description?: StringFilter }> };
+  type FieldOr = {
+    OR: Array<{
+      name?: StringFilter;
+      brand?: StringFilter;
+      sku?: StringFilter;
+      description?: StringFilter;
+      descriptionExtended?: StringFilter;
+      useCases?: StringFilter;
+    }>;
+  };
   const stemOr: FieldOr[] = stems.map((s) => ({
     OR: [
       { name: { contains: s, mode: "insensitive" } },
       { brand: { contains: s, mode: "insensitive" } },
       { sku: { contains: s, mode: "insensitive" } },
       { description: { contains: s, mode: "insensitive" } },
+      { descriptionExtended: { contains: s, mode: "insensitive" } },
+      { useCases: { contains: s, mode: "insensitive" } },
     ],
   }));
 
@@ -205,9 +221,12 @@ export async function getProduct(input: z.infer<typeof getProductSchema>) {
     sku: p.sku,
     slug: p.slug,
     name: p.name,
-    brand: p.brand,
+    brand: p.brandResolved ?? p.brand,
     category: p.category.name,
-    description: p.description ?? "",
+    description: p.descriptionExtended ?? p.description ?? "",
+    use_cases: p.useCases ?? null,
+    composition: p.composition ?? null,
+    storage_info: p.storageInfo ?? null,
     pack_label: p.packLabel,
     storage: p.storageType,
     pricing: {
