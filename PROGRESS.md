@@ -380,7 +380,67 @@
 ### Deferred (manual, не блокеры)
 - [ ] Custom domain (например `app.horecom.kz`) — ждёт решение от co-founderа
 - [ ] менеджер admin: `UPDATE "User" SET "isAdmin"=true WHERE email='***REMOVED***';` — после её первого magic-link логина
-- [ ] Этап 1.5 deferred steps 4-6 (catalog/PDP/subscription/group-buying по v2-дизайну)
+
+## Этап X — MCP server (DONE — May 21, 2026)
+
+> Из `MCP_SERVER_BRIEF.md` — добавляется между Этапом 4 и Этапом 6 по новому ТЗ.
+> Цель: сделать Horecom доступным как MCP-сервер для AI-агентов (Claude Desktop, ChatGPT, Cursor, Gemini).
+
+### Endpoints (production live)
+- `GET  /api/mcp/manifest.json` — server metadata
+- `GET  /api/mcp/tools` — каталог из 6 tools с JSON Schema
+- `POST /api/mcp/call` — выполнить tool
+
+### 6 tools реализованы
+- [x] `search_products` — full-text search в каталоге с фильтрами (category/brand/stock)
+- [x] `get_product` — detail by slug + volume tiers + inventory
+- [x] `check_inventory` — SKU stock check + alternatives suggestion
+- [x] `get_volume_pricing` — tier pricing с recommendation
+- [x] `find_similar` — V0 heuristic (category + brand + price proximity); pgvector embeddings — V1 follow-up
+- [x] `create_draft_order` — создаёт `DRAFT_PENDING_CONFIRMATION` Order с WhatsApp deep link для customer'а
+
+### Schema
+- [x] Migration `20260521040000_mcp_server` применена: новый OrderStatus `DRAFT_PENDING_CONFIRMATION`, новое `Order.agentMetadata JSONB`, новая модель `McpCall` для аналитики
+- [x] `Order.source = "MCP_AGENT"` для отслеживания агент-инициированных заказов
+
+### Infrastructure
+- [x] `lib/mcp/tools.ts` — все 6 handlers с Zod validation
+- [x] `lib/mcp/rate-limit.ts` — in-memory 60 req/мин/IP
+- [x] `lib/mcp/logger.ts` — best-effort McpCall persistence для аналитики
+- [x] `@modelcontextprotocol/sdk` installed
+- [x] Local smoke test pass: search_products вернул 7 продуктов по запросу "сгущ"
+- [x] Build clean (35 routes, MCP endpoints видны)
+
+### Test через Claude Desktop
+В Claude Desktop → Settings → Developer → Edit Config добавить:
+```json
+{
+  "mcpServers": {
+    "horecom": {
+      "url": "https://horecom-platform-it0j2xipa-dd-osaman-s-projects.vercel.app/api/mcp"
+    }
+  }
+}
+```
+После restart — «Search Horecom for сгущёнка» вызовет `search_products` tool.
+
+### V1 follow-ups
+- [ ] pgvector extension в Supabase + embeddings generation (`scripts/generate-product-embeddings.ts` готов в брифе)
+- [ ] Перейти на native MCP wire format (JSON-RPC over SSE) — текущий REST-style API совместим для demo
+
+## Этап 1.5 — Catalog v2 (DONE — May 21, 2026)
+
+- [x] `(marketing)/[locale]/catalog/page.tsx` — переписан под v2 layout
+- [x] Sidebar с категориями (live counts из БД) + stock + mode toggles (Subscription/Group)
+- [x] cat-head: breadcrumb + h1 + live-data sub + toolbar (search/filter/sort/view-toggle) + active filter chips
+- [x] Product cards в card-img + card-info + card-data (MOQ/Стек/Кат) + card-bot (price + QuickAddButton)
+- [x] URL-driven фильтры (`?category=`, `?subscription=true`, `?group=true`, `?q=`)
+- [x] `catalog.css` extracted из v2 mockup (387 lines)
+
+### Still deferred (Этап 1.5 leftover)
+- [ ] PDP v2 (photo gallery slider + volume tier table) — текущий PDP работает с AddToCartButton
+- [ ] Subscription v2 (predictive chart "Кофейня Куст") — текущий лендинг + форма-запрос работают
+- [ ] Group-Buying v2 (live-group card с countdown widget) — текущий waitlist работает
 
 ### Что подготовлено в коде
 - [x] `vercel.json` создан: installCommand `npm install --legacy-peer-deps`, buildCommand `prisma migrate deploy && prisma generate && next build`, framework `nextjs`, region `fra1` (Frankfurt — ближе к KZ)
