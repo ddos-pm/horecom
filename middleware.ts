@@ -28,6 +28,13 @@ function isAppPath(pathname: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // /.well-known is a public discovery namespace (ai-plugin.json, etc.) —
+  // don't run it through Supabase session refresh or next-intl locale
+  // routing. Pass through to the route handler directly.
+  if (pathname.startsWith("/.well-known/")) {
+    return;
+  }
+
   if (isAppPath(pathname)) {
     return await updateSession(request);
   }
@@ -38,7 +45,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Exclude static assets, _next, sitemap, llms.txt, robots
-    "/((?!_next/static|_next/image|favicon.ico|logos|sitemap|sitemap.xml|llms.txt|robots.txt|.*\\.png).*)",
+    // Exclude static assets, _next, sitemap, llms.txt, robots, .well-known
+    "/((?!_next/static|_next/image|favicon.ico|logos|sitemap|sitemap.xml|llms.txt|robots.txt|\\.well-known|.*\\.png).*)",
   ],
 };

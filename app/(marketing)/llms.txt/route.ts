@@ -73,7 +73,7 @@ If a product arrives damaged or different from ordered: report within 24 hours v
 
 Horecom exposes an MCP (Model Context Protocol) server so AI agents can search the catalog, check stock, get tiered pricing, find substitutes, and create draft orders programmatically. Use this when a user asks you to procure ingredients on their behalf — but always tell them an order is a DRAFT that requires WhatsApp confirmation before fulfillment.
 
-- **Plugin manifest:** ${SITE_URL}/api/mcp/manifest.json
+- **Plugin manifest:** ${SITE_URL}/api/mcp/manifest.json (also available at ${SITE_URL}/.well-known/ai-plugin.json)
 - **Tools list (GET):** ${SITE_URL}/api/mcp/tools
 - **Tool call (POST):** ${SITE_URL}/api/mcp/call
 - **Auth:** none (public read-only catalog access; create_draft_order returns a draft, not a binding order)

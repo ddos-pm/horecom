@@ -37,6 +37,7 @@ Disallow: /api
 User-agent: GPTBot
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /api
 Disallow: /profile
@@ -44,14 +45,17 @@ Disallow: /profile
 User-agent: ChatGPT-User
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: OAI-SearchBot
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: ClaudeBot
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /api
 Disallow: /profile
@@ -59,29 +63,36 @@ Disallow: /profile
 User-agent: Claude-Web
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: anthropic-ai
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: PerplexityBot
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: Google-Extended
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: cohere-ai
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: Applebot-Extended
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 User-agent: Meta-ExternalAgent
 Allow: /
 Allow: /api/mcp/
+Allow: /.well-known/
 
 Sitemap: https://horecom-platform-eosin.vercel.app/sitemap.xml
