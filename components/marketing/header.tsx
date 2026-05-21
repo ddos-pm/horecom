@@ -1,6 +1,7 @@
-import { Search, ShoppingCart } from "lucide-react";
+import { Search } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { MobileDrawer } from "./mobile-drawer";
+import { CartIconBadge } from "@/components/cart/cart-icon-badge";
 
 export function MarketingHeader() {
   return (
@@ -33,12 +34,10 @@ export function MarketingHeader() {
           </form>
 
           <div className="hc-actions">
-            <a href="/login" className="hc-login show-md">
+            <Link href="/login" className="hc-login show-md">
               Войти
-            </a>
-            <a href="/cart" className="hc-cart" aria-label="Корзина">
-              <ShoppingCart className="h-5 w-5" />
-            </a>
+            </Link>
+            <CartIconBadge />
           </div>
         </div>
       </header>
