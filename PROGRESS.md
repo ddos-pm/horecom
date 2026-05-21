@@ -470,6 +470,68 @@
 ## Этап 1.5 СТАТУС: 5/5 v2-страниц DONE
 - home, catalog, product, subscription, group-buying — все в production через auto-deploy
 
+## Grant-readiness fixes (DONE — May 21, 2026)
+
+> 6 пунктов критики Дияра + bonus fixes. Production verified.
+
+### Step 1 — Duplicate cleanup ✅
+- `Copy: DECOL` (HC-FOOD-0088) удалён из БД и из `prisma/products.json`
+- 189 active products (было 190 с duplicate)
+- Seed уже был idempotent (upsert по slug) — duplicate не вернётся при re-seed
+
+### Step 2 — Inventory seed ✅
+- `scripts/seed-inventory.ts` — hash-based distribution: 30% out / 50% medium (10-50) / 20% high (50-200)
+- 119/189 products в наличии после запуска
+- Idempotent (upsert keyed on productId)
+
+### Step 3 — i18n unit names ✅
+- `lib/units.ts` mapper: piece/pcs/unit → шт, pack → уп, kg → кг, l → л, g → г, ml → мл (+ kz варианты)
+- Заменено в 4 местах: hero card / catalog cards / PDP / cart toast
+- «0 piece» bug на главной → «0 шт»
+
+### Step 4 — Product enrichment ⏸️
+- Скрипт `scripts/enrich-products.ts` готов (Claude Sonnet, 5 полей, dry-run + force)
+- Заблокирован на `ANTHROPIC_API_KEY` в .env.local
+
+### Step 5 — Embeddings ⏸️
+- pgvector extension + Product.embedding column + HNSW index уже на проде
+- Скрипт `scripts/generate-product-embeddings.ts` готов (OpenAI text-embedding-3-small)
+- MCP `find_similar` авто-переключится на pgvector когда embeddings сгенерируются
+- Заблокирован на `OPENAI_API_KEY`
+
+### Step 6 — Volume pricing seed ✅
+- `scripts/seed-volume-pricing.ts` ставит wholesale tier на каждый Price:
+  - Top 15 (по minOrderQty desc) → threshold 10, −10%
+  - Остальные 174 → threshold 4, −5%
+- MCP `get_volume_pricing` теперь возвращает реальные tiers + recommendation
+- PDP volume tier table перестала быть пустой
+
+### Bonus 1 — Cyrillic search fix ⭐
+- `buildSearchStems()` в MCP `search_products` handles:
+  1. Declension: «сгущёнка» → также `сгущ` prefix → matches «Сгущённое/сгущёнки/сгущёнкой»
+  2. ё↔е spelling: query с ё ↔ stored без ё (и наоборот)
+  3. Multi-word: «Barry Callebaut» → OR per-word, finds любой из слов
+- «сгущёнка» raw 0 → 7 hits
+
+### Bonus 2 — Rate limit DB-backed ⭐
+- In-memory `Map` не работает в serverless (Vercel routes между cold-start instances)
+- `lib/mcp/rate-limit.ts` теперь async + DB count from McpCall таблицы
+- Fast-path in-memory bucket остался как soft pre-deny
+- 60 req/min/IP — true cross-instance limit через `prisma.mcpCall.count({ ip, createdAt: { gte: 60s ago } })`
+
+### Bonus 3 — Stable production URL ⭐
+- `horecom-platform-eosin.vercel.app` (Vercel project alias) вместо per-deploy hash URLs
+- `PUBLIC_BASE_URL` constant + `productUrl(slug)` helper в MCP tools.ts
+- При подключении custom domain (horecom.kz) — поменять только env var, без rebuild
+
+### Production smoke verified
+- `search_products('сгущёнка')` → 7 hits
+- `search_products('шоколад')` → 37 hits
+- `get_volume_pricing(HC-FOOD-0098)` → base 1800 ₸ + tier 4+ = 1710 ₸ (−5%) + recommendation
+- `check_inventory(HC-FOOD-0098, 3)` → can_fulfill: true, available: 36
+- `find_similar(HC-FOOD-0098)` → 3 DECOL substitutes (heuristic, score 0.8)
+- `create_draft_order` → HC-73426586 с status DRAFT_PENDING_CONFIRMATION + WA deep link
+
 ## AI этапы (groundwork DONE, runtime — отложено)
 
 ### Готово в коде (commits `4c6d00b`, `296cd80`)

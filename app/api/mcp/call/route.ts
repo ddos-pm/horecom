@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   const ip = clientIp(request);
   const userAgent = request.headers.get("user-agent") ?? undefined;
 
-  const rl = checkRateLimit(ip);
+  const rl = await checkRateLimit(ip);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "rate_limit_exceeded", reset_at: new Date(rl.resetAt).toISOString() },
