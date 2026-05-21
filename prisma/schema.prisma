@@ -169,19 +169,21 @@ model Company {
 
 model User {
   id           String    @id @default(cuid())
+  supabaseId   String?   @unique
   companyId    String?
   company      Company?  @relation(fields: [companyId], references: [id])
   role         UserRole  @default(STAFF)
   name         String?
-  phone        String    @unique
+  phone        String?   @unique
   email        String?   @unique
   lastLoginAt  DateTime?
-  
+
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  
+
   @@index([phone])
   @@index([companyId])
+  @@index([supabaseId])
 }
 
 model Address {

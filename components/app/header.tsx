@@ -1,13 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, ChevronDown } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
+import { UserMenu } from "./user-menu";
 
-export function AppHeader() {
+export async function AppHeader() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white">
       <div className="container-tight flex h-14 items-center justify-between gap-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
           <Image
             src="/logos/logo-header.png"
             alt="Horecom"
@@ -18,18 +25,13 @@ export function AppHeader() {
           />
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link href="/cart" aria-label="Корзина">
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />
             </Button>
           </Link>
-
-          {/* User dropdown placeholder — wired in Этап 2 (auth) */}
-          <Button variant="ghost" className="gap-1.5">
-            <span className="hidden text-sm sm:inline">Аккаунт</span>
-            <ChevronDown className="h-4 w-4" />
-          </Button>
+          <UserMenu email={user?.email ?? null} />
         </div>
       </div>
     </header>

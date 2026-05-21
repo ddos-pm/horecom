@@ -1,17 +1,8 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
-export function middleware(request: NextRequest) {
-  const host = request.headers.get("host") ?? "";
-
-  // Future: app.horecom.kz subdomain routing.
-  // Next.js route groups already resolve /cart → (app)/cart and /catalog → (marketing)/catalog,
-  // so the middleware is a placeholder for subdomain split and (Этап 2+) auth gates.
-  if (host.startsWith("app.")) {
-    return NextResponse.next();
-  }
-
-  return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
 }
 
 export const config = {

@@ -66,9 +66,46 @@
 ### Known issue addressed
 - [x] **Prisma connection drops on idle direct connection** (Supabase port 5432 закрывает idle коннекции). Added `?connection_limit=1&pool_timeout=20` to `DATABASE_URL` in `.env`/`.env.local`. Fix: switch to Transaction Pooler (port 6543) on Vercel — нужен регион проекта.
 
-## V0 Plan — Этапы 2-9: pending
+## V0 Plan — Этап 2: Auth Supabase magic link + onboarding (DONE — May 21, 2026)
 
-- [ ] **Этап 2** — Auth: Supabase magic link + onboarding (1 день)
+### Installed
+- [x] `@supabase/supabase-js@2.106.1` + `@supabase/ssr@0.10.3` (--legacy-peer-deps)
+
+### Schema
+- [x] `User.supabaseId String? @unique` добавлен + index
+- [x] `User.phone String?` стал опциональным (magic link даёт только email)
+- [x] Migration `20260521010000_add_supabase_auth_fields` применена (deploy, не dev — non-interactive)
+
+### Supabase clients
+- [x] `lib/supabase/server.ts` — createServerClient с `await cookies()` (Next 15 async API)
+- [x] `lib/supabase/client.ts` — createBrowserClient для клиентских компонентов
+- [x] `lib/supabase/middleware.ts` — updateSession + защита `/cart|/checkout|/orders|/profile|/dashboard|/subscription/manage|/admin|/onboarding`
+
+### Pages & routes
+- [x] `middleware.ts` подключает updateSession на каждый запрос (auth gates + cookie refresh)
+- [x] `app/auth/callback/route.ts` — exchangeCodeForSession → find-or-create User (по supabaseId, fallback по email) → redirect (/onboarding если companyId нет, иначе на next)
+- [x] `app/(app)/login/page.tsx` — client form с signInWithOtp + post-submit success state + error из ?error param
+- [x] `app/(app)/onboarding/page.tsx` — 3-шаговый wizard (сегмент → компания → адрес) с локальным state
+- [x] `app/(app)/onboarding/actions.ts` — server action completeOnboarding (Zod валидация, Company+Address create, User.companyId link)
+
+### UI
+- [x] `components/app/user-menu.tsx` — client dropdown с email + Профиль/Выйти
+- [x] `components/app/header.tsx` — server component, читает user через supabase.auth.getUser(), показывает UserMenu
+
+### Verification
+- [x] `npm run build` clean (24 routes; middleware 87.7 kB)
+
+### Manual steps for co-founderа/Дияра in Supabase Dashboard (BLOCKER for testing)
+- [!] **Authentication → URL Configuration** → добавить в **Site URL** или **Redirect URLs**: `http://localhost:3000/auth/callback` (для local) + `https://*.vercel.app/auth/callback` (для preview deploys). Без этого magic link отдаст error.
+- [ ] (полировка, не блокер) **Authentication → Email Templates → Magic Link** — перевести на русский (текст в плане Этапа 2, шаг 7)
+
+### Known limitations (V0)
+- Supabase free tier SMTP: 4 emails/hour. Для production V1 — подключить Resend.
+- `/login` рендерится в `(app)` layout c AppSidebar — sidebar показывает protected ссылки для unauth user. Косметика, не блокер. Полировка в Этапе 8 если нужно.
+
+## V0 Plan — Этапы 3-9: pending
+
+- [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
