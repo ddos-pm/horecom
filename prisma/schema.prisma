@@ -234,26 +234,39 @@ model Product {
   brand                   String?
   imageUrl                String?
   imageUrls               String[]    @default([])
-  
+
+  // AI-enriched fields (populated by scripts/enrich-products.ts)
+  brandResolved           String?
+  descriptionExtended     String?
+  useCases                String?
+  composition             String?
+  storageInfo             String?
+  enrichedAt              DateTime?
+
+  // pgvector embedding for find_similar in MCP (populated by
+  // scripts/generate-product-embeddings.ts; column type added via raw SQL
+  // because Prisma doesn't natively support vector(N))
+  embedding               Unsupported("vector(1536)")?
+
   categoryId              String
   category                Category    @relation(fields: [categoryId], references: [id])
-  
+
   storageType             StorageType @default(AMBIENT)
   unitType                String
   packLabel               String
   minOrderQty             Int         @default(1)
-  
+
   isGroupEligible         Boolean     @default(false)
   isSubscriptionEligible  Boolean     @default(false)
   isActive                Boolean     @default(true)
-  
+
   inventorySnapshot       InventorySnapshot?
   prices                  Price[]
   cartItems               CartItem[]
   orderItems              OrderItem[]
   subscriptionPlanItems   SubscriptionPlanItem[]
   groupBuyOffers          GroupBuyOffer[]
-  
+
   createdAt               DateTime    @default(now())
   updatedAt               DateTime    @updatedAt
   

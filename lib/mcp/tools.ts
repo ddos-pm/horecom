@@ -262,8 +262,6 @@ export async function getVolumePricing(input: z.infer<typeof getVolumePricingSch
 }
 
 export async function findSimilar(input: z.infer<typeof findSimilarSchema>) {
-  // V0 fallback: same-category sort by stock + price proximity. pgvector
-  // embedding-based ranking will replace this once embeddings are generated.
   const source = await prisma.product.findUnique({
     where: { sku: input.sku },
     include: {
@@ -274,6 +272,74 @@ export async function findSimilar(input: z.infer<typeof findSimilarSchema>) {
   if (!source) return null;
   const basePrice = source.prices[0] ? Number(source.prices[0].basePrice.toString()) : 0;
 
+  // Try pgvector cosine ranking first. Falls back to the V0 heuristic if
+  // embeddings aren't generated yet, source has no embedding, or pgvector
+  // extension isn't enabled (raw query throws → caught below).
+  type VectorRow = {
+    sku: string;
+    name: string;
+    brand: string | null;
+    slug: string;
+    similarity: number;
+    in_stock: boolean;
+    price_per_pack: number | null;
+  };
+  let vectorMatches: VectorRow[] = [];
+  try {
+    const inStockFilter = input.prefer_in_stock ? "AND COALESCE(i.\"availableQty\", 0) > 0" : "";
+    const rows = await prisma.$queryRawUnsafe<VectorRow[]>(
+      `
+      WITH src AS (
+        SELECT "embedding" FROM "Product" WHERE id = $1 AND "embedding" IS NOT NULL
+      )
+      SELECT
+        p.sku,
+        p.name,
+        p.brand,
+        p.slug,
+        (1 - (p."embedding" <=> (SELECT "embedding" FROM src)))::float AS similarity,
+        COALESCE(i."availableQty", 0) > 0 AS in_stock,
+        (SELECT pr."basePrice"::float FROM "Price" pr WHERE pr."productId" = p.id ORDER BY pr."createdAt" DESC LIMIT 1) AS price_per_pack
+      FROM "Product" p
+      LEFT JOIN "InventorySnapshot" i ON i."productId" = p.id
+      WHERE p.id != $1
+        AND p."isActive" = true
+        AND p."embedding" IS NOT NULL
+        AND EXISTS (SELECT 1 FROM src)
+        ${inStockFilter}
+      ORDER BY p."embedding" <=> (SELECT "embedding" FROM src)
+      LIMIT $2
+      `,
+      source.id,
+      input.max_results,
+    );
+    vectorMatches = rows;
+  } catch {
+    vectorMatches = [];
+  }
+
+  if (vectorMatches.length > 0) {
+    return {
+      source_product: { sku: source.sku, name: source.name, brand: source.brand },
+      similar_products: vectorMatches.map((r) => {
+        const priceDiff =
+          basePrice > 0 && r.price_per_pack ? ((r.price_per_pack - basePrice) / basePrice) * 100 : 0;
+        return {
+          sku: r.sku,
+          name: r.name,
+          brand: r.brand,
+          similarity_score: Math.round(r.similarity * 100) / 100,
+          similarity_reason: `Semantic embedding match (cosine ${r.similarity.toFixed(2)})`,
+          in_stock: r.in_stock,
+          price_per_pack: r.price_per_pack ?? 0,
+          price_difference_percent: Math.round(priceDiff * 10) / 10,
+          product_url: `https://horecom.kz/ru/product/${r.slug}`,
+        };
+      }),
+    };
+  }
+
+  // Fallback heuristic
   const candidates = await prisma.product.findMany({
     where: {
       categoryId: source.categoryId,
