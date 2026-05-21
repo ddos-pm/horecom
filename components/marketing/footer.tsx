@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { MessageCircle, Instagram, AtSign } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
@@ -7,9 +8,15 @@ export function MarketingFooter() {
     <footer className="hc-footer">
       <div className="container-x hc-footer-top">
         <div className="hc-footer-brand">
-          <div className="hc-logo hc-logo-dark">
-            <img src="/logos/logo-horizontal.png" alt="Horecom" className="logo-img" />
-          </div>
+          <Link href="/" className="hc-logo hc-logo-dark inline-block" aria-label="Horecom — главная">
+            <Image
+              src="/logos/logo-horizontal-transparent.png"
+              alt="Horecom"
+              width={569}
+              height={113}
+              className="h-10 w-auto md:h-12"
+            />
+          </Link>
           <p className="t-body">
             B2B-поставка ингредиентов для кондитерских и HoReCa в Астане. 10 лет на рынке, 50+ клиентов, 50
             поставщиков.

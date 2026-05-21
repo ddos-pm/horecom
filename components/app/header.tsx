@@ -16,10 +16,10 @@ export async function AppHeader() {
       <div className="container-tight flex h-14 items-center justify-between gap-4">
         <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
           <Image
-            src="/logos/logo-header.png"
+            src="/logos/logo-horizontal-transparent.png"
             alt="Horecom"
-            width={120}
-            height={64}
+            width={320}
+            height={86}
             className="h-7 w-auto"
             priority
           />

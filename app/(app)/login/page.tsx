@@ -1,9 +1,25 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+
+function StandaloneLogo() {
+  return (
+    <div className="mb-8 flex justify-center">
+      <Image
+        src="/logos/logo-horizontal-transparent.png"
+        alt="Horecom"
+        width={569}
+        height={113}
+        className="h-12 w-auto md:h-14"
+        priority
+      />
+    </div>
+  );
+}
 
 function LoginForm() {
   const params = useSearchParams();
@@ -38,8 +54,9 @@ function LoginForm() {
 
   if (sent) {
     return (
-      <div className="container-tight py-16">
+      <div className="container-tight py-12 md:py-16">
         <div className="mx-auto max-w-md space-y-3 text-center">
+          <StandaloneLogo />
           <h1 className="text-2xl font-semibold">Проверьте почту</h1>
           <p className="text-sm text-muted-foreground">
             Ссылка для входа отправлена на <b>{email}</b>. Откройте письмо и нажмите кнопку — вернётесь сюда уже залогиненным.
@@ -53,9 +70,10 @@ function LoginForm() {
   }
 
   return (
-    <div className="container-tight py-16">
+    <div className="container-tight py-12 md:py-16">
       <div className="mx-auto max-w-md space-y-4">
-        <h1 className="text-2xl font-semibold">Вход в Horecom</h1>
+        <StandaloneLogo />
+        <h1 className="text-2xl font-semibold text-center">Вход в Horecom</h1>
         <p className="text-sm text-muted-foreground">
           Введите email — пришлём ссылку для входа. Регистрация и вход — в одном шаге.
         </p>
