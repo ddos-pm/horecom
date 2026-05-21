@@ -103,9 +103,61 @@
 - Supabase free tier SMTP: 4 emails/hour. Для production V1 — подключить Resend.
 - `/login` рендерится в `(app)` layout c AppSidebar — sidebar показывает protected ссылки для unauth user. Косметика, не блокер. Полировка в Этапе 8 если нужно.
 
-## V0 Plan — Этапы 3-9: pending
+## V0 Plan — Этап 3: Cart + Checkout + WhatsApp handoff (DONE — May 21, 2026)
 
-- [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
+### Cart store + helpers
+- [x] `lib/cart-store.ts` — Zustand с `persist` middleware (localStorage), CartItem, addItem (с MOQ auto-bump), updateQuantity, removeItem, clear; helpers: getCartSubtotal, getDeliveryFee (1000₸ ниже 30к, free от 30к), getCartTotal, getCartWarnings, CART_LIMITS
+- [x] `lib/email.ts` — STUB sendOrderConfirmation / sendOrderToManager (console.log; TODO V1 Resend)
+
+### Add-to-cart UI
+- [x] `components/cart/add-to-cart-button.tsx` — PDP вариант: qty selector (шаг = MOQ) + "Добавить в корзину" + sonner toast
+- [x] `components/cart/quick-add-button.tsx` — каталог вариант: моментальное добавление MOQ + toast
+- [x] PDP (product/[slug]/page.tsx) — заменён placeholder Button на AddToCartButton; WhatsApp "Спросить" остаётся отдельно
+- [x] Catalog (catalog/page.tsx) — карточки теперь рендерят next/image с реальным фото с Tilda CDN + QuickAddButton под Link
+- [x] next.config.ts — добавлены domains `static.tildacdn.com` и `thb.tildacdn.com`
+- [x] `<Toaster richColors />` подключён в обоих layout (marketing и app)
+
+### /cart page (replaced placeholder)
+- [x] Список позиций с фото, qty controls (±MOQ), удалить
+- [x] Sticky summary справа (mobile: внизу): Subtotal / Доставка / Итого + warnings (минимум 5000₸ / до бесплатной доставки X₸)
+- [x] Empty state с CTA "Открыть каталог"
+- [x] "Оформить заказ" disabled когда subtotal < 5000₸
+
+### /checkout (3-section, single page)
+- [x] `checkout/page.tsx` — server component, авторизация + onboarding guards + read addresses
+- [x] `checkout/form.tsx` — client; 3 секции: Адрес+время (7-day picker + 3 slots + comment) → Substitution preference (ASK / SAME_BRAND_ONLY / NEVER + сохраняется в Company) → Оплата ЗАГЛУШКА (single option "Договоримся при подтверждении")
+- [x] Sticky summary с subtotal/delivery/total + error surface
+
+### POST /api/orders
+- [x] `app/api/orders/route.ts` — Zod валидация, auth gate, address ownership check, price snapshot, atomic Order + OrderItems create, Company.substitutionPreference update, email stubs, возвращает orderId
+- [x] OrderNumber формат: `HC-{8 digits unix}`
+- [x] Initial OrderStatus = `CREATED` (платёж не онлайн, не WAITING_PAYMENT)
+
+### /orders/[id]
+- [x] Server component; auth + company-scope доступ (чужой → notFound)
+- [x] `?just_created=true` → большой success-блок c "Открыть чат в WhatsApp" (deep link c pre-filled текстом про номер заказа) + anchor "Посмотреть детали"
+- [x] Статус-таймлайн (5 этапов CREATED → CONFIRMED → PICKING → OUT_FOR_DELIVERY → DELIVERED), скрыт для CANCELLED
+- [x] Items list с фото и snapshot цен/названий
+- [x] Address + delivery window + comment block
+- [x] Кнопки: ReorderButton (клон в корзину → /cart) + Open WhatsApp
+
+### /orders list
+- [x] Server-rendered, only own company orders, sort by createdAt desc, take 50
+- [x] Cards с number + status badge + создан + count позиций + total
+- [x] Empty state с CTA "Открыть каталог"
+
+### Verification
+- [x] `npm run build` clean (25 routes: marketing + app + /api/orders; middleware 87.7 kB)
+- [x] /cart 3.59 kB, /checkout 5.5 kB, /orders/[id] 3.53 kB — реалистичные размеры
+
+### Limitations (V0, addressed in later этапах)
+- Cart icon in app/marketing headers нет badge с count (плана это не требует, mini-polish в Этапе 8)
+- Email уведомления — только console.log (Resend integration в V1)
+- Substitution flow в админке без email клиенту — менеджер связывается через WhatsApp (V1)
+
+## V0 Plan — Этапы 4-9: pending
+
+- [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)

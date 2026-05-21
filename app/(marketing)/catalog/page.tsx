@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice, stockStatusInfo } from "@/lib/utils";
+import { QuickAddButton } from "@/components/cart/quick-add-button";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -137,36 +139,66 @@ function ProductCard({ product }: { product: ProductWithRelations }) {
   const stockInfo = stock ? stockStatusInfo(stock.stockStatus) : null;
 
   return (
-    <Link
-      href={`/product/${product.slug}`}
-      className="group flex flex-col rounded-lg border border-border bg-card p-4 transition-all hover:shadow-md"
-    >
-      <div className="mb-3 flex aspect-square items-center justify-center rounded-md bg-muted">
-        <span className="text-4xl opacity-60">📦</span>
-      </div>
-      <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-        <span>{product.brand}</span>
-        <span>·</span>
-        <span>{product.packLabel}</span>
-      </div>
-      <h3 className="mb-2 line-clamp-2 text-sm font-medium group-hover:text-primary">
-        {product.name}
-      </h3>
-      <div className="mt-auto space-y-2">
-        <div className="flex items-end justify-between">
-          {price && (
-            <div>
-              <div className="tabular text-lg font-semibold">{formatPrice(price.basePrice.toString())}</div>
-              <div className="text-xs text-muted-foreground">{price.unitLabel}</div>
-            </div>
+    <div className="group flex flex-col rounded-lg border border-border bg-card p-4 transition-all hover:shadow-md">
+      <Link href={`/product/${product.slug}`} className="flex flex-1 flex-col">
+        <div className="relative mb-3 aspect-square overflow-hidden rounded-md bg-muted">
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover transition-transform group-hover:scale-[1.02]"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-4xl opacity-60">📦</div>
           )}
-          {stockInfo && <Badge variant={stockInfo.tone}>{stockInfo.label}</Badge>}
         </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Мин. заказ: {product.minOrderQty}</span>
-          {product.isSubscriptionEligible && <Badge variant="info" className="text-[10px]">Подписка</Badge>}
+        <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+          {product.brand && (
+            <>
+              <span>{product.brand}</span>
+              <span>·</span>
+            </>
+          )}
+          <span>{product.packLabel}</span>
         </div>
-      </div>
-    </Link>
+        <h3 className="mb-2 line-clamp-2 text-sm font-medium group-hover:text-primary">
+          {product.name}
+        </h3>
+        <div className="mt-auto space-y-2">
+          <div className="flex items-end justify-between">
+            {price && (
+              <div>
+                <div className="tabular text-lg font-semibold">{formatPrice(price.basePrice.toString())}</div>
+                <div className="text-xs text-muted-foreground">{price.unitLabel}</div>
+              </div>
+            )}
+            {stockInfo && <Badge variant={stockInfo.tone}>{stockInfo.label}</Badge>}
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Мин. заказ: {product.minOrderQty}</span>
+            {product.isSubscriptionEligible && <Badge variant="info" className="text-[10px]">Подписка</Badge>}
+          </div>
+        </div>
+      </Link>
+      {price && (
+        <div className="mt-3 pt-3 border-t border-border">
+          <QuickAddButton
+            product={{
+              productId: product.id,
+              slug: product.slug,
+              name: product.name,
+              image: product.imageUrl ?? null,
+              price: Number(price.basePrice.toString()),
+              minOrderQty: product.minOrderQty,
+              packLabel: product.packLabel,
+              unitType: product.unitType,
+              stockStatus: stock?.stockStatus ?? null,
+            }}
+          />
+        </div>
+      )}
+    </div>
   );
 }

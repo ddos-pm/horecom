@@ -1,3 +1,4 @@
+import { Toaster } from "sonner";
 import { AppHeader } from "@/components/app/header";
 import { AppSidebar } from "@/components/app/sidebar";
 
@@ -9,6 +10,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <AppSidebar />
         <main className="flex-1 pb-20 md:pb-0">{children}</main>
       </div>
+      <Toaster richColors position="bottom-right" />
     </>
   );
 }

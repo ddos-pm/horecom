@@ -1,3 +1,4 @@
+import { Toaster } from "sonner";
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { JsonLd, ORG_JSON_LD, WEBSITE_JSON_LD } from "@/components/json-ld";
@@ -10,6 +11,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <MarketingHeader />
       <main className="flex-1">{children}</main>
       <MarketingFooter />
+      <Toaster richColors position="bottom-right" />
     </>
   );
 }

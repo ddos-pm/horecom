@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JsonLd } from "@/components/json-ld";
 import { formatPrice, stockStatusInfo } from "@/lib/utils";
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -167,10 +168,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   </div>
                 )}
 
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                  <Button size="lg" className="flex-1">
-                    Добавить в корзину
-                  </Button>
+                <div className="mt-4 flex flex-col gap-3">
+                  <AddToCartButton
+                    product={{
+                      productId: product.id,
+                      slug: product.slug,
+                      name: product.name,
+                      image: product.imageUrl,
+                      price: Number(price.basePrice),
+                      minOrderQty: product.minOrderQty,
+                      packLabel: product.packLabel,
+                      unitType: product.unitType,
+                      stockStatus: product.inventorySnapshot?.stockStatus ?? null,
+                    }}
+                  />
                   <a
                     href={`https://api.whatsapp.com/send/?phone=77078607779&text=${encodeURIComponent(
                       `Здравствуйте! Интересует ${product.name} (${product.sku})`
@@ -178,9 +189,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="lg" variant="outline">
+                    <Button size="lg" variant="outline" className="w-full">
                       <MessageCircle className="h-4 w-4" />
-                      Спросить
+                      Спросить в WhatsApp
                     </Button>
                   </a>
                 </div>
