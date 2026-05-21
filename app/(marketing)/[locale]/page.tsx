@@ -7,7 +7,10 @@ import { StatusStrip } from "@/components/marketing/status-strip";
 import { formatUnit } from "@/lib/units";
 import "./home.css";
 
-export const dynamic = "force-dynamic";
+// ISR — Tyler/grant reviewers should never wait on a cold start. Marketing
+// home re-renders in the background every 10 min; stale-while-revalidate
+// keeps the cached page warm for any concurrent visitors.
+export const revalidate = 600;
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
   "chocolate-glazes": (

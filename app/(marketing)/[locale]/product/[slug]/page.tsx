@@ -11,7 +11,22 @@ import { formatUnit } from "@/lib/units";
 import { Gallery } from "./gallery";
 import "./product.css";
 
-export const dynamic = "force-dynamic";
+// ISR — top-30 bulk-pack products (by minOrderQty desc) are pre-rendered at
+// build time so popular PDPs are instant; everything else is rendered on
+// first hit and cached for 5 min. Keeps build wall-time + DB-connection
+// pressure manageable on the Tokyo pooler.
+export const revalidate = 300;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    orderBy: { minOrderQty: "desc" },
+    take: 30,
+    select: { slug: true },
+  });
+  return products.map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({
   params,

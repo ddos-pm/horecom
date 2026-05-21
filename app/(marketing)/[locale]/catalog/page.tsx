@@ -7,7 +7,10 @@ import { QuickAddButton } from "@/components/cart/quick-add-button";
 import { formatUnit } from "@/lib/units";
 import "./catalog.css";
 
-export const dynamic = "force-dynamic";
+// ISR — base /catalog (no filters) is cached for 5 min and refreshes in the
+// background. Filtered URLs (?category=…&subscription=true&q=…) bypass the
+// static cache automatically because of dynamic searchParams access.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Каталог · опт ингредиентов для кондитерских и HoReCa",
