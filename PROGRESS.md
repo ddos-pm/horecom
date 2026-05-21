@@ -456,8 +456,25 @@
 - [x] GroupBuyWaitlistForm preserved at `#waitlist`
 - [x] `group-buying.css` 459 lines extracted + helper classes
 
-### Still deferred (Этап 1.5 leftover)
-- [ ] PDP v2 (photo gallery slider + extended volume tier table) — текущий PDP работает с AddToCartButton
+## Этап 1.5 — PDP v2 (DONE — May 21, 2026)
+
+- [x] Breadcrumb по category slug
+- [x] **Gallery** (client component) с thumbnail row + main image, click-to-swap, fallback на logo-mark
+- [x] Brand line + h1 + colored stock pill + sub/group/storage badges
+- [x] Price block с volume tier table (current row подсвечен, экономия %)
+- [x] AddToCartButton (existing) + WhatsApp CTA + MOQ note
+- [x] Ops summary + trust line (3 rows) + specs grid + policy callout + related grid
+- [x] JSON-LD Product + BreadcrumbList preserved; locale-aware Links
+- [x] `product.css` 480 lines extracted из v2 mockup
+
+## Этап 1.5 СТАТУС: 5/5 v2-страниц DONE
+- home, catalog, product, subscription, group-buying — все в production через auto-deploy
+
+## Blocked on access (AI этапы из расширенного ТЗ)
+
+- [!] **Этап AI-1 Product enrichment** — нужен `ANTHROPIC_API_KEY` в `.env.local` + файл `PRODUCT_ENRICHMENT_SCRIPT.md` (в launch package отсутствует)
+- [!] **MCP find_similar embeddings** — нужен `OPENAI_API_KEY` + enable pgvector extension в Supabase (Dashboard → Database → Extensions → "vector"). Текущий find_similar работает на category+brand+price heuristics.
+- [!] Файлы из расширенного ТЗ которых нет в launch package: `PRODUCT_ENRICHMENT_SCRIPT.md`, `AI_ARCHITECTURE.md`
 
 ### Что подготовлено в коде
 - [x] `vercel.json` создан: installCommand `npm install --legacy-peer-deps`, buildCommand `prisma migrate deploy && prisma generate && next build`, framework `nextjs`, region `fra1` (Frankfurt — ближе к KZ)
