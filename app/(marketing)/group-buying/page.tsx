@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Users, ShieldCheck, Timer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { GroupBuyWaitlistForm } from "./waitlist-form";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Групповые закупки — оптовые цены для самозанятых кондитеров",
@@ -10,9 +14,20 @@ export const metadata: Metadata = {
     "Объединяйтесь с другими кондитерами для оптовых цен без необходимости держать склад. Цена фиксируется при старте группы.",
 };
 
-export default function GroupBuyingPage() {
+export default async function GroupBuyingPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true, brand: true, packLabel: true, sku: true },
+    orderBy: [{ isGroupEligible: "desc" }, { name: "asc" }],
+  });
+
   return (
-    <div className="container-tight py-8 max-w-3xl">
+    <div className="container-tight max-w-3xl py-8">
       <Badge variant="info" className="mb-3">Запускаем в V1.5</Badge>
       <h1 className="mb-3 text-2xl font-bold tracking-tight md:text-3xl">Групповые закупки</h1>
       <p className="mb-8 text-lg text-muted-foreground">
@@ -63,19 +78,19 @@ export default function GroupBuyingPage() {
         <h2>Когда запускаем</h2>
         <p>
           Групповые закупки — часть V1.5. Сейчас мы готовим механику и подбираем 20–30 пилотных
-          участников из текущей базы (76 000 подписчиков в Instagram). Если хотите участвовать в пилоте —
-          напишите нам в WhatsApp.
+          участников из текущей базы (76 000 подписчиков в Instagram). Запишитесь на форму ниже — свяжемся
+          как только наберётся группа на интересующий вас товар.
         </p>
       </section>
 
-      <div className="mt-12">
-        <a
-          href="https://api.whatsapp.com/send/?phone=77078607779&text=Хочу+участвовать+в+пилоте+групповых+закупок"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button size="lg">Участвовать в пилоте</Button>
+      <div className="mt-10">
+        <a href="#waitlist">
+          <Button size="lg">Записаться в пилот</Button>
         </a>
+      </div>
+
+      <div id="waitlist" className="mt-12 scroll-mt-20">
+        <GroupBuyWaitlistForm products={products} defaultEmail={user?.email ?? null} />
       </div>
     </div>
   );

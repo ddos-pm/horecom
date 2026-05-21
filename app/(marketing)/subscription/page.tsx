@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Bell, RefreshCcw, Sliders, PauseCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { SubscriptionRequestForm } from "./request-form";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Подписка на доставку ингредиентов",
@@ -9,9 +14,20 @@ export const metadata: Metadata = {
     "Регулярная доставка для кондитерских: гибкий график, WhatsApp-напоминания, edit/skip/pause всегда доступны. Бесплатно.",
 };
 
-export default function SubscriptionPage() {
+export default async function SubscriptionPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true, brand: true, packLabel: true, sku: true },
+    orderBy: [{ isSubscriptionEligible: "desc" }, { name: "asc" }],
+  });
+
   return (
-    <div className="container-tight py-8 max-w-3xl">
+    <div className="container-tight max-w-3xl py-8">
       <h1 className="mb-3 text-2xl font-bold tracking-tight md:text-3xl">Подписка на доставку</h1>
       <p className="mb-8 text-lg text-muted-foreground">
         Не успеваете отслеживать когда что заканчивается? Подключите подписку — мы доставим вовремя
@@ -71,13 +87,17 @@ export default function SubscriptionPage() {
         </p>
       </section>
 
-      <div className="mt-12 flex gap-3">
-        <Link href="/catalog?subscription=true">
-          <Button size="lg">Подобрать товары</Button>
+      <div className="mt-10 flex flex-wrap gap-3">
+        <a href="#request">
+          <Button size="lg">Подать запрос</Button>
+        </a>
+        <Link href="/catalog">
+          <Button size="lg" variant="outline">Открыть каталог</Button>
         </Link>
-        <Link href="/how-ordering-works">
-          <Button size="lg" variant="outline">Подробнее о заказе</Button>
-        </Link>
+      </div>
+
+      <div id="request" className="mt-12 scroll-mt-20">
+        <SubscriptionRequestForm products={products} isAuthed={!!user} />
       </div>
     </div>
   );

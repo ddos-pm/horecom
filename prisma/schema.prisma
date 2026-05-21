@@ -157,6 +157,7 @@ model Company {
   subscriptionPlans         SubscriptionPlan[]
   groupBuyParticipations    GroupBuyParticipation[]
   groupBuyOffersInitiated   GroupBuyOffer[]
+  groupBuyInterests         GroupBuyInterest[]
   documents                 Document[]
   notifications             NotificationLog[]
   
@@ -554,7 +555,29 @@ model WhatsAppTemplate {
   approvedAt      DateTime?
   
   notifications   NotificationLog[]
-  
+
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
+}
+
+// ============================================================
+// V0 DEMAND-SIGNAL COLLECTORS
+// ============================================================
+// Lightweight forms that collect customer interest before V1+ workspaces
+// fully implement subscription cron / group-buy mechanics.
+
+model GroupBuyInterest {
+  id          String    @id @default(cuid())
+  email       String
+  phone       String?
+  companyId   String?
+  company     Company?  @relation(fields: [companyId], references: [id])
+  productIds  String[]  @default([])
+  message     String?
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+  processedBy String?
+
+  @@index([createdAt])
+  @@index([companyId])
 }

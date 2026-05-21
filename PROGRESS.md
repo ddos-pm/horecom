@@ -189,9 +189,39 @@
 ### Limitations (V0)
 - Address.createdAt отсутствует в schema → orderBy уюзаем `[isDefault desc, id asc]` (cuid примерно time-sortable). Если потребуется истинная сортировка по времени — миграция в V1.
 
-## V0 Plan — Этапы 5-9: pending
+## V0 Plan — Этап 5: Subscription request + Group Buy waitlist (DONE — May 21, 2026)
 
-- [ ] **Этап 5** — Subscription request + Group Buy waitlist формы (0.5 дня)
+### Schema
+- [x] Новая модель `GroupBuyInterest` (email + phone? + companyId? + productIds[] + message? + processedAt/By) с индексами по createdAt и companyId
+- [x] `Company.groupBuyInterests GroupBuyInterest[]` обратное отношение
+- [x] Migration `20260521020000_add_group_buy_interest` применена
+
+### Server actions
+- [x] `app/(marketing)/subscription/actions.ts` → submitSubscriptionRequest (Zod validation, auth+company guard, создаёт SubscriptionPlan со status REVIEW_REQUIRED + items с defaultQty=MOQ; days/timeOfDay укладываются в notes)
+- [x] `app/(marketing)/group-buying/actions.ts` → submitGroupBuyInterest (Zod, доступно anonymous; companyId автоматически если залогинен)
+
+### Reusable component
+- [x] `components/product-picker.tsx` — клиентский ProductPicker с поиском по name/brand/sku + scrollable checkbox list
+
+### /subscription (public)
+- [x] Async server component, читает products + auth state
+- [x] "Подать запрос" button скроллит к #request
+- [x] `request-form.tsx` (client) — guard auth (если нет → "Войти" CTA), ProductPicker + cadence select + days toggle group (Пн-Вс) + time of day select + комментарий
+- [x] On success → toast + redirect на `/subscription/manage`
+
+### /group-buying (public)
+- [x] Async server component, читает products + (опционально) user email
+- [x] "Записаться в пилот" button скроллит к #waitlist
+- [x] `waitlist-form.tsx` (client) — email (required, default из session) + phone + ProductPicker (optional) + message; работает для anonymous
+- [x] On success → success card "Спасибо, свяжемся когда соберём первую группу"
+
+### Verification
+- [x] `npm run build` clean (/subscription 4.06 kB, /group-buying 3.53 kB)
+- [x] Submission заявок создаёт корректные записи в БД через server actions
+
+## V0 Plan — Этапы 6-9: pending
+
+- [ ] **Этап 6** — Минимальная админка (1.5 дня)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
