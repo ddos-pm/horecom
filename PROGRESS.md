@@ -323,9 +323,91 @@
 ### Verification
 - [x] `npm run build` clean
 
-## V0 Plan — Этап 9: pending
+## V0 Plan — Этап 9: Deploy на Vercel (READY — May 21, 2026)
 
-- [ ] **Этап 9** — Deploy на Vercel + v0.0.1 tag (15 мин)
+### Что подготовлено в коде
+- [x] `vercel.json` создан: installCommand `npm install --legacy-peer-deps`, buildCommand `prisma migrate deploy && prisma generate && next build`, framework `nextjs`, region `fra1` (Frankfurt — ближе к KZ)
+- [x] Все миграции в `prisma/migrations/` — будут авто-применены на prod при первом deploy
+
+### Что нужно сделать вручную (Дияр / co-founder)
+
+**Шаг 1: Авторизоваться в Vercel CLI (одноразово)**
+```bash
+vercel login
+# Выбрать "Continue with Email" или "Continue with GitHub"
+# Открыть письмо / браузер, подтвердить
+```
+
+**Шаг 2: Сделать первый deploy из этой директории**
+```bash
+cd /Users/alizhan/Desktop/horecom-platform
+vercel --prod
+# Vercel CLI спросит:
+#   - Set up and deploy "horecom-platform"? → Y
+#   - Which scope? → выбрать аккаунт co-founderа
+#   - Link to existing project? → N (первый раз)
+#   - What's your project's name? → horecom (или другое)
+#   - In which directory is your code located? → ./ (текущая)
+#   - Modify settings? → N (vercel.json уже задаёт всё)
+```
+
+**Шаг 3: Добавить env vars (через Vercel Dashboard или CLI)**
+
+Открыть https://vercel.com/dashboard → project horecom → Settings → Environment Variables. Добавить все из `.env.local` (см. файл локально):
+- `DATABASE_URL` (на pooler если знаешь регион — иначе пока direct, переключим позже)
+- `DIRECT_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `AUTH_SECRET` (можно ту же, можно сгенерировать новую `openssl rand -base64 32`)
+- `NEXT_PUBLIC_BASE_URL=https://horecom.vercel.app` (или другой production URL который выдаст Vercel)
+
+После добавления env vars — Vercel автоматически сделает Redeploy.
+
+**Шаг 4: Обновить Supabase redirect URLs**
+
+В Supabase Dashboard → Authentication → URL Configuration добавить в **Redirect URLs**:
+```
+https://horecom.vercel.app/auth/callback
+https://*.vercel.app/auth/callback
+```
+
+(замени `horecom` на реальный slug проекта если другой)
+
+**Шаг 5: Тестовый прогон**
+
+1. Открой production URL
+2. Пройди registration → magic link → onboarding → catalog → cart → checkout → success page
+3. Если что-то падает: `vercel logs <project-url>` покажет server logs
+
+**Шаг 6: Tag v0.0.1**
+```bash
+git tag v0.0.1
+git push --tags
+```
+(но push блокирован — см. ниже)
+
+### По-прежнему блокируется
+
+- [!] **GitHub push** в `ddos-pm/horecom` — этот Mac авторизован как `Sariev-Alizhan`. До `gh auth login` под co-founderа (или PAT) — 9 локальных коммитов не уходят в репо. Vercel может deploy без GitHub link (через `vercel --prod` напрямую), но preview-deployments на PR не будут работать пока репо не подключён.
+
+### V0 готовность
+
+- [x] Sprint 0 — каркас + brand kit + 190 SKU
+- [x] Sprint 1-2 — Supabase auth + onboarding + cart/checkout
+- [x] Sprint 3-4 — dashboard + profile + admin
+- [x] Sprint 5-6 — subscription/group-buy forms + admin panel
+- [x] Sprint 7 — i18n RU/KZ
+- [x] Sprint 8 — pre-deploy polish
+- [ ] Sprint 9 — deploy (ready, ждёт Vercel login)
+
+### V1 dependencies (external — после grant)
+
+- 360dialog WhatsApp Business approval → OTP auth + template messages
+- Kaspi Pay Business API approval → online payments
+- Resend → real email notifications
+- Native KZ-speaker review для `messages/kz.json`
+- ЭСФ provider для авто-генерации счёт-фактур
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
