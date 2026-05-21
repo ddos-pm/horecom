@@ -219,9 +219,54 @@
 - [x] `npm run build` clean (/subscription 4.06 kB, /group-buying 3.53 kB)
 - [x] Submission заявок создаёт корректные записи в БД через server actions
 
-## V0 Plan — Этапы 6-9: pending
+## V0 Plan — Этап 6: Минимальная админка (DONE — May 21, 2026)
 
-- [ ] **Этап 6** — Минимальная админка (1.5 дня)
+### Schema
+- [x] `User.isAdmin Boolean @default(false)` + index
+- [x] Migration `20260521030000_add_user_is_admin` применена
+- [!] **Manual step required:** в Supabase SQL editor выполнить `UPDATE "User" SET "isAdmin" = true WHERE email = '***REMOVED***';` (только после того как менеджер залогинится хотя бы раз — её User row должен существовать)
+
+### /admin layout
+- [x] `app/(app)/admin/layout.tsx` — auth + isAdmin guard (non-admin → notFound 404)
+- [x] Sidebar: Заказы (badge: count CREATED/WAITING_PAYMENT/CONFIRMED), Каталог, Подписки (badge: REVIEW_REQUIRED), Group Buy (badge: unprocessed interests)
+- [x] `/admin` → redirect на `/admin/orders`
+
+### /admin/orders
+- [x] Server-rendered таблица: number / client / total / status badge / created / actions
+- [x] Filter pills по статусу (default — non-final активные)
+- [x] `actions.ts`: updateOrderStatus + updateItemStatus + proposeSubstitute (Zod, requireAdmin gate, revalidatePath)
+- [x] `row-actions.tsx`: статус-aware dropdown с next-state опциями
+
+### /admin/orders/[id]
+- [x] Header с статус badge + status controls (status-aware кнопки: Подтвердить / В сборку / В доставку / Доставлен / Отменить)
+- [x] Items list с item-status badge + inline controls: ✓ Подтвердить / Нет в наличии / Замена / Отменить
+- [x] `item-controls.tsx`: модалка-панель с ProductPicker (max=1) для предложения замены + reason input
+- [x] Sidebar с клиентом, адресом, доставкой, итогами, substitutionPreference
+
+### /admin/catalog
+- [x] Поиск (name/brand/SKU) + фильтр по категории + пагинация по 50
+- [x] Таблица: товар / бренд (inline edit) / категория / сток (inline edit + status badge) / активен (toggle)
+- [x] `actions.ts`: updateStock (создаёт/обновляет InventorySnapshot с auto-status: IN_STOCK / LOW_STOCK / OUT_OF_STOCK по правилу <10 / >0 / 0) + updateProduct (brand + isActive)
+
+### /admin/subscriptions
+- [x] Список всех планов, REVIEW_REQUIRED первыми
+- [x] Каждый план: company name + status badge + cadence + email + notes (где запросные параметры)
+- [x] `actions.ts`: changeSubscriptionStatus (ACTIVE / PAUSED / CANCELLED)
+- [x] Кнопка WhatsApp deep-link на телефон владельца с pre-filled текстом
+
+### /admin/group-buy-interests
+- [x] Список заявок, processed=null первыми; processed → opacity-60
+- [x] Каждая заявка: email + phone + company? + status badge + product names + message
+- [x] `actions.ts`: markInterestProcessed (processedAt + processedBy) + unmarkInterestProcessed (revert)
+- [x] Buttons: Email (mailto), WhatsApp (deep-link), Mark processed / Undo
+
+### Verification
+- [x] `npm run build` clean (30 routes, 5 админских)
+- [x] Non-admin user → notFound на /admin/*
+
+## V0 Plan — Этапы 7-9: pending
+
+- [ ] **Этап 7** — Локализация RU/KZ для (marketing) (1 день)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
