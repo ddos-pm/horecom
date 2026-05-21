@@ -437,10 +437,27 @@
 - [x] URL-driven фильтры (`?category=`, `?subscription=true`, `?group=true`, `?q=`)
 - [x] `catalog.css` extracted из v2 mockup (387 lines)
 
+## Этап 1.5 — Subscription v2 (DONE — May 21, 2026)
+
+- [x] Hero с S2-eyebrow + h1 «Доставляем до того как у вас закончилось» + CTAs + meta
+- [x] **Predictive timeline SVG chart** — Кофейня «Куст», 10 weeks stock-level, delivery dots, dashed forecast, confidence band, next-delivery callout (flagship visual)
+- [x] WhatsApp flow: device mockup с 3-кнопочной карточкой + 5-step explanation
+- [x] Comparison band: Subscription vs One-off (−14.3% savings на 12-SKU basket)
+- [x] SubscriptionRequestForm preserved at `#request` anchor
+- [x] `subscription.css` 420 lines extracted из v2 mockup
+
+## Этап 1.5 — Group-Buying v2 (DONE — May 21, 2026)
+
+- [x] Hero dark surface (grid-bg + glow) с V1.5 pilot pill + h1 «Опт на пятерых»
+- [x] **Live group demo card** с product photo, prices (strike/new/save), progress bar 4/6, avatar stack
+- [x] **LiveCountdown client component** — `setInterval`/`useState` real-time countdown к target date (2 дня 14 часов)
+- [x] 4-step «Как это работает» с mock screens (последний в success green)
+- [x] Economics band: 3 big stats (−18%, 4–6, 3 дня) + price calculator (розница vs опт = −58 800₸/год на муке)
+- [x] GroupBuyWaitlistForm preserved at `#waitlist`
+- [x] `group-buying.css` 459 lines extracted + helper classes
+
 ### Still deferred (Этап 1.5 leftover)
-- [ ] PDP v2 (photo gallery slider + volume tier table) — текущий PDP работает с AddToCartButton
-- [ ] Subscription v2 (predictive chart "Кофейня Куст") — текущий лендинг + форма-запрос работают
-- [ ] Group-Buying v2 (live-group card с countdown widget) — текущий waitlist работает
+- [ ] PDP v2 (photo gallery slider + extended volume tier table) — текущий PDP работает с AddToCartButton
 
 ### Что подготовлено в коде
 - [x] `vercel.json` создан: installCommand `npm install --legacy-peer-deps`, buildCommand `prisma migrate deploy && prisma generate && next build`, framework `nextjs`, region `fra1` (Frankfurt — ближе к KZ)
