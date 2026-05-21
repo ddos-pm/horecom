@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/json-ld";
 import { COMPANY } from "@/lib/company";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { formatUnit } from "@/lib/units";
+import { SITE_URL } from "@/lib/base-url";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -124,29 +125,50 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     }
   }
 
-  // JSON-LD
+  // Price valid until end of next year — keeps Google Shopping happy
+  // without committing to a hard expiration we'd have to maintain.
+  const priceValidUntil = new Date(new Date().getFullYear() + 1, 11, 31)
+    .toISOString()
+    .slice(0, 10);
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": `https://horecom.kz/ru/product/${product.slug}#product`,
+    "@id": `${SITE_URL}/ru/product/${product.slug}#product`,
     name: product.name,
-    description: product.description,
+    description: product.descriptionExtended ?? product.description,
     sku: product.sku,
-    ...(product.brand && { brand: { "@type": "Brand", name: product.brand } }),
+    ...((product.brandResolved ?? product.brand) && {
+      brand: { "@type": "Brand", name: product.brandResolved ?? product.brand },
+    }),
     category: product.category.name,
     image: galleryImages,
     ...(basePrice && {
       offers: {
         "@type": "Offer",
-        url: `https://horecom.kz/ru/product/${product.slug}`,
+        url: `${SITE_URL}/ru/product/${product.slug}`,
         priceCurrency: basePrice.currency,
         price: basePrice.basePrice.toString(),
+        priceValidUntil,
         availability: stockStatusToSchema(stock?.stockStatus),
-        seller: { "@id": "https://horecom.kz/#organization" },
+        itemCondition: "https://schema.org/NewCondition",
+        seller: {
+          "@type": "Organization",
+          "@id": `${SITE_URL}/#organization`,
+          name: "Horecom",
+          url: SITE_URL,
+        },
         eligibleQuantity: {
           "@type": "QuantitativeValue",
           minValue: product.minOrderQty,
           unitText: product.unitType,
+        },
+        areaServed: { "@type": "City", name: "Астана" },
+        deliveryLeadTime: {
+          "@type": "QuantitativeValue",
+          minValue: 0,
+          maxValue: 1,
+          unitCode: "DAY",
         },
       },
     }),
@@ -156,13 +178,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Главная", item: "https://horecom.kz/ru" },
-      { "@type": "ListItem", position: 2, name: "Каталог", item: "https://horecom.kz/ru/catalog" },
+      { "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/ru` },
+      { "@type": "ListItem", position: 2, name: "Каталог", item: `${SITE_URL}/ru/catalog` },
       {
         "@type": "ListItem",
         position: 3,
         name: product.category.name,
-        item: `https://horecom.kz/ru/catalog?category=${product.category.slug}`,
+        item: `${SITE_URL}/ru/catalog?category=${product.category.slug}`,
       },
       { "@type": "ListItem", position: 4, name: product.name },
     ],
