@@ -517,7 +517,8 @@
 - In-memory `Map` не работает в serverless (Vercel routes между cold-start instances)
 - `lib/mcp/rate-limit.ts` теперь async + DB count from McpCall таблицы
 - Fast-path in-memory bucket остался как soft pre-deny
-- 60 req/min/IP — true cross-instance limit через `prisma.mcpCall.count({ ip, createdAt: { gte: 60s ago } })`
+- **Known V0 limitation:** race условие в serverless — logger пишет async после response, поэтому 60 одновременных burst пробивают (`count()` видит state до записи). Real abuse покрывается Vercel-edge DDoS protection. Для строгого rate limit в V1 — Vercel KV / Upstash Redis.
+- ✅ Logging тем не менее работает: 145+ entries в McpCall, все 6 tools tracked для аналитики
 
 ### Bonus 3 — Stable production URL ⭐
 - `horecom-platform-eosin.vercel.app` (Vercel project alias) вместо per-deploy hash URLs
