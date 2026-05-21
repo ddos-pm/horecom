@@ -1,14 +1,16 @@
-import Link from "next/link";
 import Image from "next/image";
 import { MessageCircle, Instagram, Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 
-export function MarketingFooter() {
+export async function MarketingFooter() {
+  const t = await getTranslations("footer");
+  const year = new Date().getFullYear();
+
   return (
     <footer className="mt-16 bg-black text-white">
-      {/* Main grid */}
       <div className="container-tight grid gap-8 py-12 md:grid-cols-4">
-        {/* Brand */}
         <div>
           <Link href="/" className="mb-3 inline-block">
             <Image
@@ -19,9 +21,7 @@ export function MarketingFooter() {
               className="h-9 w-auto"
             />
           </Link>
-          <p className="mt-3 text-sm text-white/70">
-            B2B-поставка ингредиентов для кондитерских и HoReCa в Астане. 10 лет на рынке.
-          </p>
+          <p className="mt-3 text-sm text-white/70">{t("tagline")}</p>
           <div className="mt-4 flex gap-2">
             <a
               href={COMPANY.whatsappLink}
@@ -44,34 +44,34 @@ export function MarketingFooter() {
           </div>
         </div>
 
-        {/* Catalog */}
         <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/80">Каталог</h3>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/80">
+            {t("columns.catalog")}
+          </h3>
           <ul className="space-y-2 text-sm text-white/70">
-            <li><Link href="/catalog" className="hover:text-white">Все товары</Link></li>
-            <li><Link href="/catalog/chocolate-glazes" className="hover:text-white">Шоколад и глазури</Link></li>
-            <li><Link href="/catalog/syrups" className="hover:text-white">Сиропы</Link></li>
-            <li><Link href="/catalog/dairy" className="hover:text-white">Молочная продукция</Link></li>
-            <li><Link href="/subscription" className="hover:text-white">Подписка</Link></li>
-            <li><Link href="/group-buying" className="hover:text-white">Групповые закупки</Link></li>
+            <li><Link href="/catalog" className="hover:text-white">{t("links.about")}</Link></li>
+            <li><Link href="/subscription" className="hover:text-white">{t("links.subscription")}</Link></li>
+            <li><Link href="/group-buying" className="hover:text-white">{t("links.groupBuying")}</Link></li>
           </ul>
         </div>
 
-        {/* Info */}
         <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/80">Информация</h3>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/80">
+            {t("columns.info")}
+          </h3>
           <ul className="space-y-2 text-sm text-white/70">
-            <li><Link href="/about" className="hover:text-white">О нас</Link></li>
-            <li><Link href="/how-ordering-works" className="hover:text-white">Как заказать</Link></li>
-            <li><Link href="/delivery-and-payment" className="hover:text-white">Доставка и оплата</Link></li>
-            <li><Link href="/faq" className="hover:text-white">Частые вопросы</Link></li>
-            <li><Link href="/privacy" className="hover:text-white">Конфиденциальность</Link></li>
+            <li><Link href="/about" className="hover:text-white">{t("links.about")}</Link></li>
+            <li><Link href="/how-ordering-works" className="hover:text-white">{t("links.howOrdering")}</Link></li>
+            <li><Link href="/delivery-and-payment" className="hover:text-white">{t("links.delivery")}</Link></li>
+            <li><Link href="/faq" className="hover:text-white">{t("links.faq")}</Link></li>
+            <li><Link href="/privacy" className="hover:text-white">{t("links.privacy")}</Link></li>
           </ul>
         </div>
 
-        {/* Contacts */}
         <div>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/80">Контакты</h3>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/80">
+            {t("columns.contacts")}
+          </h3>
           <ul className="space-y-3 text-sm text-white/70">
             <li>
               <a
@@ -83,7 +83,7 @@ export function MarketingFooter() {
                 <MessageCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-orange" />
                 <div>
                   <div>{COMPANY.phoneWhatsAppDisplay}</div>
-                  <div className="text-xs text-white/50">WhatsApp · приём заказов</div>
+                  <div className="text-xs text-white/50">WhatsApp</div>
                 </div>
               </a>
             </li>
@@ -92,7 +92,6 @@ export function MarketingFooter() {
                 <Phone className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-blue" />
                 <div>
                   <div>{COMPANY.phoneCallbackDisplay}</div>
-                  <div className="text-xs text-white/50">Звонки</div>
                 </div>
               </a>
             </li>
@@ -104,19 +103,20 @@ export function MarketingFooter() {
             </li>
             <li className="flex items-start gap-2">
               <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/60" />
-              <span>Астана, ул. Шамши Калдаякова 1</span>
+              <span>{COMPANY.physicalAddress}</span>
             </li>
           </ul>
         </div>
       </div>
 
-      {/* Legal bar */}
       <div className="border-t border-white/10">
         <div className="container-tight flex flex-col gap-2 py-4 text-xs text-white/50 md:flex-row md:items-center md:justify-between">
-          <span>© 2026 Horecom · {COMPANY.legalNameShort}</span>
+          <span>
+            © {t("legal", { year, legalName: COMPANY.legalNameShort, iin: COMPANY.iin })}
+          </span>
           <span className="flex items-center gap-1">
             <ShieldCheck className="h-3.5 w-3.5" />
-            ИИН {COMPANY.iin} · {COMPANY.bank}
+            {COMPANY.bank}
           </span>
         </div>
       </div>

@@ -1,7 +1,25 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { routing } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
+
+const BASE = "https://horecom.kz";
+
+function withAlternates(path: string, ru: Partial<MetadataRoute.Sitemap[number]> = {}): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${BASE}/ru${path}`,
+    alternates: {
+      languages: Object.fromEntries(
+        routing.locales.map((l) => [
+          l === "kz" ? "kk" : l,
+          `${BASE}/${l}${path}`,
+        ]),
+      ),
+    },
+    ...ru,
+  };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await prisma.product.findMany({
@@ -9,31 +27,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, updatedAt: true },
   });
 
-  const categories = await prisma.category.findMany({ select: { slug: true } });
-
   const staticPages: MetadataRoute.Sitemap = [
-    { url: "https://horecom.kz", priority: 1.0, lastModified: new Date(), changeFrequency: "daily" },
-    { url: "https://horecom.kz/catalog", priority: 0.9, changeFrequency: "daily" },
-    { url: "https://horecom.kz/about", priority: 0.5, changeFrequency: "monthly" },
-    { url: "https://horecom.kz/how-ordering-works", priority: 0.8, changeFrequency: "monthly" },
-    { url: "https://horecom.kz/subscription", priority: 0.8, changeFrequency: "monthly" },
-    { url: "https://horecom.kz/group-buying", priority: 0.8, changeFrequency: "monthly" },
-    { url: "https://horecom.kz/delivery-and-payment", priority: 0.7, changeFrequency: "monthly" },
-    { url: "https://horecom.kz/faq", priority: 0.7, changeFrequency: "monthly" },
+    withAlternates("", { priority: 1.0, lastModified: new Date(), changeFrequency: "daily" }),
+    withAlternates("/catalog", { priority: 0.9, changeFrequency: "daily" }),
+    withAlternates("/about", { priority: 0.5, changeFrequency: "monthly" }),
+    withAlternates("/how-ordering-works", { priority: 0.8, changeFrequency: "monthly" }),
+    withAlternates("/subscription", { priority: 0.8, changeFrequency: "monthly" }),
+    withAlternates("/group-buying", { priority: 0.8, changeFrequency: "monthly" }),
+    withAlternates("/delivery-and-payment", { priority: 0.7, changeFrequency: "monthly" }),
+    withAlternates("/faq", { priority: 0.7, changeFrequency: "monthly" }),
   ];
 
-  const categoryPages: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `https://horecom.kz/catalog?category=${c.slug}`,
-    priority: 0.7,
-    changeFrequency: "weekly",
-  }));
+  const productPages: MetadataRoute.Sitemap = products.map((p) =>
+    withAlternates(`/product/${p.slug}`, {
+      lastModified: p.updatedAt,
+      priority: 0.6,
+      changeFrequency: "weekly",
+    }),
+  );
 
-  const productPages: MetadataRoute.Sitemap = products.map((p) => ({
-    url: `https://horecom.kz/product/${p.slug}`,
-    lastModified: p.updatedAt,
-    priority: 0.6,
-    changeFrequency: "weekly",
-  }));
-
-  return [...staticPages, ...categoryPages, ...productPages];
+  return [...staticPages, ...productPages];
 }

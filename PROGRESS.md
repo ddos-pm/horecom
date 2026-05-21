@@ -264,9 +264,46 @@
 - [x] `npm run build` clean (30 routes, 5 админских)
 - [x] Non-admin user → notFound на /admin/*
 
-## V0 Plan — Этапы 7-9: pending
+## V0 Plan — Этап 7: Локализация RU/KZ для (marketing) (DONE — May 21, 2026)
 
-- [ ] **Этап 7** — Локализация RU/KZ для (marketing) (1 день)
+### Setup
+- [x] `next-intl@4.x` установлен (--legacy-peer-deps)
+- [x] `i18n/routing.ts` — defineRouting locales=['ru','kz'], defaultLocale='ru', localePrefix='always' + createNavigation helpers (Link, redirect, usePathname, useRouter)
+- [x] `i18n/request.ts` — getRequestConfig load messages/{locale}.json
+- [x] `next.config.ts` — createNextIntlPlugin wrapper
+- [x] `middleware.ts` — chain: app paths → updateSession (auth), marketing paths → intlMiddleware (locale routing)
+
+### Structure
+- [x] Move (marketing)/* → (marketing)/[locale]/*: page, about, catalog, delivery-and-payment, faq, group-buying, how-ordering-works, privacy, product, subscription
+- [x] (marketing)/[locale]/layout.tsx async — hasLocale validation + setRequestLocale + NextIntlClientProvider + header/footer/Toaster + JSON-LD + generateStaticParams
+- [x] llms.txt и sitemap остались в (marketing)/ (не локализованы)
+
+### Translations
+- [x] `messages/ru.json` — полный, ~85 ключей (header, footer, home segments/categories, catalog filters/stock, product labels, subscription/group landing CTAs, common UI)
+- [x] `messages/kz.json` — draft переведённый, с `_TODO_REVIEW` флагом для native review (особенно: коммерческие/гастрономические термины, юр.формулировки)
+
+### Header / Footer
+- [x] MarketingHeader использует Link из @/i18n/routing + getTranslations("header") — auto-prefix /ru или /kz для каталога/подписки/корзины
+- [x] MarketingFooter — getTranslations("footer"), все ссылки через locale-aware Link
+- [x] `components/marketing/language-switcher.tsx` — client switcher Русский/Қазақша, replace pathname с новым locale
+
+### SEO
+- [x] sitemap.ts с alternates.languages — каждая страница в /ru и /kz, hreflang='kk' для KZ, 'ru' для RU
+- [x] Build clean: /ru/* и /kz/* prerender'ятся через generateStaticParams (SSG)
+
+### Verification
+- [x] `npm run build` clean (32 routes; middleware 122 kB с next-intl)
+- [x] curl: `/` → 200 на `/ru`, `/ru/catalog` → 200, `/kz/catalog` → 200, `/cart` → 200 после auth redirect
+
+### V0 limitations (V1 follow-ups)
+- Long-form prose внутри страниц (About, FAQ, Privacy, Subscription/Group landing tex, How-Ordering-Works) остаётся RU в JSX. KZ-варианты — TODO для native speaker review.
+- Root html lang=ru фиксирован (app routes — RU only). На /kz/* пользователь видит KZ контент, но `<html lang>` остаётся "ru". Hreflang в sitemap корректные — для search engines достаточно.
+- Internal Links в long-form страницах используют next/link с href="/catalog" — intl middleware редиректит на /{locale}/catalog (308). Производительно меньше, чем locale-aware Link, но работает.
+- App pages → marketing links (например /cart → /catalog button) проходят через intl redirect → /ru/catalog. Косметика.
+
+## V0 Plan — Этапы 8-9: pending
+
+- [ ] **Этап 8** — Pre-deploy polish (0.5 дня)
 - [ ] **Этап 3** — Корзина + Checkout + WhatsApp handoff (2 дня)
 - [ ] **Этап 4** — Личный кабинет + Профиль + адреса (1 день)
 - [ ] **Этап 5** — Subscription request + Group Buy waitlist (0.5 дня)
