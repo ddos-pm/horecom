@@ -45,7 +45,11 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Exclude static assets, _next, sitemap, llms.txt, robots, .well-known
-    "/((?!_next/static|_next/image|favicon.ico|logos|sitemap|sitemap.xml|llms.txt|robots.txt|\\.well-known|.*\\.png).*)",
+    // Exclude static assets, _next, sitemap, llms.txt, robots, .well-known,
+    // and Next.js metadata routes (icon/apple-icon/manifest auto-generated
+    // by app/icon.png + app/apple-icon.png + app/manifest.ts). Without
+    // these exclusions next-intl wraps them in locale routing and they
+    // 500/307 in production.
+    "/((?!_next/static|_next/image|favicon\\.ico|logos|sitemap|sitemap\\.xml|llms\\.txt|robots\\.txt|\\.well-known|manifest\\.webmanifest|icon|apple-icon|.*\\.png|.*\\.svg|.*\\.ico).*)",
   ],
 };

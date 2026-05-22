@@ -41,10 +41,10 @@ export const metadata: Metadata = {
       "B2B-платформа закупок для кондитеров и HoReCa в Центральной Азии. Подписка, оптовые цены, доставка по Астане.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Horecom" }],
   },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
+  // No explicit `icons:` — Next.js auto-detects app/icon.png and
+  // app/apple-icon.png (and emits <link rel="icon"> / <link rel="apple-touch-icon">
+  // pointing at the hashed versions). An explicit override would short-circuit
+  // that and point at stale paths.
   alternates: {
     canonical: SITE_URL,
   },
@@ -53,6 +53,13 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" },
   },
+};
+
+// Theme color isn't auto-emitted from manifest.ts — declare it via Next's
+// viewport export so the iOS Safari address bar + Android Chrome chrome tint
+// match the orange mark.
+export const viewport: import("next").Viewport = {
+  themeColor: "#F18305",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
