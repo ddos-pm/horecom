@@ -75,21 +75,50 @@ async function makeSquareIcon(
 }
 
 async function main() {
-  console.log("Generating Horecom icon set…");
-  await makeSquareIcon(32, "transparent", "app/icon.png", 0.05);
-  await makeSquareIcon(180, "white", "app/apple-icon.png", 0.12);
-  await makeSquareIcon(192, "transparent", "public/icon-192.png", 0.1);
-  await makeSquareIcon(512, "transparent", "public/icon-512.png", 0.1);
+  console.log("Generating Horecom icon set (uniform WHITE background)…");
+  // White on every size: a transparent favicon reads as black on
+  // dark-mode browser tabs and on iOS home screen. Дияр's call: orange
+  // mark on a clean white square everywhere — consistent across surfaces.
+  // 15% inner padding so the iOS round-rect mask doesn't clip the mark.
+  await makeSquareIcon(32, "white", "app/icon.png", 0.15);
+  await makeSquareIcon(180, "white", "app/apple-icon.png", 0.15);
+  await makeSquareIcon(192, "white", "public/icon-192.png", 0.15);
+  await makeSquareIcon(512, "white", "public/icon-512.png", 0.15);
 
-  // favicon.ico — sharp can't write multi-resolution .ico, but it can emit a
-  // single 32x32 PNG with .ico extension which every browser still accepts.
-  const birdPng = await (await loadBirdOnTransparent()).png().toBuffer();
-  const tmp32 = await sharp(birdPng)
-    .resize(32, 32, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  // favicon.ico — sharp can't emit multi-resolution .ico, but every
+  // browser also accepts a single PNG renamed to .ico. Use the keyed
+  // bird composited on white at 32x32 so the legacy /favicon.ico URL
+  // matches the rest of the set.
+  const bird32 = await makeSquareIconBuffer(32, "white", 0.15);
+  await writeFile("public/favicon.ico", bird32);
+  console.log("  ✓ public/favicon.ico (32x32 PNG-in-ICO, white BG)");
+
+  // Legacy direct-probe fallbacks under public/ for browsers/feed
+  // readers that hit the bare URL instead of following the <link> tag.
+  await writeFile("public/favicon.png", await makeSquareIconBuffer(32, "white", 0.15));
+  await writeFile("public/apple-touch-icon.png", await makeSquareIconBuffer(180, "white", 0.15));
+  console.log("  ✓ public/favicon.png + public/apple-touch-icon.png");
+}
+
+async function makeSquareIconBuffer(
+  size: number,
+  background: "transparent" | "white",
+  paddingRatio: number,
+): Promise<Buffer> {
+  const bird = await loadBirdOnTransparent();
+  const inner = Math.round(size * (1 - paddingRatio * 2));
+  const resizedBird = await bird
+    .resize({ width: inner, height: inner, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toBuffer();
-  await writeFile("public/favicon.ico", tmp32);
-  console.log("  ✓ public/favicon.ico (32x32 PNG-in-ICO)");
+  const bg =
+    background === "white"
+      ? { r: 255, g: 255, b: 255, alpha: 1 }
+      : { r: 0, g: 0, b: 0, alpha: 0 };
+  return sharp({ create: { width: size, height: size, channels: 4, background: bg } })
+    .composite([{ input: resizedBird, gravity: "center" }])
+    .png()
+    .toBuffer();
 }
 
 main().catch((e) => {
