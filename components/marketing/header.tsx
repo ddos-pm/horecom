@@ -28,10 +28,13 @@ export function MarketingHeader() {
             showShortcut
           />
 
+          {/* /login and /cart live OUTSIDE the locale segment (APP_PREFIXES
+              in middleware) — using next-intl <Link> here would prefix them
+              with /ru and produce 404. Plain <a> hits the real path. */}
           <div className="hc-actions">
-            <Link href="/login" className="hc-login show-md">
+            <a href="/login" className="hc-login show-md">
               Войти
-            </Link>
+            </a>
             <CartIconBadge />
           </div>
         </div>
