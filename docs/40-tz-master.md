@@ -566,10 +566,24 @@ DB-based rate limit имеет race condition в serverless (несколько 
 - ⚠️ 35 из 189 SKU без brand вообще — enrichment не угадывает (`brandResolved = null`). Не ломает работу, но смотрится менее полно. Решение в V1.5: GPT-4 brand-extraction pass с confidence threshold ≥0.7
 
 ### 11.6 Тестирование
-- ❌ Unit/integration tests отсутствуют
-- ❌ E2E tests отсутствуют
+- ❌ Unit tests отсутствуют (V1.5)
+- ✅ **E2E walkthrough** — `tests/e2e/site-walkthrough.spec.ts` (16 сценариев на Playwright Chromium): home, catalog filter, debounced search, PDP rendering, add-to-cart + badge, cart → /login redirect, login form, header & drawer search, footer AI link, KZ banner, subscription gate, group-buy V1.5 badge, icons, manifest, JSON-LD coverage
+- ✅ **Smoke test** — `scripts/smoke-test.sh` (39 curl checks): все routes + auth gates + AI surfaces + icons + MCP bad-args validation
 - ✅ Build на Vercel ловит большую часть TS-ошибок
 - 🟡 CI workflow готов локально, но требует `gh auth refresh -s workflow` от Дияра
+
+#### Команды
+```bash
+# Smoke (быстро, ~30 сек):
+bash scripts/smoke-test.sh
+
+# Browser walkthrough (~2 мин):
+npx playwright test tests/e2e/site-walkthrough.spec.ts --reporter=list
+
+# Если на локалке:
+BASE_URL=http://localhost:3000 bash scripts/smoke-test.sh
+BASE_URL=http://localhost:3000 npx playwright test
+```
 
 ### 11.7 i18n
 - ✅ Маршруты `/kz/*` существуют, redirect-safe
@@ -577,6 +591,16 @@ DB-based rate limit имеет race condition в serverless (несколько 
 - ❌ Реальный перевод `messages/kz.json` ждёт native-speaker pass (нанять переводчика)
 
 ---
+
+### 11.8 next-intl `<Link>` каверзы — known fix pattern
+
+next-intl `<Link>` (import from `@/i18n/routing`) имеет два известных гнойника:
+
+1. **Same-pathname click no-op.** При клике на `<Link href="/catalog?category=X">` со страницы `/catalog`, onClick handler видит «same pathname» и не вызывает `router.push` → URL не меняется, фильтр не применяется. SSR href в HTML правильный — только client click сломан. **Fix:** для same-pathname навигации использовать **plain `<a href="/${locale}/path?…">`** (полный путь с locale).
+
+2. **App paths (`/cart`, `/login`, `/checkout`) → 404 при /ru/ префиксе.** Эти routes намеренно живут вне `[locale]` сегмента (см. APP_PREFIXES в middleware.ts). next-intl Link добавит `/ru` prefix → `/ru/cart` → 404. **Fix:** для app paths использовать plain `<a href="/cart">` или `next/link` (без locale wrapping).
+
+Соблюдай эти правила в новом коде, или Playwright walkthrough поймает.
 
 ## 12. Контактные точки для разработчиков
 
