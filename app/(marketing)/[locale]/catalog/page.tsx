@@ -30,10 +30,13 @@ const STOCK_CLASS: Record<string, string> = {
 };
 
 export default async function CatalogPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ q?: string; category?: string; subscription?: string; group?: string }>;
 }) {
+  const { locale } = await params;
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
   const categorySlug = sp.category;
@@ -221,17 +224,20 @@ export default async function CatalogPage({
                   <span className="n">{total}</span>
                 </Link>
                 {categories.map((c) => (
-                  <Link
+                  // Plain <a> — next-intl <Link> intercepts the click via its
+                  // onClick handler and no-ops when the pathname computes as
+                  // "same" (we're going from /catalog to /catalog?…). With
+                  // <a>, the browser does a real navigation that the server
+                  // handles fresh. Locale is already in the URL prefix; we
+                  // hard-code /ru since marketing layout always wraps locale.
+                  <a
                     key={c.id}
-                    // string href instead of {pathname, query} object — next-intl's
-                    // client router drops the query on same-pathname navigation
-                    // when an object href is used. String form survives.
-                    href={`/catalog?category=${c.slug}`}
+                    href={`/${locale}/catalog?category=${c.slug}`}
                     className={categorySlug === c.slug ? "active" : ""}
                   >
                     <span>{c.name}</span>
                     <span className="n">{c._count.products}</span>
-                  </Link>
+                  </a>
                 ))}
               </div>
             </div>
