@@ -39,6 +39,14 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    // Force the Next.js client router cache to drop dynamic segments
+    // immediately. Without this, clicking a catalog sidebar Link to
+    // /ru/catalog?category=X from /ru/catalog (same pathname, different
+    // query) reuses the cached unfiltered RSC payload and the filter
+    // doesn't apply on soft-nav. Direct URL loads worked because they
+    // bypass the cache; only the click was broken. Playwright caught it
+    // in tests/e2e/site-walkthrough.spec.ts §3.
+    staleTimes: { dynamic: 0, static: 0 },
   },
 };
 
