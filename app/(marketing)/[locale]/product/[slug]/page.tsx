@@ -20,13 +20,27 @@ export const revalidate = 300;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    orderBy: { minOrderQty: "desc" },
-    take: 30,
-    select: { slug: true },
-  });
-  return products.map((p) => ({ slug: p.slug }));
+  // Tokyo Supabase pooler occasionally times out on the local "npm run build"
+  // pass (transient Pacific→Pacific latency). Failing here aborts the whole
+  // export and reports as "Failed to collect page data". Swallow + return
+  // empty: the page is dynamicParams=true and ISR'd anyway, so an empty
+  // pre-render set just means everything renders on-demand on the first hit.
+  // Vercel's build env tends to succeed because it's closer to the pooler.
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      orderBy: { minOrderQty: "desc" },
+      take: 30,
+      select: { slug: true },
+    });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch (e) {
+    console.warn(
+      "[generateStaticParams] DB unreachable — skipping PDP pre-render",
+      e instanceof Error ? e.message.slice(0, 100) : "unknown",
+    );
+    return [];
+  }
 }
 
 export async function generateMetadata({
