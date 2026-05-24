@@ -169,42 +169,45 @@ export default async function CatalogPage({
               <span className="t-meta" style={{ color: "var(--c-fg-3)", fontSize: 12, marginRight: 4 }}>
                 Фильтры:
               </span>
+              {/* Same-pathname chip Links use plain <a> for the same reason
+                  as the category sidebar — next-intl <Link> no-ops when the
+                  destination pathname equals the current one. */}
               {activeCategory && (
-                <Link href="/catalog" className="chip active">
+                <a href={`/${locale}/catalog`} className="chip active">
                   {activeCategory.name} <span className="x">×</span>
-                </Link>
+                </a>
               )}
               {subscriptionOnly && (
-                <Link
-                  href={categorySlug ? `/catalog?category=${categorySlug}` : "/catalog"}
+                <a
+                  href={categorySlug ? `/${locale}/catalog?category=${categorySlug}` : `/${locale}/catalog`}
                   className="chip active"
                 >
                   Подписка <span className="x">×</span>
-                </Link>
+                </a>
               )}
               {groupOnly && (
-                <Link
-                  href={categorySlug ? `/catalog?category=${categorySlug}` : "/catalog"}
+                <a
+                  href={categorySlug ? `/${locale}/catalog?category=${categorySlug}` : `/${locale}/catalog`}
                   className="chip active"
                 >
                   Группа <span className="x">×</span>
-                </Link>
+                </a>
               )}
               {query && (
-                <Link
-                  href={categorySlug ? `/catalog?category=${categorySlug}` : "/catalog"}
+                <a
+                  href={categorySlug ? `/${locale}/catalog?category=${categorySlug}` : `/${locale}/catalog`}
                   className="chip active"
                 >
                   «{query}» <span className="x">×</span>
-                </Link>
+                </a>
               )}
-              <Link
-                href="/catalog"
+              <a
+                href={`/${locale}/catalog`}
                 className="t-meta"
                 style={{ fontSize: 12, color: "var(--c-blue)", fontWeight: 500 }}
               >
                 Сбросить
-              </Link>
+              </a>
             </div>
           )}
         </div>
@@ -216,13 +219,13 @@ export default async function CatalogPage({
             <div className="filt">
               <h4>Категории</h4>
               <div className="cat-list">
-                <Link
-                  href="/catalog"
+                <a
+                  href={`/${locale}/catalog`}
                   className={!categorySlug ? "active" : ""}
                 >
                   <span>Все товары</span>
                   <span className="n">{total}</span>
-                </Link>
+                </a>
                 {categories.map((c) => (
                   // Plain <a> — next-intl <Link> intercepts the click via its
                   // onClick handler and no-ops when the pathname computes as
@@ -251,13 +254,13 @@ export default async function CatalogPage({
 
             <div className="filt" style={{ borderBottom: 0 }}>
               <h4>Режим работы</h4>
-              <Link
+              <a
                 href={(() => {
                   const params = new URLSearchParams();
                   if (categorySlug) params.set("category", categorySlug);
                   if (!subscriptionOnly) params.set("subscription", "true");
                   const qs = params.toString();
-                  return qs ? `/catalog?${qs}` : "/catalog";
+                  return qs ? `/${locale}/catalog?${qs}` : `/${locale}/catalog`;
                 })()}
                 className="filt-toggle"
                 style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
@@ -266,14 +269,14 @@ export default async function CatalogPage({
                 <span className="pill pill-orange" style={{ marginLeft: "auto" }}>
                   Подписка · {subscriptionCount}
                 </span>
-              </Link>
-              <Link
+              </a>
+              <a
                 href={(() => {
                   const params = new URLSearchParams();
                   if (categorySlug) params.set("category", categorySlug);
                   if (!groupOnly) params.set("group", "true");
                   const qs = params.toString();
-                  return qs ? `/catalog?${qs}` : "/catalog";
+                  return qs ? `/${locale}/catalog?${qs}` : `/${locale}/catalog`;
                 })()}
                 className="filt-toggle"
                 style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
@@ -282,7 +285,7 @@ export default async function CatalogPage({
                 <span className="pill pill-blue" style={{ marginLeft: "auto" }}>
                   Группа · {groupCount}
                 </span>
-              </Link>
+              </a>
             </div>
           </aside>
 
