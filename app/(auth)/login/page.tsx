@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -24,9 +24,12 @@ function StandaloneLogo() {
 
 function LoginForm() {
   const params = useSearchParams();
+  const router = useRouter();
   const redirectTo = params.get("redirectTo") ?? "/dashboard";
   const errorParam = params.get("error");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(
     errorParam === "auth_failed" ? "Ссылка устарела или уже использовалась. Запросите новую." : null,
@@ -38,6 +41,23 @@ function LoginForm() {
     setLoading(true);
     setError(null);
     const supabase = createClient();
+
+    // If a password is provided, do a direct credential login — bypasses
+    // the magic-link redirect dance entirely. Useful for the seeded test
+    // account and for any returning user who set a password later.
+    if (showPassword && password) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+      router.push(redirectTo);
+      router.refresh();
+      return;
+    }
+
+    // Otherwise, the original magic-link path.
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -96,10 +116,26 @@ function LoginForm() {
             autoFocus
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
+          {showPassword && (
+            <input
+              type="password"
+              placeholder="Пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" size="lg" disabled={loading || !email} className="w-full">
-            {loading ? "Отправляю…" : "Получить ссылку"}
+          <Button type="submit" size="lg" disabled={loading || !email || (showPassword && !password)} className="w-full">
+            {loading ? (showPassword ? "Входим…" : "Отправляю…") : (showPassword ? "Войти" : "Получить ссылку")}
           </Button>
+          <button
+            type="button"
+            onClick={() => setShowPassword((s) => !s)}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            {showPassword ? "← Войти через email-ссылку" : "У меня есть пароль →"}
+          </button>
         </form>
         <div className="text-center">
           <a href="/ru" className="text-sm text-muted-foreground hover:text-foreground">

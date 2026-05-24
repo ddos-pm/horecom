@@ -27,6 +27,7 @@ import { createClient } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
 
 const EMAIL = process.env.TEST_EMAIL ?? "test@horecom.kz";
+const PASSWORD = process.env.TEST_PASSWORD ?? "horecom-demo-2026";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://horecom-platform-eosin.vercel.app";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -51,10 +52,13 @@ async function main() {
 
   if (existing) {
     supabaseUserId = existing.id;
-    console.log(`  ✓ Supabase Auth user already exists (id=${supabaseUserId.slice(0, 8)}…)`);
+    // Ensure password is current — useful if seed re-runs with new TEST_PASSWORD.
+    await admin.auth.admin.updateUserById(existing.id, { password: PASSWORD });
+    console.log(`  ✓ Supabase Auth user already exists (id=${supabaseUserId.slice(0, 8)}…), password reset`);
   } else {
     const { data, error } = await admin.auth.admin.createUser({
       email: EMAIL,
+      password: PASSWORD,
       email_confirm: true,
       user_metadata: { source: "seed-test-user", note: "тест-аккаунт для демо" },
     });
@@ -138,12 +142,19 @@ async function main() {
   console.log("=".repeat(80));
   console.log("ГОТОВО — тестовый аккаунт готов:");
   console.log();
-  console.log(`  Email: ${EMAIL}`);
-  console.log(`  Company: ${company.name}`);
-  console.log(`  Адрес доставки: ${company.addresses[0].street}, ${company.addresses[0].house}`);
-  console.log(`  Сегмент: ${company.segment}`);
+  console.log(`  Email   : ${EMAIL}`);
+  console.log(`  Пароль  : ${PASSWORD}`);
+  console.log(`  Company : ${company.name}`);
+  console.log(`  Адрес   : ${company.addresses[0].street}, ${company.addresses[0].house}`);
+  console.log(`  Сегмент : ${company.segment}`);
   console.log();
-  console.log("ОДНОРАЗОВЫЙ MAGIC-LINK (валидный 1 час):");
+  console.log("ЗАЙТИ ЧЕРЕЗ ПАРОЛЬ (быстро, многоразово):");
+  console.log(`  1. Открой ${BASE_URL}/login`);
+  console.log("  2. Введи email");
+  console.log('  3. Жми "У меня есть пароль →"');
+  console.log("  4. Введи пароль выше → Войти");
+  console.log();
+  console.log("ИЛИ одноразовый magic-link (валидный 1 час):");
   console.log();
   console.log(fixedLink);
   console.log();
