@@ -65,6 +65,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, result }, { headers: { "X-RateLimit-Remaining": String(rl.remaining) } });
   } catch (err) {
     const durationMs = Date.now() - start;
+    // Per-tool arg schemas live inside the handler (e.g. searchProductsSchema)
+    // and throw ZodError on bad input. Without this branch they used to leak
+    // as `execution_error` with 500 — wrong HTTP semantics and made AI
+    // agents think the server was broken. Return 400 + field-level details.
+    if (err instanceof z.ZodError) {
+      void logMcpCall({
+        toolName,
+        input: parsed.data.arguments,
+        error: `arguments validation failed: ${err.errors.length} issue(s)`,
+        durationMs,
+        ip,
+        userAgent,
+      });
+      return NextResponse.json(
+        { error: "invalid_arguments", details: err.errors },
+        { status: 400 },
+      );
+    }
     const message = err instanceof Error ? err.message : String(err);
     void logMcpCall({
       toolName,
