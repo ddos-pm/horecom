@@ -173,7 +173,7 @@ export default async function CatalogPage({
               )}
               {subscriptionOnly && (
                 <Link
-                  href={{ pathname: "/catalog", query: { category: categorySlug } }}
+                  href={categorySlug ? `/catalog?category=${categorySlug}` : "/catalog"}
                   className="chip active"
                 >
                   Подписка <span className="x">×</span>
@@ -181,7 +181,7 @@ export default async function CatalogPage({
               )}
               {groupOnly && (
                 <Link
-                  href={{ pathname: "/catalog", query: { category: categorySlug } }}
+                  href={categorySlug ? `/catalog?category=${categorySlug}` : "/catalog"}
                   className="chip active"
                 >
                   Группа <span className="x">×</span>
@@ -189,7 +189,7 @@ export default async function CatalogPage({
               )}
               {query && (
                 <Link
-                  href={{ pathname: "/catalog", query: { category: categorySlug } }}
+                  href={categorySlug ? `/catalog?category=${categorySlug}` : "/catalog"}
                   className="chip active"
                 >
                   «{query}» <span className="x">×</span>
@@ -223,7 +223,10 @@ export default async function CatalogPage({
                 {categories.map((c) => (
                   <Link
                     key={c.id}
-                    href={{ pathname: "/catalog", query: { category: c.slug } }}
+                    // string href instead of {pathname, query} object — next-intl's
+                    // client router drops the query on same-pathname navigation
+                    // when an object href is used. String form survives.
+                    href={`/catalog?category=${c.slug}`}
                     className={categorySlug === c.slug ? "active" : ""}
                   >
                     <span>{c.name}</span>
@@ -243,10 +246,13 @@ export default async function CatalogPage({
             <div className="filt" style={{ borderBottom: 0 }}>
               <h4>Режим работы</h4>
               <Link
-                href={{
-                  pathname: "/catalog",
-                  query: { category: categorySlug, subscription: subscriptionOnly ? undefined : "true" },
-                }}
+                href={(() => {
+                  const params = new URLSearchParams();
+                  if (categorySlug) params.set("category", categorySlug);
+                  if (!subscriptionOnly) params.set("subscription", "true");
+                  const qs = params.toString();
+                  return qs ? `/catalog?${qs}` : "/catalog";
+                })()}
                 className="filt-toggle"
                 style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
               >
@@ -256,10 +262,13 @@ export default async function CatalogPage({
                 </span>
               </Link>
               <Link
-                href={{
-                  pathname: "/catalog",
-                  query: { category: categorySlug, group: groupOnly ? undefined : "true" },
-                }}
+                href={(() => {
+                  const params = new URLSearchParams();
+                  if (categorySlug) params.set("category", categorySlug);
+                  if (!groupOnly) params.set("group", "true");
+                  const qs = params.toString();
+                  return qs ? `/catalog?${qs}` : "/catalog";
+                })()}
                 className="filt-toggle"
                 style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
               >

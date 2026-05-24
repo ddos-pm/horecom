@@ -16,3 +16,7 @@ dist/
 .prettiercache
 design-final-clean/
 .vercel
+
+# Playwright artifacts
+test-results/
+playwright-report/
