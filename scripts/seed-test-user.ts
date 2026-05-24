@@ -101,19 +101,21 @@ async function main() {
   }
   console.log(`  ✓ Company ready: ${company.name} (id=${company.id.slice(0, 8)}…)`);
 
-  // 3. Upsert User row linked to the company
+  // 3. Upsert User row linked to the company. isAdmin=true so the test
+  // account can also browse /admin/* — that gate checks dbUser.isAdmin.
   const user = await prisma.user.upsert({
     where: { supabaseId: supabaseUserId },
-    update: { companyId: company.id, email: EMAIL },
+    update: { companyId: company.id, email: EMAIL, isAdmin: true },
     create: {
       supabaseId: supabaseUserId,
       email: EMAIL,
       companyId: company.id,
       name: "Тестовый пользователь",
       role: "OWNER",
+      isAdmin: true,
     },
   });
-  console.log(`  ✓ User row linked to Company (role=${user.role})`);
+  console.log(`  ✓ User row linked to Company (role=${user.role}, isAdmin=${user.isAdmin})`);
 
   // 4. Generate one-time magic-link.
   // Supabase enforces its own allowlist for redirect URLs (configured in
