@@ -318,12 +318,15 @@ export default async function CatalogPage({
                       </Link>
                       <div className="card-info">
                         <div className="card-meta">
-                          {p.brand && (
-                            <>
-                              <span>{p.brand}</span>
-                              <span>·</span>
-                            </>
-                          )}
+                          {(() => {
+                            const brand = p.brandResolved ?? p.brand;
+                            return brand ? (
+                              <>
+                                <span>{brand}</span>
+                                <span>·</span>
+                              </>
+                            ) : null;
+                          })()}
                           <span className="pack">{p.packLabel}</span>
                         </div>
                         <Link href={`/product/${p.slug}`} className="card-name">
