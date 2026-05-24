@@ -1,7 +1,7 @@
-import { Search } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { MobileDrawer } from "./mobile-drawer";
 import { CartIconBadge } from "@/components/cart/cart-icon-badge";
+import { HeaderSearchInput } from "./header-search-input";
 
 export function MarketingHeader() {
   return (
@@ -22,16 +22,11 @@ export function MarketingHeader() {
             </Link>
           </nav>
 
-          <form action="/catalog" method="get" className="hc-search show-md" role="search">
-            <Search className="h-4 w-4" />
-            <input
-              type="search"
-              name="q"
-              placeholder="Barry Callebaut, мука 25 кг, пюре манго…"
-              aria-label="Поиск"
-            />
-            <kbd className="kbd-shortcut">⌘K</kbd>
-          </form>
+          <HeaderSearchInput
+            className="hc-search show-md"
+            placeholder="Barry Callebaut, мука 25 кг, пюре манго…"
+            showShortcut
+          />
 
           <div className="hc-actions">
             <Link href="/login" className="hc-login show-md">

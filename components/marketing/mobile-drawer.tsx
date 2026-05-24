@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, X, MessageCircle, Phone } from "lucide-react";
+import { X, MessageCircle, Phone } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
+import { HeaderSearchInput } from "./header-search-input";
 
 const NAV = [
   { href: "/catalog", label: "Каталог", hint: "190 SKU" },
@@ -71,10 +72,11 @@ export function MobileDrawer() {
           </button>
         </div>
 
-        <form action="/catalog" method="get" className="hc-drawer-search">
-          <Search className="h-4 w-4" />
-          <input type="search" name="q" placeholder="Поиск по 190 SKU…" aria-label="Поиск" />
-        </form>
+        <HeaderSearchInput
+          className="hc-drawer-search"
+          placeholder="Поиск по 190 SKU…"
+          onAfterSubmit={() => setOpen(false)}
+        />
 
         <nav className="hc-drawer-nav">
           {NAV.map((item) => (
