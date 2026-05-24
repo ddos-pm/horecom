@@ -80,6 +80,9 @@ const STOCK_PILL: Record<string, { cls: string; label: (qty: number, unit: strin
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
+  // Stage 1: load the product (we need its categoryId before we can fetch
+  // related). Each Tokyo round-trip is ~250ms from Frankfurt, so we keep
+  // this one hop minimal.
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
@@ -91,6 +94,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   if (!product || !product.isActive) notFound();
 
+  // Stage 2: related products — independent of all the derivations below,
+  // kick it off and let it run while we compute the synchronous bits.
+  const relatedPromise = prisma.product.findMany({
+    where: { categoryId: product.categoryId, id: { not: product.id }, isActive: true },
+    take: 4,
+    orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
+    include: { prices: { take: 1, orderBy: { createdAt: "desc" } } },
+  });
+
   const basePrice = product.prices[0];
   const stock = product.inventorySnapshot;
   const stockKey = stock?.stockStatus ?? "OUT_OF_STOCK";
@@ -101,13 +113,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const fallbackImage = ["/logos/logo-mark.png"];
   const galleryImages = images.length > 0 ? images : fallbackImage;
 
-  // Related products (same category, exclude self)
-  const related = await prisma.product.findMany({
-    where: { categoryId: product.categoryId, id: { not: product.id }, isActive: true },
-    take: 4,
-    orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
-    include: { prices: { take: 1, orderBy: { createdAt: "desc" } } },
-  });
+  const related = await relatedPromise;
 
   // Volume tiers (synthesise simple ladder from base + wholesale fields)
   const tiers: { min: number; price: number; perUnit: number | null; saving: number | null; current?: boolean }[] = [];
