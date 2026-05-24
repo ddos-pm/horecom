@@ -267,14 +267,33 @@
     border-radius: 16px; overflow: hidden;
     display: flex; flex-direction: column;
   }
-  .cmp-card.hi { border-color: var(--c-orange); box-shadow: 0 0 0 1px var(--c-orange); position: relative; }
+  .cmp-card.hi {
+    border-color: var(--c-orange);
+    box-shadow: 0 0 0 1px var(--c-orange);
+    position: relative;
+    /* override the default `overflow: hidden` on .cmp-card so the ::before
+       "Подписка" badge can stick out above the rounded corner. Without
+       this the badge gets clipped by the orange ring and only the bottom
+       half is visible. */
+    overflow: visible;
+  }
   .cmp-card.hi::before {
     content: 'Подписка';
-    position: absolute; top: -12px; left: 22px;
-    background: var(--c-orange); color: #fff;
-    font-size: 11px; font-weight: 700;
-    padding: 4px 10px; border-radius: 999px;
-    letter-spacing: 0.04em; text-transform: uppercase;
+    position: absolute;
+    top: -12px;
+    left: 22px;
+    background: var(--c-orange);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 7px 12px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(241, 131, 5, 0.28);
+    z-index: 1;
+    white-space: nowrap;
   }
   .cmp-h { padding: 22px; border-bottom: 1px solid var(--c-border); }
   .cmp-h .name { font-size: 14px; color: var(--c-fg-3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
