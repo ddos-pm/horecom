@@ -3,6 +3,11 @@ import { MessageCircle, Instagram, AtSign } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 
+// COMPANY is still imported for socials, email, phone, etc.
+// Legal-entity fields (iin, iban, bank, legalAddress) are intentionally NOT
+// rendered on public surfaces — they appear only in invoices and on the
+// privacy page on request.
+
 export function MarketingFooter() {
   return (
     <footer className="hc-footer">
@@ -112,7 +117,7 @@ export function MarketingFooter() {
 
       <div className="container-x hc-footer-bottom">
         <span>
-          © {new Date().getFullYear()} Horecom · {COMPANY.legalNameShort} · ИИН {COMPANY.iin} · {COMPANY.bank}
+          © {new Date().getFullYear()} Horecom · реквизиты и БИН/ИИН — в счёте после регистрации
         </span>
         <span className="hc-footer-meta">
           <span>

@@ -18,7 +18,6 @@ export const ORG_JSON_LD = {
   description:
     "B2B procurement platform for HoReCa businesses in Central Asia. Wholesale food ingredients and confectionery raw materials.",
   foundingDate: "2016",
-  founder: { "@type": "Person", name: "co-founder" },
   address: {
     "@type": "PostalAddress",
     streetAddress: "ул. Шамши Калдаякова, 1",

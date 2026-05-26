@@ -157,11 +157,15 @@ export default async function HomePage() {
                   <span style={{ marginLeft: "auto" }}>PDP · {featured[0]?.sku ?? "HC-DAIRY-0067"}</span>
                 </div>
                 <div className="hero-card-body">
-                  <div className="hero-card-img">
+                  <Link
+                    href={`/product/${featured[0]?.slug ?? "shokoladnye-palochki-44-1-6kg"}`}
+                    className="hero-card-img"
+                    aria-label={featured[0]?.name ?? "Открыть карточку товара"}
+                  >
                     {featured[0]?.imageUrl && (
                       <img src={featured[0].imageUrl} alt={featured[0].name} />
                     )}
-                  </div>
+                  </Link>
                   <div className="hero-card-info">
                     <div className="meta">
                       {featured[0]?.brand ?? "Любимо"} · {featured[0]?.category.name ?? "Молочная"}

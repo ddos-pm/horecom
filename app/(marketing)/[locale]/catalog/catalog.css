@@ -190,6 +190,33 @@
   }
   .filt-toggle input { accent-color: var(--c-orange); }
 
+  /* Horizontal category strip — mobile only (sidebar is desktop-only). */
+  .cats-mobile {
+    display: flex; gap: 6px;
+    overflow-x: auto; overflow-y: hidden;
+    margin-top: 14px;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .cats-mobile::-webkit-scrollbar { display: none; }
+  @media (min-width: 1024px) { .cats-mobile { display: none; } }
+  .cat-pill {
+    flex: 0 0 auto;
+    height: 32px; padding: 0 12px;
+    display: inline-flex; align-items: center;
+    border: 1px solid var(--c-border-strong);
+    background: #fff; color: var(--c-fg-2);
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+  .cat-pill.active {
+    background: var(--c-blue-50); color: var(--c-blue-700);
+    border-color: var(--c-blue);
+  }
+
   /* Mobile filter sheet trigger */
   .filt-mobile-btn {
     display: inline-flex; align-items: center; gap: 8px;

@@ -14,12 +14,12 @@ export default function PrivacyPage() {
 
       <h2>Кто обрабатывает данные</h2>
       <p>
-        Оператор персональных данных — <b>{COMPANY.legalName}</b> (ИИН {COMPANY.iin}),
+        Оператор персональных данных — индивидуальный предприниматель, зарегистрированный в Республике
+        Казахстан. Полные реквизиты (БИН/ИИН, юридический адрес) предоставляются по запросу в адрес ниже —
         в соответствии с Законом РК «О персональных данных и их защите».
       </p>
       <ul>
-        <li>Юридический адрес: {COMPANY.legalAddress}</li>
-        <li>Физический адрес (склад): {COMPANY.physicalAddress}</li>
+        <li>Склад и точка самовывоза: {COMPANY.physicalAddress}</li>
         <li>Email для запросов: <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a></li>
         <li>WhatsApp: {COMPANY.phoneWhatsAppDisplay}</li>
       </ul>
@@ -43,7 +43,8 @@ export default function PrivacyPage() {
       <h2>С кем мы делимся данными</h2>
       <ul>
         <li><strong>Supabase</strong> — хранение учётной записи и сессии (US/EU инфраструктура)</li>
-        <li><strong>{COMPANY.bank}</strong> — для безналичных платежей по реквизитам</li>
+        <li><strong>Банк-эквайер</strong> — для безналичных платежей по реквизитам (название банка
+          указывается в выставленном счёте)</li>
         <li><strong>Vercel</strong> — хостинг приложения</li>
       </ul>
       <p>Мы НЕ продаём данные третьим лицам и не передаём их рекламным сетям.</p>

@@ -10,8 +10,7 @@
  *
  * Sender domain: defaults to `orders@horecom.kz`. Override with
  * RESEND_FROM if the verified domain on Resend is different.
- * Manager copy goes to RESEND_MANAGER (менеджер) or falls back to
- * Horecomkz@gmail.com.
+ * Manager copy goes to RESEND_MANAGER or falls back to Horecomkz@gmail.com.
  */
 
 type OrderSummary = {

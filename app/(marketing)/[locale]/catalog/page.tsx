@@ -164,6 +164,26 @@ export default async function CatalogPage({
             </div>
           </div>
 
+          {/* Mobile category strip — sidebar is hidden under 1024px so without
+              this row the user has no way to switch category on phones. */}
+          <div className="cats-mobile" aria-label="Категории">
+            <a
+              href={`/${locale}/catalog`}
+              className={`cat-pill${!categorySlug ? " active" : ""}`}
+            >
+              Все
+            </a>
+            {categories.map((c) => (
+              <a
+                key={c.id}
+                href={`/${locale}/catalog?category=${c.slug}`}
+                className={`cat-pill${categorySlug === c.slug ? " active" : ""}`}
+              >
+                {c.name}
+              </a>
+            ))}
+          </div>
+
           {(categorySlug || subscriptionOnly || groupOnly || query) && (
             <div className="chips">
               <span className="t-meta" style={{ color: "var(--c-fg-3)", fontSize: 12, marginRight: 4 }}>

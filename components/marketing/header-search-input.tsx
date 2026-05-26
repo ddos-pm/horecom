@@ -36,9 +36,28 @@ export function HeaderSearchInput({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  // Read ?q= from the URL via window after mount instead of useSearchParams —
+  // subscribing here would bail every statically prerendered marketing page
+  // out of the static export with a "missing-suspense-with-csr-bailout" error.
   const [value, setValue] = useState("");
   const [, startTransition] = useTransition();
   const lastSentRef = useRef("");
+
+  // Hydrate the input from the URL once on mount and on history navigation
+  // (back/forward, programmatic push from the catalog search box).
+  useEffect(() => {
+    function readUrl() {
+      if (typeof window === "undefined") return;
+      const q = new URLSearchParams(window.location.search).get("q") ?? "";
+      if (q !== lastSentRef.current) {
+        lastSentRef.current = q;
+        setValue(q);
+      }
+    }
+    readUrl();
+    window.addEventListener("popstate", readUrl);
+    return () => window.removeEventListener("popstate", readUrl);
+  }, [pathname]);
 
   function navigate(q: string) {
     if (typeof window === "undefined") return;

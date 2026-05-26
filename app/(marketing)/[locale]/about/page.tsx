@@ -27,7 +27,7 @@ export default function AboutPage() {
 
         <p>
           Наш склад и точка самовывоза находятся в Астане, на улице Шамши Калдаякова 1. Доставка по городу
-          отправляется каждые 3 часа. В 2026 году запускаем Алматы как второй город.
+          отправляется каждые 3 часа.
         </p>
 
         <h2 className="mt-8 text-xl font-semibold">Что мы строим</h2>
@@ -45,13 +45,9 @@ export default function AboutPage() {
 
         <h2 className="mt-8 text-xl font-semibold">Команда</h2>
         <p>
-          <strong>co-founder</strong> — директор и операционный со-основатель. До Horecom 5+ лет вела
-          сеть кондитерских магазинов (redacted) в Астане по франшизе.
-        </p>
-        <p>
-          <strong>Даулет Досаманов</strong> — со-основатель и CPO, отвечает за продукт и платформу.
-          Senior Product Manager в a major mobility tech company, ранее (redacted) super-app. (redacted) alumnus. В 2024 году получил
-          награду (redacted) за инициативу в активации новых пользователей.
+          За плечами команды — 10 лет в кондитерской дистрибуции в Астане, опыт продуктового менеджмента
+          в крупных tech-компаниях и франшизная сеть кондитерских (redacted). Подробности готовы рассказать в
+          переписке.
         </p>
 
         <h2 className="mt-8 text-xl font-semibold">Контакты</h2>

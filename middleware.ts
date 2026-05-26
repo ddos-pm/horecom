@@ -1,5 +1,5 @@
 import createIntlMiddleware from "next-intl/middleware";
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { routing } from "@/i18n/routing";
 
@@ -21,8 +21,23 @@ const APP_PREFIXES = [
   "/api",
 ];
 
+const LOCALE_PREFIXES = routing.locales.map((l) => `/${l}`);
+
 function isAppPath(pathname: string) {
   return APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+// Strip a /ru or /kz prefix if the rest of the path is an app route. Returns
+// the canonical path or null when no rewrite applies. Prevents 404s like
+// /ru/cart when a stale link or i18n <Link> prefixes an app path.
+function stripLocaleFromAppPath(pathname: string): string | null {
+  for (const lp of LOCALE_PREFIXES) {
+    if (pathname === lp || pathname.startsWith(`${lp}/`)) {
+      const rest = pathname.slice(lp.length) || "/";
+      if (isAppPath(rest)) return rest;
+    }
+  }
+  return null;
 }
 
 export async function middleware(request: NextRequest) {
@@ -33,6 +48,15 @@ export async function middleware(request: NextRequest) {
   // routing. Pass through to the route handler directly.
   if (pathname.startsWith("/.well-known/")) {
     return;
+  }
+
+  // /ru/cart, /kz/checkout, … → 308 to the canonical app path. App routes
+  // live outside the [locale] segment; a leftover locale prefix would 404.
+  const canonical = stripLocaleFromAppPath(pathname);
+  if (canonical) {
+    const url = request.nextUrl.clone();
+    url.pathname = canonical;
+    return NextResponse.redirect(url, 308);
   }
 
   if (isAppPath(pathname)) {
