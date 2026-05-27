@@ -82,17 +82,32 @@
     margin: 0;
     font-family: var(--f-display);
     font-size: clamp(36px, 7vw, 84px);
-    line-height: 1.0;
+    line-height: 1.05;
     font-weight: 700;
-    letter-spacing: -0.045em;
+    /* -0.02em on 84px ≈ -1.68px — readable in Cyrillic; -0.045em
+       (≈ -3.78px) was bleeding letters into each other. */
+    letter-spacing: -0.02em;
     color: #fff;
     text-wrap: balance;
   }
   @media (max-width: 480px) {
-    .hero h1 { font-size: 38px; line-height: 1.02; letter-spacing: -0.035em; }
+    .hero h1 { font-size: 38px; line-height: 1.05; letter-spacing: -0.012em; }
   }
   .hero h1 .em-blue { color: var(--c-blue-500); }
   .hero h1 .em-orange { color: var(--c-orange); }
+
+  /* Quiet caption sitting under the hero h1 ("оптом и в наличии."). It's
+     intentionally NOT a heading — the team wanted a soft signature, not a
+     second display headline. Always lowercase, never tight tracking. */
+  .hero-subhead {
+    margin-top: 10px;
+    font-size: clamp(15px, 1.4vw, 20px);
+    font-weight: 500;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0;
+    text-transform: none;
+  }
   .hero .lede {
     margin-top: 24px;
     font-size: clamp(16px, 1.6vw, 19px);
@@ -215,8 +230,10 @@
     font-size: clamp(40px, 5vw, 56px);
     line-height: 1;
     font-weight: 700;
-    letter-spacing: -0.04em;
+    /* Numeric, so tighter is fine — kept moderate (-0.02em). */
+    letter-spacing: -0.02em;
     color: var(--c-ink);
+    font-variant-numeric: tabular-nums;
   }
   .trust-item .num .u {
     font-size: 0.5em; color: var(--c-fg-3); margin-left: 2px; font-weight: 600;
@@ -243,8 +260,8 @@
   .s-head h2 {
     margin: 0;
     font-size: clamp(28px, 4vw, 48px);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
     font-weight: 700;
   }
   .s-head .sub {
@@ -281,8 +298,8 @@
     font-variant-numeric: tabular-nums;
   }
   .seg h3 {
-    font-size: 24px; line-height: 1.1;
-    font-weight: 700; letter-spacing: -0.025em;
+    font-size: 24px; line-height: 1.15;
+    font-weight: 700; letter-spacing: -0.012em;
     margin: 14px 0 8px;
     font-family: var(--f-display);
   }
@@ -502,7 +519,7 @@
   .cta-strip h2 {
     font-family: var(--f-display);
     font-size: clamp(28px, 4.4vw, 52px);
-    line-height: 1.02; letter-spacing: -0.035em; font-weight: 700;
+    line-height: 1.08; letter-spacing: -0.015em; font-weight: 700;
     margin: 0; color: #fff;
   }
   .cta-strip p { margin-top: 16px; color: rgba(255,255,255,0.65); max-width: 560px; font-size: 17px; line-height: 1.5; }
@@ -603,8 +620,8 @@
 .ops-h2 {
   font-family: var(--f-display);
   font-size: clamp(26px, 3.4vw, 40px);
-  line-height: 1.05;
-  letter-spacing: -0.028em;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
   margin: 0 0 14px;
 }
 .ops-p {

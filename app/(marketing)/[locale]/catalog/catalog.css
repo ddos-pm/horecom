@@ -18,8 +18,8 @@
   .cat-head h1 {
     font-family: var(--f-display);
     font-size: clamp(26px, 3.4vw, 44px);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    line-height: 1.1;
+    letter-spacing: -0.012em;
     font-weight: 700;
     margin: 0;
   }

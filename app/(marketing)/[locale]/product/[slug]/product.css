@@ -114,8 +114,8 @@
   .pdp-name {
     font-family: var(--f-display);
     font-size: clamp(28px, 3.4vw, 40px);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    line-height: 1.1;
+    letter-spacing: -0.012em;
     font-weight: 700;
     margin: 0;
   }
@@ -145,8 +145,10 @@
     font-family: var(--f-display);
     font-size: clamp(36px, 4.5vw, 56px);
     font-weight: 700;
-    letter-spacing: -0.04em;
+    /* Numeric: tabular nums + moderate tightening is fine. */
+    letter-spacing: -0.02em;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
   .price-head .per {
     font-size: 16px; color: var(--c-fg-3); font-weight: 500;

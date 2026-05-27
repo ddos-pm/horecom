@@ -118,17 +118,21 @@
     max-width: 100%;
   }
 
+  /* Cyrillic-aware tracking: -0.025em-style "tight" headings make Russian
+     letters bleed into each other (especially at 60px+ with uppercase).
+     Keep tracking close to neutral; reserve negative tracking for very
+     large display headlines where readers expect optical compensation. */
   h1,
   h2,
   h3,
   .h-display {
     font-family: var(--f-display);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.012em;
     font-weight: 700;
   }
 
   h1 {
-    letter-spacing: -0.035em;
+    letter-spacing: -0.018em;
   }
 
   a {
@@ -196,11 +200,13 @@
     align-items: center;
     gap: 6px;
     height: 22px;
-    padding: 0 8px;
+    padding: 0 10px;
     border-radius: 999px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    /* Uppercase Cyrillic needs +tracking to breathe ("ПОДПИСКА НА ПОСТАВКУ"
+       at 11px with -tracking glues itself together). */
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     line-height: 1;
     white-space: nowrap;
@@ -275,23 +281,23 @@
 
   .h1 {
     font-size: clamp(34px, 5.5vw, 64px);
-    line-height: 1.02;
+    line-height: 1.08;
     font-weight: 700;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.018em;
     font-family: var(--f-display);
   }
   .h2 {
     font-size: clamp(26px, 3.4vw, 40px);
-    line-height: 1.08;
+    line-height: 1.1;
     font-weight: 700;
-    letter-spacing: -0.028em;
+    letter-spacing: -0.012em;
     font-family: var(--f-display);
   }
   .h3 {
     font-size: clamp(20px, 2.2vw, 26px);
-    line-height: 1.15;
+    line-height: 1.2;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.008em;
     font-family: var(--f-display);
   }
   .h4 {

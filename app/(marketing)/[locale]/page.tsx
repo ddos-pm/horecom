@@ -122,12 +122,8 @@ export default async function HomePage() {
         <div className="container-x hero-body">
           <div className="hero-layout">
             <div>
-              <h1>
-                Поставки для пекарен, кофеен и кондитеров в&nbsp;Астане.{" "}
-                <span className="em-orange" style={{ fontSize: "0.55em", fontWeight: 600, display: "block", marginTop: 8 }}>
-                  оптом и в наличии.
-                </span>
-              </h1>
+              <h1>Поставки для пекарен, кофеен и кондитеров в&nbsp;Астане.</h1>
+              <p className="hero-subhead">оптом и в наличии.</p>
 
               <p className="lede">
                 Умные закупки: помогаем следить за остатками, обеспечиваем стабильные поставки и быструю
