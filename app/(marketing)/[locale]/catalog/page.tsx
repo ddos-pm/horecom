@@ -34,16 +34,23 @@ export default async function CatalogPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; category?: string; subscription?: string; group?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    brand?: string;
+    subscription?: string;
+    group?: string;
+  }>;
 }) {
   const { locale } = await params;
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
   const categorySlug = sp.category;
+  const brandFilter = sp.brand?.trim() ?? "";
   const subscriptionOnly = sp.subscription === "true";
   const groupOnly = sp.group === "true";
 
-  const [categories, products, total] = await Promise.all([
+  const [categories, products, total, brandAgg] = await Promise.all([
     prisma.category.findMany({
       orderBy: { sortOrder: "asc" },
       include: { _count: { select: { products: { where: { isActive: true } } } } },
@@ -52,6 +59,7 @@ export default async function CatalogPage({
       where: {
         isActive: true,
         ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+        ...(brandFilter ? { brandResolved: brandFilter } : {}),
         ...(subscriptionOnly ? { isSubscriptionEligible: true } : {}),
         ...(groupOnly ? { isGroupEligible: true } : {}),
         ...(query
@@ -78,7 +86,26 @@ export default async function CatalogPage({
       take: 200,
     }),
     prisma.product.count({ where: { isActive: true } }),
+    // Top brands across active products (by count desc). brandResolved is
+    // the AI-enriched canonical form; we use it instead of raw `brand` so
+    // case duplicates / typos don't fragment the list. Cap to 24 — anything
+    // longer becomes hard to scan in a sidebar. Sort case-insensitive when
+    // counts tie so the alphabetical fallback reads cleanly.
+    prisma.product.groupBy({
+      by: ["brandResolved"],
+      where: {
+        isActive: true,
+        brandResolved: { not: null },
+        ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+      },
+      _count: { _all: true },
+      orderBy: { _count: { brandResolved: "desc" } },
+      take: 24,
+    }),
   ]);
+  const brands = brandAgg
+    .filter((b): b is { brandResolved: string; _count: { _all: number } } => !!b.brandResolved)
+    .map((b) => ({ name: b.brandResolved, count: b._count._all }));
 
   const activeCategory = categorySlug ? categories.find((c) => c.slug === categorySlug) : null;
   const [subscriptionCount, groupCount, inStockCount] = await Promise.all([
@@ -264,6 +291,34 @@ export default async function CatalogPage({
                 ))}
               </div>
             </div>
+
+            {brands.length > 0 && (
+              <div className="filt">
+                <h4>Бренды</h4>
+                <div className="brand-chips">
+                  {brands.map((b) => {
+                    const isActive = brandFilter === b.name;
+                    const next = new URLSearchParams();
+                    if (categorySlug) next.set("category", categorySlug);
+                    if (query) next.set("q", query);
+                    if (subscriptionOnly) next.set("subscription", "true");
+                    if (groupOnly) next.set("group", "true");
+                    if (!isActive) next.set("brand", b.name);
+                    const qs = next.toString();
+                    return (
+                      <a
+                        key={b.name}
+                        href={qs ? `/${locale}/catalog?${qs}` : `/${locale}/catalog`}
+                        className={`brand-chip${isActive ? " active" : ""}`}
+                      >
+                        {b.name}
+                        <span className="n">{b.count}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="filt">
               <h4>Наличие</h4>

@@ -190,6 +190,40 @@
   }
   .filt-toggle input { accent-color: var(--c-orange); }
 
+  /* Brand chips — wrapped grid of toggleable brand filters */
+  .brand-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding-top: 4px;
+  }
+  .brand-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px;
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 12px;
+    color: var(--c-fg-2);
+    transition: border-color 120ms, background 120ms, color 120ms;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .brand-chip:hover {
+    border-color: var(--c-blue);
+    color: var(--c-fg);
+  }
+  .brand-chip.active {
+    background: var(--c-blue);
+    color: #fff;
+    border-color: var(--c-blue);
+  }
+  .brand-chip.active .n { color: rgba(255, 255, 255, 0.7); }
+  .brand-chip .n {
+    font-size: 11px;
+    color: var(--c-fg-4);
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Horizontal category strip — mobile only (sidebar is desktop-only). */
   .cats-mobile {
     display: flex; gap: 6px;

@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { LocaleBanner } from "@/components/marketing/locale-banner";
+import { FloatingCartBar } from "@/components/cart/floating-cart-bar";
 import { JsonLd, ORG_JSON_LD, WEBSITE_JSON_LD } from "@/components/json-ld";
 import { routing } from "@/i18n/routing";
 
@@ -31,6 +32,7 @@ export default async function MarketingLayout({
       <LocaleBanner />
       <main className="flex-1">{children}</main>
       <MarketingFooter />
+      <FloatingCartBar />
       <Toaster richColors position="bottom-right" />
     </NextIntlClientProvider>
   );

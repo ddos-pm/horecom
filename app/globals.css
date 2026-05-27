@@ -558,6 +558,50 @@
 
   /* Lock scroll when drawer open */
   body.hc-locked { overflow: hidden; }
+
+  /* === Floating cart bar (mobile, sticky bottom) === */
+  .floating-cart-bar {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--c-ink);
+    color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.35);
+    font-size: 14px;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: transform 120ms, box-shadow 120ms;
+  }
+  .floating-cart-bar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 36px -8px rgba(0, 0, 0, 0.45);
+  }
+  .floating-cart-bar:active { transform: translateY(0); }
+  .floating-cart-text {
+    flex: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .floating-cart-text b { color: var(--c-orange); font-weight: 700; }
+  .floating-cart-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    color: var(--c-orange);
+    white-space: nowrap;
+  }
+  /* Desktop has the header cart icon — hide the bar above the tablet
+     breakpoint to avoid double-affordance. */
+  @media (min-width: 1024px) {
+    .floating-cart-bar { display: none; }
+  }
 }
 
 @layer utilities {

@@ -24,7 +24,7 @@ type CartState = {
   items: CartItem[];
 } & CartActions;
 
-const FREE_DELIVERY_THRESHOLD = 30_000;
+const FREE_DELIVERY_THRESHOLD = 20_000;
 const MIN_ORDER_TOTAL = 5_000;
 const DELIVERY_FEE = 1_000;
 
