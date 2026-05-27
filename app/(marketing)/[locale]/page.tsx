@@ -1,9 +1,9 @@
-import Image from "next/image";
 import { MessageCircle, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 import { StatusStrip } from "@/components/marketing/status-strip";
+import { TopMonthList } from "@/components/marketing/top-month-list";
 import { formatUnit } from "@/lib/units";
 import "./home.css";
 
@@ -14,62 +14,62 @@ export const revalidate = 600;
 
 const CAT_ICONS: Record<string, React.ReactNode> = {
   "chocolate-glazes": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <rect x="4" y="4" width="16" height="16" rx="2" />
       <path d="M8 4v16M16 4v16M4 8h16M4 16h16" />
     </svg>
   ),
   syrups: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M8 2h8v4l2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8l2-2V2Z" />
     </svg>
   ),
   ingredients: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9" />
       <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
     </svg>
   ),
   fillings: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 8h16l-1.5 11a2 2 0 0 1-2 2H7.5a2 2 0 0 1-2-2L4 8Z" />
       <path d="M9 5a3 3 0 0 1 6 0v3H9V5Z" />
     </svg>
   ),
   "food-colorings": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M12 2a10 10 0 1 0 10 10H12V2Z" />
       <circle cx="9" cy="7" r="1.5" fill="currentColor" />
     </svg>
   ),
   dairy: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M8 2h8v4l2 4v9a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-9l2-4V2Z" />
     </svg>
   ),
   frozen: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19" />
     </svg>
   ),
   "sauces-canned": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M6 2h12v3H6zM7 5h10v17H7z" />
       <path d="M10 12h4" />
     </svg>
   ),
   "parchment-foil": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 6h16v14H4zM4 6l4-4h8l4 4" />
     </svg>
   ),
   "bakery-staples": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 8a8 4 0 1 0 16 0M4 8v8a8 4 0 0 0 16 0V8M4 12a8 4 0 0 0 16 0" />
     </svg>
   ),
   sprinkles: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="7" cy="8" r="1.5" />
       <circle cx="13" cy="6" r="1.5" />
       <circle cx="17" cy="11" r="1.5" />
@@ -101,7 +101,7 @@ export default async function HomePage() {
     }),
     prisma.product.findMany({
       where: { isActive: true },
-      take: 8,
+      take: 18,
       orderBy: { createdAt: "asc" },
       include: FEATURED_INCLUDE,
     }),
@@ -387,7 +387,7 @@ export default async function HomePage() {
             ))}
             <Link href="/catalog" className="cat cat-dark">
               <div className="cat-icon">
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-7 w-7" />
               </div>
               <div className="cat-name">Весь<br />каталог</div>
               <div className="cat-count"><b>{skuCount}</b> товаров</div>
@@ -407,47 +407,7 @@ export default async function HomePage() {
             <Link href="/catalog" className="btn btn-ghost show-md">Все товары →</Link>
           </div>
 
-          <div className="prods">
-            {featured.map((p) => {
-              const price = p.prices[0];
-              const stock = p.inventorySnapshot;
-              return (
-                <Link key={p.id} href={`/product/${p.slug}`} className="prod">
-                  <div className="prod-img">
-                    {p.imageUrl && (
-                      <Image src={p.imageUrl} alt={p.name} fill sizes="200px" style={{ objectFit: "contain" }} />
-                    )}
-                    {(p.isSubscriptionEligible || p.isGroupEligible) && (
-                      <div className="prod-badges">
-                        {p.isSubscriptionEligible && <span className="pill pill-orange">Подписка на поставку</span>}
-                        {p.isGroupEligible && <span className="pill pill-blue">Групповая закупка</span>}
-                      </div>
-                    )}
-                  </div>
-                  <div className="prod-info">
-                    <div className="prod-meta">
-                      {p.brand ? `${p.brand} · ` : ""}{p.packLabel}
-                    </div>
-                    <div className="prod-name">{p.name}</div>
-                    <div className="prod-bot">
-                      <div>
-                        <div className="prod-price tabular">
-                          {price ? Number(price.basePrice).toLocaleString("ru-RU") : "—"} ₸
-                        </div>
-                        <div className="prod-unit">{price?.unitLabel ?? `за ${p.packLabel}`}</div>
-                      </div>
-                      {stock && stock.availableQty > 0 && (
-                        <div className={`prod-stock${stock.stockStatus === "LOW_STOCK" ? " low" : ""}`}>
-                          <span className="live-dot" />
-                          {stock.availableQty} {formatUnit(p.unitType)}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <TopMonthList products={featured} />
         </div>
       </section>
 

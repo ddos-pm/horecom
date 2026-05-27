@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Групповая закупка — оптовые цены для самозанятых кондитеров",
   description:
-    "Объединяйтесь с 3–5 кондитерами и купите оптовый мешок шоколада или муки — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
+    "Объединяйтесь с 3–5 кондитерами и купите оптовое ведро шоколада или мешок муки — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
 };
 
 export default async function GroupBuyingPage() {
@@ -60,7 +60,7 @@ export default async function GroupBuyingPage() {
               </h1>
 
               <p className="lede">
-                Объединитесь с 3–5 кондитерами и купите оптовый мешок муки или ведро шоколада — каждый получит
+                Объединитесь с 3–5 кондитерами и купите оптовое ведро шоколада или мешок муки — каждый получит
                 свою долю и оптовую цену. Цена защищена с момента создания группы.
               </p>
 
@@ -104,16 +104,16 @@ export default async function GroupBuyingPage() {
               <div className="gb-card-prod">
                 <div className="img">
                   <img
-                    src="https://static.tildacdn.com/stor3839-3864-4833-b431-663732316462/75482454.webp"
-                    alt="Мука"
+                    src="https://static.tildacdn.com/stor3935-3966-4830-a661-366365656231/13115719.jpg"
+                    alt="Шоколад"
                   />
                 </div>
                 <div>
-                  <div className="meta">Цесна · мешок 25 кг</div>
-                  <div className="nm">Мука ржаная, 25 кг</div>
+                  <div className="meta">Veliche · ведро 10 кг</div>
+                  <div className="nm">Шоколад белый, 10 кг</div>
                   <div className="prices">
-                    <span className="strike">6 825 ₸</span>
-                    <span className="new">5 600 ₸</span>
+                    <span className="strike">32 000 ₸</span>
+                    <span className="new">26 240 ₸</span>
                     <span className="save">−18%</span>
                   </div>
                   <div
@@ -124,7 +124,7 @@ export default async function GroupBuyingPage() {
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
-                    224 ₸/кг при цене в группе
+                    2 624 ₸/кг при цене в группе
                   </div>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default async function GroupBuyingPage() {
 
               <div className="gb-card-foot">
                 <a href="#waitlist" className="btn btn-orange btn-lg" style={{ width: "100%" }}>
-                  Присоединиться · 5 600 ₸
+                  Присоединиться · 26 240 ₸
                 </a>
               </div>
             </div>
@@ -191,9 +191,9 @@ export default async function GroupBuyingPage() {
                 txt: "Откройте товар с пометкой «Доступна группа». Укажите порог (4 / 6 / 8 человек) и срок — обычно 3–7 дней.",
                 mock: (
                   <>
-                    Товар: <b>Мука ржаная 25 кг</b>
+                    Товар: <b>Шоколад белый 10 кг</b>
                     <br />
-                    Цена в группе: <b>5 600 ₸</b>
+                    Цена в группе: <b>26 240 ₸</b>
                     <br />
                     Порог: <b>6 человек</b> · срок: <b>3 дня</b>
                   </>
@@ -301,39 +301,39 @@ export default async function GroupBuyingPage() {
 
             <div className="calc">
               <div className="calc-row head">
-                <span className="lbl">Сценарий: мука ржаная 25 кг</span>
-                <span className="lbl">за 1 мешок</span>
+                <span className="lbl">Сценарий: шоколад белый 10 кг</span>
+                <span className="lbl">за 1 ведро</span>
               </div>
               <div className="calc-row">
                 <div className="lbl">
                   <b>Розничная цена</b>
                   <span className="sm">если покупаете в одиночку</span>
                 </div>
-                <span className="val">6 825 ₸</span>
+                <span className="val">32 000 ₸</span>
               </div>
               <div className="calc-row">
                 <div className="lbl">
                   <b>Оптовая цена (от 4 шт)</b>
                   <span className="sm">если вас 4–6 в группе</span>
                 </div>
-                <span className="val">5 600 ₸</span>
+                <span className="val">26 240 ₸</span>
               </div>
               <div className="calc-row">
-                <div className="lbl">Экономия на 1 мешке</div>
-                <span className="val save">−1 225 ₸</span>
+                <div className="lbl">Экономия на 1 ведре</div>
+                <span className="val save">−5 760 ₸</span>
               </div>
               <div className="calc-row">
-                <div className="lbl">Если берёте 4 мешка / месяц</div>
-                <span className="val save">−4 900 ₸</span>
+                <div className="lbl">Если берёте 2 ведра / месяц</div>
+                <span className="val save">−11 520 ₸</span>
               </div>
               <div className="calc-row total">
                 <div className="lbl">
                   <b>В год</b>
                   <span className="sm" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    только на одной муке
+                    только на одном шоколаде
                   </span>
                 </div>
-                <span className="val">−58 800 ₸</span>
+                <span className="val">−138 240 ₸</span>
               </div>
             </div>
           </div>
