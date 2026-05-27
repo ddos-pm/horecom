@@ -126,7 +126,7 @@ export function MarketingFooter() {
           <span aria-hidden="true">·</span>
           <Link href="/privacy">Конфиденциальность</Link>
           <span aria-hidden="true">·</span>
-          <Link href="/delivery-and-payment">Оферта</Link>
+          <Link href="/offer">Оферта</Link>
           <span aria-hidden="true">·</span>
           <a
             href="/llms.txt"
