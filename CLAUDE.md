@@ -62,11 +62,11 @@ horecom-platform/
 │   ├── 11-technical-context.md        ← tech context, state machines, integrations
 │   ├── 12-ai-discoverability-kit.md   ← what /llms.txt / Schema.org should look like
 │   ├── 13-substitution-ux-spec.md     ← spec for substitution flow (Gap #3 closure)
-│   ├── 20-product-readme.md           ← the team's context pack readme
+│   ├── 20-product-readme.md           ← co-founder's context pack readme
 │   ├── 21-company-story.md            ← who Horecom serves, segments, current MVP gaps
 │   ├── 22-product-vision.md           ← 3 value-modes, V1/V1.5/V2 roadmap
 │   ├── 23-traction-metrics.md         ← all current numbers ($620k, 50+ accounts, etc.)
-│   ├── 24-founders-story.md           ← the team + co-founder + (redacted) lesson
+│   ├── 24-founders-story.md           ← co-founder + co-founder + (redacted) lesson
 │   ├── 25-links-index.md              ← external URLs (LinkedIn, IG, etc.)
 │   ├── 26-references.md               ← EV grant references (3 people)
 │   ├── 30-ev-grant-angle.md           ← strategic angle for the grant (RU)
@@ -131,9 +131,9 @@ Don't make up numbers. If the answer isn't in `docs/23-traction-metrics.md`, ask
 
 ## People
 
-- **co-founder** (CPO/co-founder) — ex Senior PM at a major mobility tech company (left 2025). (redacted) alumnus. Architect of this platform. LinkedIn: ***REMOVED***
+- **co-founder** (CPO/co-founder) — ex Senior PM at a major mobility tech company (left 2025). (redacted). Architect of this platform. LinkedIn: ***REMOVED***
 - **co-founder** (Director/co-founder) — operator. Previously ran (redacted) pastry-supply network 5+ years. Domain expert. Owns operations, suppliers, customer success.
-- **Дияр** (the team's younger brother, 17, in Almaty) — running the EV grant application and platform development support. Active user of this codebase via Claude Code.
+- **Дияр** (co-founder's younger brother, 17, in Almaty) — running the EV grant application and platform development support. Active user of this codebase via Claude Code.
 
 ## Immediate next steps (priority order)
 
@@ -145,7 +145,7 @@ These are the work units to drive next. Pick one and complete it before starting
 3. Create Neon Postgres project at https://console.neon.tech → copy `DATABASE_URL`
 4. Vercel: new project → import GitHub repo → add `DATABASE_URL` and `AUTH_SECRET` env vars
 5. After first deploy: connect to Vercel Postgres or Neon, run `npx prisma migrate deploy && npx prisma db seed`
-6. Get a live URL like `https://horecom-platform.vercel.app` — share with the team
+6. Get a live URL like `https://horecom-platform.vercel.app` — share with co-founder
 
 ### 2. Submit WhatsApp templates to Meta (2–7 days approval — DO IT TODAY)
 Templates are in `prisma/seed.ts` as `WA_TEMPLATES` array. Six templates currently:

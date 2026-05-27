@@ -713,22 +713,22 @@ git push --tags
 
 ### WhatsApp setup (BLOCKS Sprint 4)
 - [ ] **Register 360dialog account** for WhatsApp Business API
-- [ ] **Verify Meta Business Manager** — the team's task, 1–2 days
+- [ ] **Verify Meta Business Manager** — co-founder's task, 1–2 days
 - [ ] **Submit all 6 WhatsApp templates** from `prisma/seed.ts` → Meta approval queue (2–7 days)
 - [ ] Get `WHATSAPP_API_KEY` from 360dialog → add to Vercel env
 
 ### Kaspi setup (BLOCKS Sprint 2)
-- [ ] **Apply for Kaspi Pay Business API** — the team's task. 1–4 weeks. Start immediately.
+- [ ] **Apply for Kaspi Pay Business API** — co-founder's task. 1–4 weeks. Start immediately.
 - [ ] Receive `KASPI_API_KEY` + `KASPI_MERCHANT_ID` → add to Vercel env
 - [ ] Decide: which payment method (Kaspi Invoice vs Kaspi Pay Direct)
 
 ### AmoCRM
-- [ ] **Get AmoCRM API token** (the team, 1 day)
+- [ ] **Get AmoCRM API token** (co-founder, 1 day)
 - [ ] Add `AMOCRM_*` vars to Vercel env
 
 ### Real product photos
 - [ ] **Create Cloudinary account** (free tier OK)
-- [ ] the team/co-founder to upload 30 real product photos
+- [ ] co-founder/co-founder to upload 30 real product photos
 - [ ] Update seed.ts with real Cloudinary URLs in `imageUrl` field
 - [ ] Re-seed
 
@@ -857,7 +857,7 @@ git push --tags
 - **`searchParams.q` filter is server-side only.** No client-side search-as-you-type. Sprint 2 or 3 polish.
 - **Cookies for segment preference not yet implemented.** Once user picks a segment, we should remember it and personalize home page.
 
-## Open questions for the team
+## Open questions for co-founder
 
 - [ ] Logo high-res asset? Need PNG + SVG
 - [ ] Should we keep horecom.kz domain on Tilda during V1 dev, or switch DNS once Vercel is live?

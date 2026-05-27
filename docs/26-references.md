@@ -1,43 +1,6 @@
-# 07 · References for Emergent Ventures
+# 07 · References
 
-Контакты референсов, которых the team может указать в заявке EV. Перед подачей нужно **получить явное согласие** каждого из них.
-
-## 1. ***REMOVED*** ***REMOVED*** — international reference
-
-- Полное имя: *****REMOVED*** ***REMOVED*****  
-- Локация: Сидней, Австралия.  
-- Отношение к фаундеру: сестра the team'а.  
-- Email: `***REMOVED***`  
-- LinkedIn: https://www.linkedin.com/in/***REMOVED***/
-
-**Что может подтвердить:**
-- Личный характер, дисциплину и долгосрочную траекторию the team'а.  
-- Наблюдения за тем, как он строил карьеру и проекты последние 10+ лет.  
-- Cross‑cultural контекст: как the team воспринимается вне Казахстана.
-
-## 2. co-founder — co‑founder & operator
-
-- Полное имя: **Ospanova co-founder Ergalievna**.  
-- Роль: директор и операционный co‑founder Horecom.  
-- Локация: Казахстан (Астана).  
-- Телефон: `***REMOVED***`  
-- Email: `***REMOVED***`
-
-**Что может подтвердить:**
-- Операционный характер бизнеса Horecom: реальные объемы, процессы, поставщики, клиенты.
-- Личное участие the team'а в ежедневной работе над продуктом и связке "продукт ↔ операции".
-- Эволюцию от (redacted) к Horecom и founder–market fit.
-
-## 3. ***REMOVED*** — family reference in Europe
-
-- Имя: *****REMOVED*****.  
-- Локация: Германия.  
-- Телефон: `***REMOVED***`.
-
-**Что может подтвердить:**
-- Характер и надёжность the team'а с точки зрения семьи и близкого окружения.
-- Долгосрочное поведение, отношение к работе и деньгам.
-
----
-
-Эти референсы дополняют профессиональные контакты (a major mobility tech company / BTS Digital / (redacted)), которые можно добавить отдельно. Для EV достаточно 2–3 человек; важно, чтобы они были готовы ответить на email от Tyler Cowen или его команды.
+> **Redacted.** Reference contacts (names, emails, phone numbers,
+> family relationships, professional connections) are private to the
+> team and supplied directly to grant reviewers through the
+> Emergent Ventures application channel.

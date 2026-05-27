@@ -28,7 +28,7 @@ Files are numbered by topic group:
 | `21-company-story.md` | What Horecom is, segments (S1/S2/S3), problem definition, current MVP gaps, why-now thesis | Onboarding any new contributor; writing copy |
 | `22-product-vision.md` | Three value-modes architecture, V1/V1.5/V2 roadmap, differentiators | Sprint planning; "what does this product actually do?" |
 | `23-traction-metrics.md` | Current real metrics: $620k GMV, 50+ accounts, 76k IG followers, conversion rates, top SKUs | Anytime you need real numbers (don't make them up) |
-| `24-founders-story.md` | the team + co-founder bios, (redacted) lesson and what it teaches Horecom | Writing about the team; making architectural choices that touch operational risk |
+| `24-founders-story.md` | co-founder + co-founder bios, (redacted) lesson and what it teaches Horecom | Writing about the team; making architectural choices that touch operational risk |
 | `25-links-index.md` | External URLs (LinkedIn, IG, Threads, etc.) | For references/citations |
 | `26-references.md` | EV grant reference contacts (3 people) | Grant follow-up; reference verification |
 
@@ -62,6 +62,6 @@ Files are numbered by topic group:
 All docs reflect the state of Horecom as of **May 19, 2026**.
 
 - Metrics in `23-traction-metrics.md` are from real 1C/Tilda exports
-- Founder bios in `24-founders-story.md` are confirmed by the team
-- Synthesis verdicts in `10-synthesis-master.md` are final unless explicit the team decision overrides
+- Founder bios in `24-founders-story.md` are confirmed by co-founder
+- Synthesis verdicts in `10-synthesis-master.md` are final unless explicit co-founder decision overrides
 - Grant materials in 30s are the actual draft for submission (not historical)

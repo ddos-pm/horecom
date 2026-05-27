@@ -21,7 +21,7 @@
    Все текущие метрики: трафик, заявки, выручка, соцсети, операционные цифры.
 
 4. `04-founders-story.md`  
-   История фаундеров: the team, co-founder, (redacted), (redacted); why this team.
+   История фаундеров: co-founder, co-founder, (redacted), (redacted); why this team.
 
 5. `05-ev-grant-angle.md`  
    Конкретно под Emergent Ventures: one‑liner, why now, why EV, use of funds, counterfactual.

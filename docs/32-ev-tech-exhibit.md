@@ -96,11 +96,8 @@ If targets are met, the next round of capital is for Almaty operational footprin
 
 ## Co-founder team
 
-**co-founder, CPO/co-founder.** Senior Product Manager at a major mobility tech company (2024 (redacted) award, +4pp activation, +30% intercity GMV); previously C++ engineer and PM at (redacted) super-app; (redacted) alumnus. Co-founded (redacted) in 2019, scaled to 17,000 deliveries across 4 cities, closed after operational quality fell behind growth — a structural lesson now built into Horecom's architecture. Left a major mobility tech company in 2025 to work on Horecom full-time.
-
-**co-founder, Director/co-founder.** Built and operated (redacted), a wholesale pastry-supply network in Astana, for 5+ years under franchise. Sold the franchise rights in 2025 and retained her customer audience (76k Instagram followers in the exact target segment). Runs Horecom's day-to-day operations: warehouse, suppliers, logistics, customer success.
-
-This is the team configuration we wish had existed during (redacted): an operator who has been both customer and supplier for the same vertical the software now serves, paired with a product builder who has shipped activation and onboarding flows at consumer scale.
+> Founder bios redacted from the public repository. See the EV submission
+> for the full team description.
 
 ---
 

@@ -73,9 +73,9 @@ Two co-founders, both in Astana. Working business with cashflow. Ten years in te
 
 **Suggested supplementary attachments (must NOT be PDF):**
 1. `EV_Grant_Tech_Exhibit_v2.docx` — 1-page technical roadmap and gap analysis
-2. `Horecom_Metrics_Dashboard.docx` or `.xlsx` — traction numbers, if the team wants formal version
+2. `Horecom_Metrics_Dashboard.docx` or `.xlsx` — traction numbers, if co-founder wants formal version
 3. Optional: short keynote/pages deck with screenshots of current MVP + planned screens
 
 **Multimedia URL field (optional):**
-- Either the team's most recent reflection post about (redacted) (Instagram URL from `06-links-index.md`)
+- Either co-founder's most recent reflection post about (redacted) (Instagram URL from `06-links-index.md`)
 - Or a 60-second video showing the physical store + a customer using the WhatsApp ordering flow (if filmed)
