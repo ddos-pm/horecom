@@ -204,6 +204,57 @@
     display: inline-block;
   }
 
+  /* 3-mode price row (Разово / Подписка / Группа) under the main price head */
+  .pdp-modes {
+    display: grid; gap: 8px;
+    grid-template-columns: 1fr;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--c-border);
+    background: var(--c-bg-soft);
+  }
+  @media (min-width: 480px) { .pdp-modes { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+  @media (min-width: 700px) { .pdp-modes { padding: 16px 22px; } }
+  .pdp-mode {
+    padding: 10px 12px;
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    background: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .pdp-mode .lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    color: var(--c-fg-3);
+    margin-bottom: 4px;
+  }
+  .pdp-mode .val {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--c-fg);
+    letter-spacing: -0.01em;
+  }
+  .pdp-mode .save {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--c-success);
+    margin-top: 2px;
+  }
+  .pdp-mode.sub { border-color: var(--c-orange); }
+  .pdp-mode.sub .lbl { color: var(--c-orange); }
+  .pdp-mode.sub .val { color: var(--c-orange-700); }
+  .pdp-mode.grp { border-color: var(--c-blue); }
+  .pdp-mode.grp .lbl { color: var(--c-blue); }
+  .pdp-mode.grp .val { color: var(--c-blue-700); }
+
+  .pdp-mode-cta {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 0 18px 12px;
+  }
+  @media (min-width: 700px) { .pdp-mode-cta { padding: 0 22px 16px; } }
+  .pdp-mode-cta .btn-card { flex: 1 1 auto; }
+
   /* Quantity + CTA */
   .price-cta {
     padding: 16px 18px;

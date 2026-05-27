@@ -9,6 +9,7 @@ import { COMPANY } from "@/lib/company";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { formatUnit } from "@/lib/units";
 import { SITE_URL } from "@/lib/base-url";
+import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -266,7 +267,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               )}
             </div>
 
-            {basePrice && (
+            {basePrice && (() => {
+              const modes = getDisplayPrices(Number(basePrice.basePrice), {
+                groupPrice: basePrice.groupPrice ? Number(basePrice.groupPrice) : null,
+              });
+              return (
               <div className="price-block">
                 <div className="price-head">
                   <div className="main">
@@ -276,6 +281,29 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <span className="per">/ {product.packLabel}</span>
                   </div>
                 </div>
+
+                {(product.isSubscriptionEligible || product.isGroupEligible) && (
+                  <div className="pdp-modes">
+                    <div className="pdp-mode">
+                      <div className="lbl">Разово</div>
+                      <div className="val tabular">{formatKzt(modes.base)}</div>
+                    </div>
+                    {product.isSubscriptionEligible && (
+                      <div className="pdp-mode sub">
+                        <div className="lbl">Подписка</div>
+                        <div className="val tabular">{formatKzt(modes.subscription)}</div>
+                        <div className="save">−{modes.subscriptionSavingsPct}%</div>
+                      </div>
+                    )}
+                    {product.isGroupEligible && (
+                      <div className="pdp-mode grp">
+                        <div className="lbl">Группа</div>
+                        <div className="val tabular">{formatKzt(modes.group)}</div>
+                        <div className="save">−{modes.groupSavingsPct}%</div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {tiers.length > 1 && (
                   <div className="tiers">
@@ -324,12 +352,34 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   </a>
                 </div>
 
+                {(product.isSubscriptionEligible || product.isGroupEligible) && (
+                  <div className="pdp-mode-cta">
+                    {product.isSubscriptionEligible && (
+                      <Link
+                        href={`/subscription?product=${encodeURIComponent(product.sku)}`}
+                        className="btn-card btn-card-outline"
+                      >
+                        + в подписку
+                      </Link>
+                    )}
+                    {product.isGroupEligible && (
+                      <Link
+                        href={`/group-buying?product=${encodeURIComponent(product.sku)}`}
+                        className="btn-card btn-card-outline"
+                      >
+                        + в групповой заказ
+                      </Link>
+                    )}
+                  </div>
+                )}
+
                 <div className="moq-note">
                   <b>Минимальный заказ:</b> {product.minOrderQty} {unitWord} ·
                   Бесплатная доставка от 20 000 ₸
                 </div>
               </div>
-            )}
+              );
+            })()}
 
             <div className="ops">
               <div>

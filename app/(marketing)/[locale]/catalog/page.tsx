@@ -8,6 +8,7 @@ import { CatalogSearchInput } from "@/components/marketing/catalog-search-input"
 import { JsonLd } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/base-url";
 import { formatUnit } from "@/lib/units";
+import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import "./catalog.css";
 
 // Catalog is filter-heavy (category, q, subscription, group). Marking it
@@ -389,7 +390,11 @@ export default async function CatalogPage({
                 {products.map((p) => {
                   const price = p.prices[0];
                   const stock = p.inventorySnapshot;
-                  const pricePerUnit = price?.unitLabel ?? "";
+                  const prices = price
+                    ? getDisplayPrices(Number(price.basePrice.toString()), {
+                        groupPrice: price.groupPrice ? Number(price.groupPrice.toString()) : null,
+                      })
+                    : null;
                   return (
                     <div key={p.id} className="card">
                       <Link href={`/product/${p.slug}`} className="card-img-link">
@@ -398,14 +403,6 @@ export default async function CatalogPage({
                             <Image src={p.imageUrl} alt={p.name} fill sizes="240px" />
                           ) : (
                             <div className="img-ph" style={{ width: "100%", height: "100%" }} />
-                          )}
-                          {(p.isSubscriptionEligible || p.isGroupEligible) && (
-                            <div className="card-badges">
-                              {p.isSubscriptionEligible && (
-                                <span className="pill pill-orange">Подписка</span>
-                              )}
-                              {p.isGroupEligible && <span className="pill pill-blue">Группа</span>}
-                            </div>
                           )}
                         </div>
                       </Link>
@@ -440,20 +437,34 @@ export default async function CatalogPage({
                                 : "Под заказ"}
                             </div>
                           </div>
-                          <div>
-                            <div className="k">Кат.</div>
-                            <div className="v" title={p.category.name}>
-                              {p.category.name.split(" ")[0].toLowerCase()}
-                            </div>
-                          </div>
                         </div>
-                        <div className="card-bot">
-                          <div>
-                            <div className="card-price tabular">
-                              {price ? Number(price.basePrice.toString()).toLocaleString("ru-RU") : "—"} ₸
+                        {prices && (
+                          <div className="prod-price-table">
+                            <div className="prod-price-row">
+                              <span className="lbl">Разово</span>
+                              <span className="val tabular">{formatKzt(prices.base)}</span>
                             </div>
-                            <div className="card-unit">{pricePerUnit}</div>
+                            {p.isSubscriptionEligible && (
+                              <div className="prod-price-row sub">
+                                <span className="lbl">Подписка</span>
+                                <span className="val tabular">
+                                  {formatKzt(prices.subscription)}
+                                  <span className="save">−{prices.subscriptionSavingsPct}%</span>
+                                </span>
+                              </div>
+                            )}
+                            {p.isGroupEligible && (
+                              <div className="prod-price-row grp">
+                                <span className="lbl">Группа</span>
+                                <span className="val tabular">
+                                  {formatKzt(prices.group)}
+                                  <span className="save">−{prices.groupSavingsPct}%</span>
+                                </span>
+                              </div>
+                            )}
                           </div>
+                        )}
+                        <div className="prod-actions">
                           {price && (
                             <QuickAddButton
                               product={{
@@ -468,6 +479,22 @@ export default async function CatalogPage({
                                 stockStatus: stock?.stockStatus ?? null,
                               }}
                             />
+                          )}
+                          {p.isSubscriptionEligible && (
+                            <Link
+                              href={`/subscription?product=${encodeURIComponent(p.sku)}`}
+                              className="btn-card btn-card-outline"
+                            >
+                              Подписка
+                            </Link>
+                          )}
+                          {p.isGroupEligible && (
+                            <Link
+                              href={`/group-buying?product=${encodeURIComponent(p.sku)}`}
+                              className="btn-card btn-card-outline"
+                            >
+                              Группа
+                            </Link>
                           )}
                         </div>
                       </div>

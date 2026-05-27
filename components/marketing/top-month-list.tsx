@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { formatUnit } from "@/lib/units";
+import { useCart } from "@/lib/cart-store";
+import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import type { Prisma } from "@prisma/client";
 
 type FeaturedProduct = Prisma.ProductGetPayload<{
@@ -16,9 +20,28 @@ type FeaturedProduct = Prisma.ProductGetPayload<{
 
 export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
   const [expanded, setExpanded] = useState(false);
+  const addItem = useCart((s) => s.addItem);
   const INITIAL = 6;
   const visible = expanded ? products : products.slice(0, INITIAL);
   const hasMore = products.length > INITIAL;
+
+  function handleAdd(e: React.MouseEvent, p: FeaturedProduct) {
+    e.preventDefault();
+    e.stopPropagation();
+    const price = p.prices[0];
+    if (!price) return;
+    addItem({
+      productId: p.id,
+      slug: p.slug,
+      name: p.name,
+      image: p.imageUrl,
+      price: Number(price.basePrice),
+      minOrderQty: p.minOrderQty,
+      packLabel: p.packLabel,
+      unitType: p.unitType,
+    });
+    toast.success("В корзине", { description: p.name });
+  }
 
   return (
     <>
@@ -26,17 +49,16 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
         {visible.map((p) => {
           const price = p.prices[0];
           const stock = p.inventorySnapshot;
+          const prices = price ? getDisplayPrices(Number(price.basePrice), {
+            groupPrice: price.groupPrice ? Number(price.groupPrice) : null,
+          }) : null;
+          const outOfStock = stock?.stockStatus === "OUT_OF_STOCK";
+
           return (
             <Link key={p.id} href={`/product/${p.slug}`} className="prod">
               <div className="prod-img">
                 {p.imageUrl && (
                   <Image src={p.imageUrl} alt={p.name} fill sizes="200px" style={{ objectFit: "contain" }} />
-                )}
-                {(p.isSubscriptionEligible || p.isGroupEligible) && (
-                  <div className="prod-badges">
-                    {p.isSubscriptionEligible && <span className="pill pill-orange">Подписка</span>}
-                    {p.isGroupEligible && <span className="pill pill-blue">Группа</span>}
-                  </div>
                 )}
               </div>
               <div className="prod-info">
@@ -45,18 +67,69 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                   {p.packLabel}
                 </div>
                 <div className="prod-name">{p.name}</div>
-                <div className="prod-bot">
-                  <div>
-                    <div className="prod-price tabular">
-                      {price ? Number(price.basePrice).toLocaleString("ru-RU") : "—"} ₸
+
+                {prices && (
+                  <div className="prod-price-table">
+                    <div className="prod-price-row">
+                      <span className="lbl">Разово</span>
+                      <span className="val tabular">{formatKzt(prices.base)}</span>
                     </div>
-                    <div className="prod-unit">{price?.unitLabel ?? `за ${p.packLabel}`}</div>
+                    {p.isSubscriptionEligible && (
+                      <div className="prod-price-row sub">
+                        <span className="lbl">Подписка</span>
+                        <span className="val tabular">
+                          {formatKzt(prices.subscription)}
+                          <span className="save">−{prices.subscriptionSavingsPct}%</span>
+                        </span>
+                      </div>
+                    )}
+                    {p.isGroupEligible && (
+                      <div className="prod-price-row grp">
+                        <span className="lbl">Группа</span>
+                        <span className="val tabular">
+                          {formatKzt(prices.group)}
+                          <span className="save">−{prices.groupSavingsPct}%</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  {stock && stock.availableQty > 0 && (
-                    <div className={`prod-stock${stock.stockStatus === "LOW_STOCK" ? " low" : ""}`}>
-                      <span className="live-dot" />
-                      {stock.availableQty} {formatUnit(p.unitType)}
-                    </div>
+                )}
+
+                {stock && stock.availableQty > 0 && (
+                  <div className={`prod-stock${stock.stockStatus === "LOW_STOCK" ? " low" : ""}`}>
+                    <span className="live-dot" />
+                    {stock.availableQty} {formatUnit(p.unitType)}
+                  </div>
+                )}
+
+                <div className="prod-actions">
+                  <button
+                    type="button"
+                    className="btn-card btn-card-primary"
+                    onClick={(e) => handleAdd(e, p)}
+                    disabled={outOfStock || !price}
+                    aria-label="Добавить в корзину"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Корзина
+                  </button>
+                  {p.isSubscriptionEligible && (
+                    <Link
+                      href={`/subscription?product=${encodeURIComponent(p.sku)}`}
+                      className="btn-card btn-card-outline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Подписка
+                    </Link>
+                  )}
+                  {p.isGroupEligible && (
+                    <Link
+                      href={`/group-buying?product=${encodeURIComponent(p.sku)}`}
+                      className="btn-card btn-card-outline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Группа
+                    </Link>
                   )}
                 </div>
               </div>
