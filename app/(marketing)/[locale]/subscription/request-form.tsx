@@ -96,7 +96,7 @@ export function SubscriptionRequestForm({
       <div>
         <h3 className="text-lg font-semibold">Запрос на подписку</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          менеджер свяжется в WhatsApp в течение дня, утончит детали и подтвердит. После этого подписка станет активной.
+          Мы свяжемся в WhatsApp в течение дня, уточним детали и подтвердим. После этого подписка станет активной.
         </p>
       </div>
 
