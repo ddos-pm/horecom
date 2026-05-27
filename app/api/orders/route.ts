@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmation, sendOrderToManager } from "@/lib/email";
+import { pushOrderToAmoCRM } from "@/lib/amocrm";
 
 const ItemSchema = z.object({
   productId: z.string(),
@@ -19,7 +20,7 @@ const Body = z.object({
 });
 
 const MIN_ORDER_TOTAL = 5_000;
-const FREE_DELIVERY_THRESHOLD = 30_000;
+const FREE_DELIVERY_THRESHOLD = 20_000;
 const DELIVERY_FEE = 1_000;
 
 export async function POST(request: Request) {
@@ -117,6 +118,30 @@ export async function POST(request: Request) {
 
   await sendOrderConfirmation(summary, dbUser.email ?? user.email ?? "");
   await sendOrderToManager(summary, dbUser.email ?? user.email ?? "");
+
+  // Fire-and-forget AmoCRM push. We do NOT await — order creation must
+  // not block on a downstream CRM, and if the env vars aren't set yet
+  // the push no-ops with a log line. When the team provisions AMOCRM_*
+  // on Vercel this starts feeding his pipeline automatically.
+  pushOrderToAmoCRM({
+    orderNumber: order.number,
+    total: Number(order.total),
+    companyName: order.company.name,
+    customerEmail: dbUser.email ?? user.email ?? null,
+    customerPhone: dbUser.phone,
+    items: orderItems.map((i) => ({
+      name: i.productNameSnapshot,
+      quantity: i.quantity,
+      unitLabel: i.unitLabelSnapshot,
+    })),
+    deliveryDate,
+    deliverySlot,
+    deliveryAddress: `${address.street}, ${address.house}${address.details ? `, ${address.details}` : ""}`,
+    substitutionPreference,
+  }).catch(() => {
+    // already logged inside pushOrderToAmoCRM; swallow to keep the
+    // response path clean.
+  });
 
   return NextResponse.json({ orderId: order.id, number: order.number });
 }
