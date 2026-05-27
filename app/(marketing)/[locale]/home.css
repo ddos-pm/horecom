@@ -48,10 +48,12 @@
 
   .hero-body {
     position: relative; z-index: 1;
-    padding: 40px 0 32px;
+    /* padding-block (not shorthand) so .container-x's padding-inline:16px
+       isn't clobbered by `padding: T 0 B` on the same element. */
+    padding-block: 40px 32px;
   }
-  @media (min-width: 768px) { .hero-body { padding: 64px 0 48px; } }
-  @media (min-width: 1024px) { .hero-body { padding: 96px 0 64px; } }
+  @media (min-width: 768px) { .hero-body { padding-block: 64px 48px; } }
+  @media (min-width: 1024px) { .hero-body { padding-block: 96px 64px; } }
 
   .hero-layout {
     display: grid;

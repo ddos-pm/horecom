@@ -42,10 +42,10 @@
   }
 
   .gb-body {
-    padding: 56px 0 24px;
+    padding-block: 56px 24px;
     position: relative; z-index: 1;
   }
-  @media (min-width: 1000px) { .gb-body { padding: 96px 0 64px; } }
+  @media (min-width: 1000px) { .gb-body { padding-block: 96px 64px; } }
 
   .gb-grid {
     display: grid; gap: 40px;
