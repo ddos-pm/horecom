@@ -34,13 +34,15 @@ const TIME_OPTIONS = [
 export function SubscriptionRequestForm({
   products,
   isAuthed,
+  initialProductIds,
 }: {
   products: PickerProduct[];
   isAuthed: boolean;
+  initialProductIds?: string[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(initialProductIds ?? []);
   const [cadence, setCadence] = useState<(typeof CADENCE_OPTIONS)[number]["value"]>("WEEKLY");
   const [days, setDays] = useState<string[]>(["MON"]);
   const [timeOfDay, setTimeOfDay] = useState<(typeof TIME_OPTIONS)[number]["value"]>("MORNING");

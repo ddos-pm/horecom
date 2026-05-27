@@ -16,7 +16,12 @@ export const metadata: Metadata = {
     "Подписка на поставку с предиктивным движком и WhatsApp-напоминаниями. За 24 часа до отгрузки — подтвердить/изменить/пропустить в один тап. Edit/Skip/Pause всегда доступны. Бесплатно.",
 };
 
-export default async function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string }>;
+}) {
+  const sp = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,6 +32,13 @@ export default async function SubscriptionPage() {
     select: { id: true, name: true, brand: true, packLabel: true, sku: true },
     orderBy: [{ isSubscriptionEligible: "desc" }, { name: "asc" }],
   });
+
+  // Pre-select the product if the user landed here from a product card link
+  // (/subscription?product=SKU). Falls back to empty selection if the SKU
+  // doesn't match — never blocks the form.
+  const initialProductIds = sp.product
+    ? products.filter((p) => p.sku === sp.product).map((p) => p.id)
+    : [];
 
   return (
     <>
@@ -493,7 +505,11 @@ export default async function SubscriptionPage() {
               активной.
             </p>
           </div>
-          <SubscriptionRequestForm products={products} isAuthed={!!user} />
+          <SubscriptionRequestForm
+            products={products}
+            isAuthed={!!user}
+            initialProductIds={initialProductIds}
+          />
         </div>
       </section>
     </>

@@ -15,7 +15,12 @@ export const metadata: Metadata = {
     "Объединяйтесь с 3–5 кондитерами и купите оптовое ведро шоколада или мешок муки — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
 };
 
-export default async function GroupBuyingPage() {
+export default async function GroupBuyingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string }>;
+}) {
+  const sp = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,6 +31,12 @@ export default async function GroupBuyingPage() {
     select: { id: true, name: true, brand: true, packLabel: true, sku: true },
     orderBy: [{ isGroupEligible: "desc" }, { name: "asc" }],
   });
+
+  // Pre-select the product when arriving from a product-card link
+  // (/group-buying?product=SKU).
+  const initialProductIds = sp.product
+    ? products.filter((p) => p.sku === sp.product).map((p) => p.id)
+    : [];
 
   // Group ends 2d 14h 23m from now — countdown for the live group demo card.
   const groupEndsAt = new Date(Date.now() + (2 * 86400 + 14 * 3600 + 23 * 60) * 1000).toISOString();
@@ -351,7 +362,11 @@ export default async function GroupBuyingPage() {
               когда наберётся.
             </p>
           </div>
-          <GroupBuyWaitlistForm products={products} defaultEmail={user?.email ?? null} />
+          <GroupBuyWaitlistForm
+            products={products}
+            defaultEmail={user?.email ?? null}
+            initialProductIds={initialProductIds}
+          />
         </div>
       </section>
     </>

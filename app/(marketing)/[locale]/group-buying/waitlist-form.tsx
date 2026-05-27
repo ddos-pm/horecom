@@ -9,15 +9,17 @@ import { submitGroupBuyInterest } from "./actions";
 export function GroupBuyWaitlistForm({
   products,
   defaultEmail,
+  initialProductIds,
 }: {
   products: PickerProduct[];
   defaultEmail: string | null;
+  initialProductIds?: string[];
 }) {
   const [pending, startTransition] = useTransition();
   const [sent, setSent] = useState(false);
   const [email, setEmail] = useState(defaultEmail ?? "");
   const [phone, setPhone] = useState("");
-  const [productIds, setProductIds] = useState<string[]>([]);
+  const [productIds, setProductIds] = useState<string[]>(initialProductIds ?? []);
   const [message, setMessage] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
