@@ -325,8 +325,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
 
                 <div className="moq-note">
-                  <b>Минимальный заказ:</b> {product.minOrderQty} {unitWord} · Общий минимум по сайту — 5 000 ₸ ·
-                  Бесплатная доставка от 30 000 ₸
+                  <b>Минимальный заказ:</b> {product.minOrderQty} {unitWord} ·
+                  Бесплатная доставка от 20 000 ₸
                 </div>
               </div>
             )}

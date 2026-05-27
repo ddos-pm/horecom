@@ -44,13 +44,13 @@ ${categories.map((c) => `- ${c.name}`).join("\n")}
 
 For small bakeries with recurring needs: configure a subscription plan with cadence (weekly, twice-weekly, biweekly), delivery days, and SKU list. Receive proactive WhatsApp reminders before each delivery with options to confirm, edit quantities, or skip. After 2 successful deliveries, the system uses a rolling-average algorithm to predict optimal cadence. Cancel or pause anytime. Subscription service is free.
 
-## Group buying (launching V1.5)
+## Group buying (pilot)
 
 For home bakers and small studios: join open groups buying specific SKUs at wholesale prices. When the volume threshold is reached, the wholesale price activates for all participants. Group price is locked at creation time — supplier price changes do not affect participants. If a group does not reach the threshold by the deadline, no charge is made and members can choose to buy at the standard price or wait for the next window.
 
 ## Delivery and payment
 
-- **Delivery area:** Astana city (expanding to Almaty in 2026)
+- **Delivery area:** Astana city
 - **Delivery time:** Same day (orders before 14:00) or next-day morning
 - **Delivery cost:** Free for orders ≥ 30,000 ₸; 1,000 ₸ for smaller orders
 - **Payment methods:** Kaspi Pay (individuals + sole proprietors), bank transfer (legal entities)

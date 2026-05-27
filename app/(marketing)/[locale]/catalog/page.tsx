@@ -125,7 +125,7 @@ export default async function CatalogPage({
           </div>
 
           <h1>
-            {activeCategory ? `${activeCategory.name} · ${products.length} SKU` : `Каталог · ${total} SKU`}
+            {activeCategory ? `${activeCategory.name} · ${products.length} товаров` : `Каталог · ${total} товаров`}
           </h1>
           <div className="sub">
             <b>
@@ -347,9 +347,9 @@ export default async function CatalogPage({
                           {(p.isSubscriptionEligible || p.isGroupEligible) && (
                             <div className="card-badges">
                               {p.isSubscriptionEligible && (
-                                <span className="pill pill-orange">Подписка</span>
+                                <span className="pill pill-orange">Подписка на поставку</span>
                               )}
-                              {p.isGroupEligible && <span className="pill pill-blue">Группа</span>}
+                              {p.isGroupEligible && <span className="pill pill-blue">Групповая закупка</span>}
                             </div>
                           )}
                         </div>

@@ -189,10 +189,10 @@ test.describe("Horecom site walkthrough", () => {
     await expect(page.getByText(/Войдите/i).first()).toBeVisible();
   });
 
-  test("14. group buying page shows V1.5 badge", async ({ page }) => {
+  test("14. group buying page shows pilot badge", async ({ page }) => {
     await page.goto(`${BASE_URL}/ru/group-buying`);
     await expect(page.locator("h1")).toBeVisible();
-    await expect(page.getByText(/V1\.5|скоро|coming/i).first()).toBeVisible();
+    await expect(page.getByText(/в.пилоте|скоро|coming/i).first()).toBeVisible();
   });
 
   test("15. icons render with white background (no transparent on tab)", async ({ page }) => {

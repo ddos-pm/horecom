@@ -37,7 +37,7 @@ export const COMPANY = {
 
   // Operational thresholds
   minOrderKzt: 5000,
-  freeDeliveryThresholdKzt: 30000,
+  freeDeliveryThresholdKzt: 20000,
   freeDeliveryThresholdSubscriptionKzt: 7000,
   paidDeliveryFeeKzt: 1000,
 } as const;

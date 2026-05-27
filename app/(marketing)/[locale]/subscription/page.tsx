@@ -11,9 +11,9 @@ import "./subscription.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Подписка на доставку — предиктивный движок",
+  title: "Подписка на поставку — предиктивный движок",
   description:
-    "Подписка с предиктивным движком и WhatsApp-напоминаниями. За 24 часа до отгрузки — подтвердить/изменить/пропустить в один тап. Edit/Skip/Pause всегда доступны. Бесплатно.",
+    "Подписка на поставку с предиктивным движком и WhatsApp-напоминаниями. За 24 часа до отгрузки — подтвердить/изменить/пропустить в один тап. Edit/Skip/Pause всегда доступны. Бесплатно.",
 };
 
 export default async function SubscriptionPage() {
@@ -37,7 +37,7 @@ export default async function SubscriptionPage() {
             <div>
               <div className="sub-eyebrow">
                 <span className="dot" />
-                <span>S2 · Для кондитерских без склада</span>
+                <span>Для кондитерских без склада</span>
               </div>
 
               <h1>
@@ -46,7 +46,7 @@ export default async function SubscriptionPage() {
               </h1>
 
               <p className="lede">
-                Подписка с предиктивным движком: считаем рост заказов и сами предлагаем что подвезти. За день до
+                Подписка на поставку с предиктивным движком: считаем рост заказов и сами предлагаем что подвезти. За день до
                 отгрузки — WhatsApp с составом. Подтверждаете в один тап.
               </p>
 
@@ -88,7 +88,7 @@ export default async function SubscriptionPage() {
                   План подписки · Кофейня «Куст»
                 </div>
                 <div className="sub">
-                  12 SKU · следующая доставка <b style={{ color: "var(--c-fg)" }}>ср, 27 мая · 10:30</b>
+                  12 позиций · следующая доставка <b style={{ color: "var(--c-fg)" }}>ср, 27 мая · 10:30</b>
                 </div>
               </div>
               <div className="pred-body">
@@ -355,7 +355,7 @@ export default async function SubscriptionPage() {
                   ttl: "За 24 часа — состав следующей доставки",
                   txt: (
                     <>
-                      WhatsApp с списком SKU и итогом. <b>Если цена изменилась</b> — отметим красным, можно
+                      WhatsApp со списком позиций и итогом. <b>Если цена изменилась</b> — отметим красным, можно
                       отказаться. <b>Если товара нет</b> — предложим аналог.
                     </>
                   ),
@@ -388,7 +388,7 @@ export default async function SubscriptionPage() {
                 {
                   n: 5,
                   ttl: "Edit / Skip / Pause — без штрафов и контрактов",
-                  txt: "Уехали в отпуск? Поставьте на паузу. Сменили рецепт? Уберите SKU. Совсем не нужно? Отмените — никаких неустоек.",
+                  txt: "Уехали в отпуск? Поставьте на паузу. Сменили рецепт? Уберите товар. Совсем не нужно? Отмените — никаких неустоек.",
                 },
               ].map((s) => (
                 <div key={s.n} className="wa-step">
@@ -409,11 +409,11 @@ export default async function SubscriptionPage() {
         <div className="container-x">
           <div className="sec-head">
             <div className="sec-eyebrow" style={{ color: "var(--c-blue)" }}>
-              Подписка vs Разовый заказ
+              Подписка на поставку vs Разовый заказ
             </div>
             <h2>Сколько вы сэкономите за месяц.</h2>
             <p className="sub">
-              Сравнение на реальном чеке: 12 SKU, 4 доставки в месяц, типовая корзина небольшой кондитерской.
+              Сравнение на реальном чеке: 12 позиций, 4 доставки в месяц, типовая корзина небольшой кондитерской.
             </p>
           </div>
 
@@ -428,8 +428,8 @@ export default async function SubscriptionPage() {
               {[
                 { ok: true, label: "Самостоятельный сбор корзины каждую неделю", v: <><b>~15 мин</b> × 4</> },
                 { ok: false, label: "Без напоминания за день", v: "" },
-                { ok: false, label: "Без оптовой ступеньки на регулярные SKU", v: "" },
-                { ok: true, label: "Бесплатная доставка", v: <>от <b>30 000 ₸</b></> },
+                { ok: false, label: "Без оптовой ступеньки на регулярные товары", v: "" },
+                { ok: true, label: "Бесплатная доставка", v: <>от <b>20 000 ₸</b></> },
                 { ok: false, label: "Без предиктивных дозакупов", v: "" },
                 { ok: true, label: "Документы для бухгалтерии", v: "все форматы" },
               ].map((row, idx) => (
@@ -443,7 +443,7 @@ export default async function SubscriptionPage() {
 
             <div className="cmp-card hi">
               <div className="cmp-h">
-                <div className="name" style={{ color: "var(--c-orange-700)" }}>Подписка</div>
+                <div className="name" style={{ color: "var(--c-orange-700)" }}>Подписка на поставку</div>
                 <div className="price">
                   <span className="tabular">187 200</span> ₸<span className="per">/ месяц</span>
                 </div>
@@ -454,7 +454,7 @@ export default async function SubscriptionPage() {
               {[
                 { label: "Корзина собирается автоматически", v: <><b>~30 сек</b> на подтверждение</> },
                 { label: "WhatsApp за 24 часа до отгрузки", v: <><b>Confirm / Edit / Skip</b></> },
-                { label: "Оптовая ступенька на регулярные SKU", v: <span className="badge">−7%</span> },
+                { label: "Оптовая ступенька на регулярные товары", v: <span className="badge">−7%</span> },
                 { label: "Бесплатная доставка", v: <>от <b>7 000 ₸</b></> },
                 { label: "Предиктивный движок: что закончится", v: "после 2 доставок" },
                 { label: "Документы для бухгалтерии", v: "все форматы" },
@@ -477,7 +477,7 @@ export default async function SubscriptionPage() {
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            Сценарий: 12 SKU · 4 доставки / мес · средняя корзина 50 000 ₸ · апрель–май 2026
+            Сценарий: 12 позиций · 4 доставки / мес · средняя корзина 50 000 ₸ · апрель–май 2026
           </div>
         </div>
       </section>

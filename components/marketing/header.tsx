@@ -16,10 +16,8 @@ export function MarketingHeader() {
 
           <nav className="hc-nav show-md">
             <Link href="/catalog">Каталог</Link>
-            <Link href="/subscription">Подписка</Link>
-            <Link href="/group-buying">
-              Группа <span className="hc-nav-flag">V1.5</span>
-            </Link>
+            <Link href="/subscription">Подписка на поставку</Link>
+            <Link href="/group-buying">Групповая закупка</Link>
           </nav>
 
           <HeaderSearchInput

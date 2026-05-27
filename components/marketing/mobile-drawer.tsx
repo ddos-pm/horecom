@@ -7,9 +7,9 @@ import { COMPANY } from "@/lib/company";
 import { HeaderSearchInput } from "./header-search-input";
 
 const NAV = [
-  { href: "/catalog", label: "Каталог", hint: "190 SKU" },
-  { href: "/subscription", label: "Подписка", hint: "S2" },
-  { href: "/group-buying", label: "Групповые закупки", hint: "V1.5", flag: true },
+  { href: "/catalog", label: "Каталог", hint: "190 товаров" },
+  { href: "/subscription", label: "Подписка на поставку" },
+  { href: "/group-buying", label: "Групповая закупка" },
   { href: "/about", label: "О компании" },
   { href: "/faq", label: "Частые вопросы" },
 ];
@@ -74,7 +74,7 @@ export function MobileDrawer() {
 
         <HeaderSearchInput
           className="hc-drawer-search"
-          placeholder="Поиск по 190 SKU…"
+          placeholder="Поиск по 190 товарам…"
           onAfterSubmit={() => setOpen(false)}
         />
 
@@ -82,9 +82,7 @@ export function MobileDrawer() {
           {NAV.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
               <span>{item.label}</span>
-              {item.hint && (
-                <span className={`count${item.flag ? " pill pill-orange" : ""}`}>{item.hint}</span>
-              )}
+              {item.hint && <span className="count">{item.hint}</span>}
             </Link>
           ))}
           <a href="/login" onClick={() => setOpen(false)}>

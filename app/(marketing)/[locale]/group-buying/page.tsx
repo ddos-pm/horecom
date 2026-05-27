@@ -10,9 +10,9 @@ import "./group-buying.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Групповые закупки — оптовые цены для самозанятых кондитеров",
+  title: "Групповая закупка — оптовые цены для самозанятых кондитеров",
   description:
-    "Объединяйтесь с 3–5 кондитерами и купите оптовый мешок муки или ведро шоколада — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
+    "Объединяйтесь с 3–5 кондитерами и купите оптовый мешок шоколада или муки — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
 };
 
 export default async function GroupBuyingPage() {
@@ -40,10 +40,10 @@ export default async function GroupBuyingPage() {
         <div className="gb-hero-top">
           <div className="container-x">
             <div className="gb-hero-top-inner">
-              <span className="pill">V1.5 · в&nbsp;пилоте</span>
-              <span>4 активные группы · 28 участников · средняя экономия −18%</span>
+              <span className="pill">В&nbsp;пилоте</span>
+              <span>4 активные закупки · 28 участников · средняя экономия −18%</span>
               <span style={{ marginLeft: "auto" }} className="show-md">
-                Запуск Q3 2026 · вход в пилот по запросу
+                Вход в пилот по запросу
               </span>
             </div>
           </div>
@@ -94,7 +94,7 @@ export default async function GroupBuyingPage() {
               <div className="gb-card-head">
                 <div className="lt">
                   <span className="live-dot" />
-                  <span className="nm">Группа активна</span>
+                  <span className="nm">Закупка активна</span>
                 </div>
                 <div className="sub">
                   Создатель: <b style={{ color: "#fff" }}>@aselya.cakes</b>
@@ -213,7 +213,7 @@ export default async function GroupBuyingPage() {
                 ),
               },
               {
-                title: "Группа заполняется",
+                title: "Закупка заполняется",
                 txt: "Кондитеры присоединяются и закрепляют за собой свою долю. Все видят прогресс и сколько ещё мест.",
                 mock: (
                   <>
@@ -279,7 +279,7 @@ export default async function GroupBuyingPage() {
                 капитал в складе на месяц.
               </p>
               <p className="sub" style={{ marginTop: 12 }}>
-                Групповые закупки решают эту арифметику: четыре кондитера по одному мешку = опт. Каждый платит
+                Групповая закупка решает эту арифметику: четыре кондитера по одному мешку = опт. Каждый платит
                 свою долю, забирает свой объём, и никто не держит лишнее на полке.
               </p>
 

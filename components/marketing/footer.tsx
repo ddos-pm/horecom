@@ -74,8 +74,8 @@ export function MarketingFooter() {
         <div>
           <h4 className="hc-footer-h">Платформа</h4>
           <ul className="ul-clean hc-footer-links">
-            <li><Link href="/subscription">Подписка</Link></li>
-            <li><Link href="/group-buying">Группа · V1.5</Link></li>
+            <li><Link href="/subscription">Подписка на поставку</Link></li>
+            <li><Link href="/group-buying">Групповая закупка</Link></li>
             <li><Link href="/how-ordering-works">Как заказать</Link></li>
             <li><Link href="/delivery-and-payment">Доставка и оплата</Link></li>
             <li><Link href="/faq">Частые вопросы</Link></li>
