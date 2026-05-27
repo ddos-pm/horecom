@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { FileText, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { CompanyForm } from "./company-form";
@@ -54,6 +56,36 @@ export default async function ProfilePage() {
           phone: dbUser.phone,
         }}
       />
+
+      <section className="rounded-lg border border-border bg-card p-5">
+        <h2 className="mb-3 text-base font-semibold">Документы</h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Условия работы и реквизиты для выставления счёта. Полные реквизиты Horecom
+          (БИН/ИИН, IBAN, юр. адрес) приходят в счёте после первого заказа.
+        </p>
+        <ul className="space-y-2 text-sm">
+          <li>
+            <Link
+              href="/offer"
+              className="inline-flex items-center gap-2 text-primary hover:underline"
+            >
+              <FileText className="h-4 w-4" />
+              Публичная оферта
+              <ExternalLink className="h-3 w-3 opacity-60" />
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/privacy"
+              className="inline-flex items-center gap-2 text-primary hover:underline"
+            >
+              <FileText className="h-4 w-4" />
+              Политика конфиденциальности
+              <ExternalLink className="h-3 w-3 opacity-60" />
+            </Link>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }

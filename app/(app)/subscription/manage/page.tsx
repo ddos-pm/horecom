@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PauseResumeButton } from "./pause-resume-button";
+import { PlanActions } from "./plan-actions";
 
 export const metadata = { title: "Подписки" };
 
@@ -101,7 +101,7 @@ export default async function SubscriptionManagePage() {
                   )}
                 </div>
               </div>
-              <PauseResumeButton
+              <PlanActions
                 planId={plan.id}
                 status={plan.status as "ACTIVE" | "PAUSED" | "REVIEW_REQUIRED" | "CANCELLED"}
               />

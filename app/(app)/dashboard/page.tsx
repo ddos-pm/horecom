@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,10 @@ export default async function DashboardPage({
   });
   if (!dbUser?.companyId || !dbUser.company) redirect("/onboarding");
 
-  const [recentOrders, lastOrder, activeSub] = await Promise.all([
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [recentOrders, lastOrder, activeSub, monthAgg] = await Promise.all([
     prisma.order.findMany({
       where: { companyId: dbUser.companyId },
       orderBy: { createdAt: "desc" },
@@ -60,7 +63,21 @@ export default async function DashboardPage({
     prisma.subscriptionPlan.findFirst({
       where: { companyId: dbUser.companyId, status: "ACTIVE" },
     }),
+    // Last 30 days of non-cancelled orders. the team's brief — single
+    // "Сумма за месяц" number on the dashboard. Cancelled excluded so
+    // refunds don't double-count.
+    prisma.order.aggregate({
+      where: {
+        companyId: dbUser.companyId,
+        status: { not: "CANCELLED" },
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      _sum: { total: true },
+      _count: { _all: true },
+    }),
   ]);
+  const monthlySpend = Number(monthAgg._sum.total ?? 0);
+  const monthlyOrderCount = monthAgg._count._all;
 
   return (
     <div className="container-tight py-6 md:py-10">
@@ -83,8 +100,9 @@ export default async function DashboardPage({
         <h1 className="text-2xl font-bold md:text-3xl">Обзор</h1>
       </header>
 
-      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <LastOrderCard order={lastOrder} />
+        <MonthlySpendCard total={monthlySpend} orderCount={monthlyOrderCount} />
         <SubscriptionCard sub={activeSub} />
         <CartCard />
       </div>
@@ -175,6 +193,31 @@ function LastOrderCard({ order }: { order: OrderLite }) {
       </Link>
     </div>
   );
+}
+
+function MonthlySpendCard({ total, orderCount }: { total: number; orderCount: number }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="text-xs text-muted-foreground">Сумма за 30 дней</div>
+      <div className="mt-2 text-lg font-semibold tabular-nums">
+        {total.toLocaleString("ru-RU")} ₸
+      </div>
+      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <TrendingUp className="h-3 w-3" />
+        {orderCount === 0
+          ? "Заказов не было"
+          : `${orderCount} ${pluralOrders(orderCount)}`}
+      </div>
+    </div>
+  );
+}
+
+function pluralOrders(n: number): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return "заказ";
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return "заказа";
+  return "заказов";
 }
 
 type SubLite = Awaited<ReturnType<typeof prisma.subscriptionPlan.findFirst>>;
