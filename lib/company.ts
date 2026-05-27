@@ -22,7 +22,7 @@ export const COMPANY = {
   phoneWhatsApp: "+77078607779",
   phoneCallback: "+77077119952",
   phoneWhatsAppDisplay: "+7 707 860 77 79",
-  phoneCallbackDisplay: "***REMOVED***",
+  phoneCallbackDisplay: "+7 707 711 9952",
   email: "Horecomkz@gmail.com",
   emailPrivacy: "Horecomkz@gmail.com",
 
