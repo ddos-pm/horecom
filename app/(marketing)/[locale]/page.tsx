@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 import { StatusStrip } from "@/components/marketing/status-strip";
+import { SuppliersMarquee } from "@/components/marketing/suppliers-marquee";
 import { TopMonthList } from "@/components/marketing/top-month-list";
 import { formatUnit } from "@/lib/units";
 import "./home.css";
@@ -356,6 +357,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <SuppliersMarquee />
 
       {/* === CATEGORIES === */}
       <section className="s" style={{ paddingTop: 0 }}>
