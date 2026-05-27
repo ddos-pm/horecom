@@ -64,8 +64,8 @@ export default async function SubscriptionManagePage() {
       </div>
 
       <div className="mb-4 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
-        В V0 запросы обрабатываются вручную — менеджер свяжется в WhatsApp в течение дня. Полноценный workspace с
-        предиктивным календарём и автоматическими напоминаниями появится в V1.
+        Запросы обрабатываются вручную — менеджер свяжется в WhatsApp в течение дня. Полноценный workspace с
+        предиктивным календарём и автоматическими напоминаниями появится в следующей версии.
       </div>
 
       <ul className="space-y-3">

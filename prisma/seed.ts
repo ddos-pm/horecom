@@ -225,7 +225,7 @@ async function main() {
   console.log(`   ${done} products with real photos from Tilda CDN`);
   console.log(`   ${WA_TEMPLATES.length} WhatsApp templates (DRAFT — submit to Meta)`);
   console.log("");
-  console.log("ℹ️  Note: stock quantities are all 0 — co-founder to update via admin panel");
+  console.log("ℹ️  Note: stock quantities are all 0 — operator to update via admin panel");
   console.log("ℹ️  Note: brands detected for 5/190 products — manual enrichment needed");
 }
 

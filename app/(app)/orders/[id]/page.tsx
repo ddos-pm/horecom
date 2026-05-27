@@ -91,7 +91,7 @@ export default async function OrderDetailPage({
                 Заказ {order.number} принят
               </h2>
               <p className="mt-1 text-sm text-foreground">
-                менеджер свяжется с вами в течение часа в WhatsApp для подтверждения и расчёта.
+                Менеджер свяжется с вами в течение часа в WhatsApp для подтверждения и расчёта.
               </p>
             </div>
           </div>

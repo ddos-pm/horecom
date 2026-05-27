@@ -47,7 +47,7 @@ function formatBody(order: OrderSummary, audience: "client" | "manager"): { subj
       <p>Сумма: <b>${totalKzt} ₸</b> · ${order.itemCount} позиций</p>
       <p>Доставка: ${order.deliveryWindow.date} ${order.deliveryWindow.slot}</p>
       <p>Адрес: ${order.deliveryAddress}</p>
-      <p>менеджер свяжется в WhatsApp для подтверждения наличия и времени доставки.</p>
+      <p>Менеджер свяжется в WhatsApp для подтверждения наличия и времени доставки.</p>
     `,
   };
 }
@@ -88,6 +88,6 @@ export async function sendOrderToManager(order: OrderSummary, customerEmail: str
   if (process.env.RESEND_API_KEY) {
     await sendViaResend(MANAGER_EMAIL, subject, body);
   } else {
-    console.log("[EMAIL STUB] → co-founder (manager)", MANAGER_EMAIL, subject);
+    console.log("[EMAIL STUB] → manager", MANAGER_EMAIL, subject);
   }
 }

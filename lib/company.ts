@@ -1,34 +1,23 @@
 /**
- * Horecom — legal entity & contact details
- * Single source of truth for company info used across the site.
- * Source: confirmed by co-founder, May 20, 2026
+ * Horecom — public contact & operational details.
+ *
+ * Legal-entity fields (legal name, ИИН, IBAN, bank, BIK, registered address)
+ * are intentionally NOT stored in code. They are supplied to legal-entity
+ * customers via the invoice/contract issued after registration, never
+ * exposed on the public site.
  */
 
 export const COMPANY = {
-  // Legal entity
-  legalName: "ИП co-founder",
-  legalNameShort: "individual entrepreneur (details on request)",
-  legalNameKz: "individual entrepreneur менеджер (redacted)",
-  legalNameEn: "Individual Entrepreneur Ospanova co-founder",
-  
   // Brand
   shortName: "Horecom",
-  
-  // Tax & banking (Kazakhstan)
-  iin: "***REMOVED***",
-  iban: "***REMOVED***",
-  bank: 'АО "***REMOVED***"',
-  bik: "***REMOVED***",
-  kbe: "19",
+
   currency: "KZT" as const,
-  vat: false, // ИП on simplified taxation — no VAT
-  
-  // Addresses
-  legalAddress: "Республика Казахстан, г. Астана, А32, дом 3, кв. 43",
+
+  // Operational address (warehouse + pickup point — public).
   physicalAddress: "г. Астана, ул. Шамши Калдаякова, 1",
   city: "Astana",
   country: "KZ",
-  
+
   // Contacts
   phoneWhatsApp: "+77078607779",
   phoneCallback: "+77077119952",
@@ -36,17 +25,17 @@ export const COMPANY = {
   phoneCallbackDisplay: "***REMOVED***",
   email: "Horecomkz@gmail.com",
   emailPrivacy: "Horecomkz@gmail.com",
-  
+
   // Social
   instagram: "https://www.instagram.com/horecom.kz/",
   instagramHandle: "@horecom.kz",
   threads: "https://www.threads.com/@horecom.kz",
   whatsappLink: "https://api.whatsapp.com/send/?phone=77078607779",
-  
+
   // Business
   yearFounded: 2016,
-  
-  // Operational
+
+  // Operational thresholds
   minOrderKzt: 5000,
   freeDeliveryThresholdKzt: 30000,
   freeDeliveryThresholdSubscriptionKzt: 7000,

@@ -30,7 +30,7 @@ const SUBSTITUTION_OPTIONS: { value: "ASK" | "SAME_BRAND_ONLY" | "NEVER"; label:
   {
     value: "ASK",
     label: "Всегда спрашивать перед заменой",
-    hint: "менеджер свяжется в WhatsApp и предложит аналог. Подходит большинству.",
+    hint: "Менеджер свяжется в WhatsApp и предложит аналог. Подходит большинству.",
   },
   {
     value: "SAME_BRAND_ONLY",
@@ -263,7 +263,7 @@ export function CheckoutForm({
                 <div className="font-medium">Договоримся при подтверждении</div>
                 <div className="text-muted-foreground">
                   После оформления менеджер свяжется в WhatsApp в течение часа и предложит удобный способ:
-                  Kaspi-перевод или безналичный счёт. Онлайн-оплата на сайте появится в следующей версии.
+                  ссылка KaspiPay или безналичный счёт.
                 </div>
               </div>
             </label>
