@@ -34,8 +34,8 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                 )}
                 {(p.isSubscriptionEligible || p.isGroupEligible) && (
                   <div className="prod-badges">
-                    {p.isSubscriptionEligible && <span className="pill pill-orange">Подписка на поставку</span>}
-                    {p.isGroupEligible && <span className="pill pill-blue">Групповая закупка</span>}
+                    {p.isSubscriptionEligible && <span className="pill pill-orange">Подписка</span>}
+                    {p.isGroupEligible && <span className="pill pill-blue">Группа</span>}
                   </div>
                 )}
               </div>

@@ -347,9 +347,9 @@ export default async function CatalogPage({
                           {(p.isSubscriptionEligible || p.isGroupEligible) && (
                             <div className="card-badges">
                               {p.isSubscriptionEligible && (
-                                <span className="pill pill-orange">Подписка на поставку</span>
+                                <span className="pill pill-orange">Подписка</span>
                               )}
-                              {p.isGroupEligible && <span className="pill pill-blue">Групповая закупка</span>}
+                              {p.isGroupEligible && <span className="pill pill-blue">Группа</span>}
                             </div>
                           )}
                         </div>
