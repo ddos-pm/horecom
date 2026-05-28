@@ -357,7 +357,15 @@
   @media (min-width: 768px) {
     .hc-main { height: 68px; gap: 20px; }
   }
-  .hc-logo { display: inline-flex; align-items: center; flex-shrink: 0; }
+  .hc-logo {
+    display: inline-flex; align-items: center; flex-shrink: 0;
+    /* Below the hamburger in the stacking order (see .hc-hamb below).
+       Without this, on some mobile builds the logo <img> painted on top
+       of the hamburger button at (~28,30) and elementFromPoint returned
+       the image — tap landed on /ru navigation, not the menu toggle. */
+    position: relative;
+    z-index: 1;
+  }
   .hc-logo .logo-img { height: 22px; width: auto; display: block; }
   @media (min-width: 768px) { .hc-logo .logo-img { height: 28px; } }
   .hc-logo-dark .logo-img { height: 32px; }
@@ -370,8 +378,17 @@
     color: var(--c-fg); border-radius: 8px;
     cursor: pointer; margin-left: -8px;
     flex-shrink: 0;
+    /* Win the stacking contest against .hc-logo (z-index:1). The header
+       itself is z-40 so descendants share that stacking context; without
+       explicit z values, last-in-DOM (logo) paints over earlier (hamburger). */
+    position: relative;
+    z-index: 2;
   }
   .hc-hamb:hover { background: var(--c-bg-muted); }
+  /* Make sure taps on the SVG icon resolve to the parent <button> rather
+     than the thin stroke paths inside — pointer-events: visiblePainted
+     (the SVG default) can otherwise pass clicks between the bars. */
+  .hc-hamb svg { pointer-events: none; }
 
   .hc-nav { display: flex; align-items: center; gap: 2px; }
   .hc-nav a {
