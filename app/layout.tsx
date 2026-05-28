@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, Inter_Tight } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/base-url";
 
+// Single Inter family covers both body text and display headings.
+// Cyrillic subset is required for the Russian-first UI. Weights pruned to
+// the four actually used in CSS (400 body, 500 medium, 600 semibold,
+// 700 bold). Display swap so first paint isn't blocked on the woff2.
+//
+// Previous build also pulled Inter_Tight for headings — same metric
+// family, dropped to halve the font-request count.
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const interTight = Inter_Tight({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-inter-tight",
   display: "swap",
 });
 
@@ -64,7 +66,7 @@ export const viewport: import("next").Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="ru" className={inter.variable}>
       <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );

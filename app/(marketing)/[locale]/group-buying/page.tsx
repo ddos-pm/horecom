@@ -1,14 +1,14 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { COMPANY } from "@/lib/company";
-import { GroupBuyWaitlistForm } from "./waitlist-form";
+import { WaitlistIsland, WaitlistSkeleton } from "./waitlist-island";
 import { LiveCountdown } from "./countdown";
 import "./group-buying.css";
 
-// ISR (5 min). See /subscription rationale — same shape (auth check +
-// products list + optional ?product=SKU pre-select).
+// ISR (5 min). Auth cookies stay in WaitlistIsland (Suspense) so the
+// top-level page stays cacheable. See /subscription for the same shape.
 export const revalidate = 300;
 
 export const metadata: Metadata = {
@@ -23,10 +23,6 @@ export default async function GroupBuyingPage({
   searchParams: Promise<{ product?: string }>;
 }) {
   const sp = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const products = await prisma.product.findMany({
     where: { isActive: true },
@@ -364,11 +360,9 @@ export default async function GroupBuyingPage({
               когда наберётся.
             </p>
           </div>
-          <GroupBuyWaitlistForm
-            products={products}
-            defaultEmail={user?.email ?? null}
-            initialProductIds={initialProductIds}
-          />
+          <Suspense fallback={<WaitlistSkeleton />}>
+            <WaitlistIsland products={products} initialProductIds={initialProductIds} />
+          </Suspense>
         </div>
       </section>
     </>

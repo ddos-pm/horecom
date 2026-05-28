@@ -1,16 +1,18 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { COMPANY } from "@/lib/company";
-import { SubscriptionRequestForm } from "./request-form";
+import { RequestFormIsland, RequestFormSkeleton } from "./request-form-island";
 import "./subscription.css";
 
-// ISR (5 min). Page reads `searchParams.product` and the current user; both
-// are cheap to compute server-side, and the products list can safely lag
-// by minutes. Force-dynamic here was costing ~3s TTFB per visit.
+// Top-level page is now fully ISR-cacheable: no cookies/auth read here,
+// products list is the only DB query and it's safe to lag 5 min. The
+// form (which DOES read auth cookies) is moved into a Suspense island
+// below so the cached HTML can stream while the user-specific piece
+// resolves on its own.
 export const revalidate = 300;
 
 export const metadata: Metadata = {
@@ -25,10 +27,6 @@ export default async function SubscriptionPage({
   searchParams: Promise<{ product?: string }>;
 }) {
   const sp = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const products = await prisma.product.findMany({
     where: { isActive: true },
@@ -508,11 +506,9 @@ export default async function SubscriptionPage({
               активной.
             </p>
           </div>
-          <SubscriptionRequestForm
-            products={products}
-            isAuthed={!!user}
-            initialProductIds={initialProductIds}
-          />
+          <Suspense fallback={<RequestFormSkeleton />}>
+            <RequestFormIsland products={products} initialProductIds={initialProductIds} />
+          </Suspense>
         </div>
       </section>
     </>
