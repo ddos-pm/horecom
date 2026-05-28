@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { MessageCircle, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
@@ -133,9 +134,9 @@ export default async function HomePage() {
               </p>
 
               <div className="hero-ctas">
-                <Link href="/catalog" className="btn btn-orange btn-lg">
+                <Link href="/catalog" className="btn btn-orange btn-lg cta-arrow">
                   Открыть каталог · {skuCount} товаров
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5 cta-arrow-icon" />
                 </Link>
                 <a
                   href={COMPANY.whatsappLink}
@@ -173,7 +174,14 @@ export default async function HomePage() {
                     aria-label={hero?.name ?? "Открыть карточку товара"}
                   >
                     {hero?.imageUrl && (
-                      <img src={hero.imageUrl} alt={hero.name} />
+                      <Image
+                        src={hero.imageUrl}
+                        alt={hero.name}
+                        fill
+                        sizes="(max-width: 768px) 132px, 240px"
+                        priority
+                        style={{ objectFit: "contain" }}
+                      />
                     )}
                   </Link>
                   <div className="hero-card-info">

@@ -7,7 +7,9 @@ import { GroupBuyWaitlistForm } from "./waitlist-form";
 import { LiveCountdown } from "./countdown";
 import "./group-buying.css";
 
-export const dynamic = "force-dynamic";
+// ISR (5 min). See /subscription rationale — same shape (auth check +
+// products list + optional ?product=SKU pre-select).
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Групповая закупка — оптовые цены для самозанятых кондитеров",

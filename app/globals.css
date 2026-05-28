@@ -179,7 +179,14 @@
     white-space: nowrap;
     font-family: inherit;
   }
-  .btn:active { transform: translateY(0.5px); }
+  /* Tactile press feedback — important on mobile where hover doesn't fire. */
+  .btn:active { transform: scale(0.97); }
+
+  /* Arrow-slide micro-interaction for "Открыть каталог →"-style CTAs.
+     Apply via .cta-arrow on the button + .cta-arrow-icon on the SVG.
+     The arrow slides 3px right on hover; non-hover state stays neutral. */
+  .cta-arrow-icon { transition: transform 200ms ease-out; }
+  .cta-arrow:hover .cta-arrow-icon { transform: translateX(3px); }
   .btn-primary { background: var(--c-blue); color: #fff; }
   .btn-primary:hover { background: var(--c-blue-700); }
   .btn-orange { background: var(--c-orange); color: #fff; }
@@ -578,6 +585,21 @@
   /* Lock scroll when drawer open */
   body.hc-locked { overflow: hidden; }
 
+  /* Respect users who opted out of motion at the OS level. Disables
+     transforms / animations / smooth scrolling globally. Override
+     for animations we explicitly need (loading spinners etc) per-rule
+     with `animation-duration: 1ms` instead of relying on default. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   /* === Floating cart bar (mobile, sticky bottom) === */
   .floating-cart-bar {
     position: fixed;
@@ -589,14 +611,27 @@
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    background: var(--c-ink);
+    /* Glassmorphic dark — translucent ink + backdrop blur for premium
+       feel without losing the high-contrast feedback we want for an
+       active-cart prompt. Solid fallback for browsers that ignore the
+       filter (older Firefox, low-end Androids). */
+    background: rgba(10, 10, 10, 0.82);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
     color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.35);
     font-size: 14px;
     line-height: 1.2;
     text-decoration: none;
     transition: transform 120ms, box-shadow 120ms;
+    /* Spring-ish appear from below */
+    animation: floating-cart-in 280ms cubic-bezier(.2, .9, .3, 1.1);
+  }
+  @keyframes floating-cart-in {
+    from { transform: translateY(24px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
   }
   .floating-cart-bar:hover {
     transform: translateY(-1px);

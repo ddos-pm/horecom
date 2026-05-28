@@ -8,7 +8,10 @@ import { COMPANY } from "@/lib/company";
 import { SubscriptionRequestForm } from "./request-form";
 import "./subscription.css";
 
-export const dynamic = "force-dynamic";
+// ISR (5 min). Page reads `searchParams.product` and the current user; both
+// are cheap to compute server-side, and the products list can safely lag
+// by minutes. Force-dynamic here was costing ~3s TTFB per visit.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Подписка на поставку — предиктивный движок",

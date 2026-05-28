@@ -56,10 +56,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative; /* anchor for next/image fill */
   }
   .gb-page-img img {
-    max-width: 80%;
-    max-height: 80%;
     object-fit: contain;
   }
 

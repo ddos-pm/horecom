@@ -159,6 +159,7 @@
     background: #fff;
     overflow: hidden;
     display: flex; align-items: center; justify-content: center;
+    position: relative; /* anchor for next/image fill */
   }
   .hero-card-img img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
   .hero-card-info .meta { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -415,8 +416,8 @@
   }
   .prod:hover {
     border-color: var(--c-border-strong);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px -16px rgba(10,10,10,0.16);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 36px -18px rgba(10,10,10,0.22);
   }
   .prod-img-link { display: block; text-decoration: none; color: inherit; }
   .prod-img {
@@ -424,7 +425,12 @@
     display: flex; align-items: center; justify-content: center;
     position: relative; overflow: hidden;
   }
-  .prod-img img { width: 80%; height: 80%; object-fit: contain; }
+  /* Micro-interaction: subtle image zoom on card hover. */
+  .prod-img img {
+    width: 80%; height: 80%; object-fit: contain;
+    transition: transform 320ms ease-out;
+  }
+  .prod:hover .prod-img img { transform: scale(1.05); }
   .prod-badges {
     position: absolute; top: 10px; left: 10px;
     display: flex; gap: 6px; flex-wrap: wrap;
@@ -514,8 +520,9 @@
     cursor: pointer;
     text-decoration: none;
     white-space: nowrap;
-    transition: background 120ms, color 120ms, border-color 120ms;
+    transition: background 120ms, color 120ms, border-color 120ms, transform 80ms;
   }
+  .btn-card:active { transform: scale(0.96); }
   .btn-card-primary {
     background: var(--c-orange);
     color: #fff;

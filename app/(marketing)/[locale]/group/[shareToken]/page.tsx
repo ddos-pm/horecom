@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Clock, Users } from "lucide-react";
@@ -102,8 +103,14 @@ export default async function GroupBuyPage({
 
           {offer.product.imageUrl && (
             <div className="gb-page-img">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={offer.product.imageUrl} alt={offer.product.name} />
+              <Image
+                src={offer.product.imageUrl}
+                alt={offer.product.name}
+                fill
+                sizes="(max-width: 900px) 100vw, 600px"
+                priority
+                style={{ objectFit: "contain" }}
+              />
             </div>
           )}
 
