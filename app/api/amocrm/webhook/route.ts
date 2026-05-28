@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ratelimit, ipFromRequest } from "@/lib/ratelimit";
 
 /**
  * Inbound webhook from AmoCRM.
@@ -14,11 +15,27 @@ import { NextResponse } from "next/server";
  * include it via Authorization header — otherwise rejected.
  */
 export async function POST(request: Request) {
+  // Rate-limit by client IP. Permissive no-op until Upstash env is set —
+  // see lib/ratelimit.ts. 60/min/IP is generous (matches AmoCRM bulk
+  // status-change scenarios) and still kills sustained abuse.
+  const rl = await ratelimit.webhook.limit(ipFromRequest(request));
+  if (!rl.success) {
+    return NextResponse.json({ error: "rate_limit_exceeded" }, { status: 429 });
+  }
+
   const secret = process.env.AMOCRM_WEBHOOK_SECRET;
   if (secret) {
-    const auth = request.headers.get("authorization") ?? "";
-    const provided = auth.replace(/^Bearer\s+/i, "").trim();
-    if (provided !== secret) {
+    // Accept the secret in any of three places — pick whichever the
+    // AmoCRM integration supports (their UI varies between accounts):
+    //   - Authorization: Bearer <secret>
+    //   - X-Webhook-Secret: <secret>
+    //   - ?token=<secret>
+    const headerBearer = (request.headers.get("authorization") ?? "")
+      .replace(/^Bearer\s+/i, "")
+      .trim();
+    const headerCustom = (request.headers.get("x-webhook-secret") ?? "").trim();
+    const queryToken = new URL(request.url).searchParams.get("token") ?? "";
+    if (headerBearer !== secret && headerCustom !== secret && queryToken !== secret) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
   }

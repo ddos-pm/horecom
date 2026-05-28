@@ -4,8 +4,34 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
+// Content-Security-Policy. Defense-in-depth on top of React's output
+// escaping. unsafe-inline + unsafe-eval are required for Next.js script
+// hydration + Tailwind injected styles; tightening to a nonce-based
+// policy would require app-router middleware rewrites and isn't worth
+// the friction yet.
+//
+// img-src includes the two CDNs we actually serve from (Tilda historic,
+// Supabase post-migration) + data:/blob: for base64 blur placeholders.
+// connect-src whitelists Supabase + AmoCRM so server actions and the
+// Amo lead-push fetch don't get blocked.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' blob: data: https://static.tildacdn.com https://static.tildacdn.pro https://thb.tildacdn.com https://thb.tildacdn.pro https://*.supabase.co",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.supabase.co https://*.amocrm.ru",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
 const SECURITY_HEADERS = [
-  // Block clickjacking
+  { key: "Content-Security-Policy", value: CSP },
+  // Block clickjacking (legacy X-Frame-Options retained alongside the
+  // newer frame-ancestors in CSP — older browsers honour only this one)
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   // Block MIME-sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -15,6 +41,8 @@ const SECURITY_HEADERS = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   // Speed up cross-origin link clicks
   { key: "X-DNS-Prefetch-Control", value: "on" },
+  // Cross-origin isolation — prevents window opener attacks
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
 
 const nextConfig: NextConfig = {
