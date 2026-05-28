@@ -30,6 +30,8 @@ const STOCK_CLASS: Record<string, string> = {
   OUT_OF_STOCK: "v red",
 };
 
+const PER_PAGE = 24;
+
 export default async function CatalogPage({
   params,
   searchParams,
@@ -41,6 +43,7 @@ export default async function CatalogPage({
     brand?: string;
     subscription?: string;
     group?: string;
+    page?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -50,6 +53,32 @@ export default async function CatalogPage({
   const brandFilter = sp.brand?.trim() ?? "";
   const subscriptionOnly = sp.subscription === "true";
   const groupOnly = sp.group === "true";
+  const rawPage = Number(sp.page ?? "1");
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+
+  // Build the `where` once and reuse for findMany + count so the
+  // pagination total matches what's actually filtered.
+  const where = {
+    isActive: true,
+    ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+    ...(brandFilter ? { brandResolved: brandFilter } : {}),
+    ...(subscriptionOnly ? { isSubscriptionEligible: true } : {}),
+    ...(groupOnly ? { isGroupEligible: true } : {}),
+    ...(query
+      ? {
+          // Search across the AI-enriched fields too — a query like
+          // "для макарон" hits products whose useCases mentions the
+          // dish even when the SKU title doesn't.
+          OR: [
+            { name: { contains: query, mode: "insensitive" as const } },
+            { brand: { contains: query, mode: "insensitive" as const } },
+            { sku: { contains: query, mode: "insensitive" as const } },
+            { descriptionExtended: { contains: query, mode: "insensitive" as const } },
+            { useCases: { contains: query, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
 
   const [categories, products, total, brandAgg] = await Promise.all([
     prisma.category.findMany({
@@ -57,36 +86,17 @@ export default async function CatalogPage({
       include: { _count: { select: { products: { where: { isActive: true } } } } },
     }),
     prisma.product.findMany({
-      where: {
-        isActive: true,
-        ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-        ...(brandFilter ? { brandResolved: brandFilter } : {}),
-        ...(subscriptionOnly ? { isSubscriptionEligible: true } : {}),
-        ...(groupOnly ? { isGroupEligible: true } : {}),
-        ...(query
-          ? {
-              // Search across the AI-enriched fields too — a query like
-              // "для макарон" hits products whose useCases mentions the
-              // dish even when the SKU title doesn't.
-              OR: [
-                { name: { contains: query, mode: "insensitive" as const } },
-                { brand: { contains: query, mode: "insensitive" as const } },
-                { sku: { contains: query, mode: "insensitive" as const } },
-                { descriptionExtended: { contains: query, mode: "insensitive" as const } },
-                { useCases: { contains: query, mode: "insensitive" as const } },
-              ],
-            }
-          : {}),
-      },
+      where,
       include: {
         prices: { take: 1, orderBy: { createdAt: "desc" } },
         inventorySnapshot: true,
         category: true,
       },
       orderBy: [{ inventorySnapshot: { availableQty: "desc" } }, { name: "asc" }],
-      take: 200,
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
     }),
-    prisma.product.count({ where: { isActive: true } }),
+    prisma.product.count({ where }),
     // Top brands across active products (by count desc). brandResolved is
     // the AI-enriched canonical form; we use it instead of raw `brand` so
     // case duplicates / typos don't fragment the list. Cap to 24 — anything
@@ -368,8 +378,9 @@ export default async function CatalogPage({
           <div>
             <div className="results-bar">
               <div className="count">
-                <b>{products.length}</b> {plural(products.length, "товар", "товара", "товаров")} найдено
+                <b>{total}</b> {plural(total, "товар", "товара", "товаров")} найдено
                 {activeCategory ? ` в категории «${activeCategory.name}»` : ""}
+                {total > PER_PAGE ? ` · стр. ${page} из ${Math.max(1, Math.ceil(total / PER_PAGE))}` : ""}
               </div>
             </div>
 
@@ -387,7 +398,7 @@ export default async function CatalogPage({
               </div>
             ) : (
               <div className="grid" data-products-grid>
-                {products.map((p) => {
+                {products.map((p, idx) => {
                   const price = p.prices[0];
                   const stock = p.inventorySnapshot;
                   const prices = price
@@ -395,12 +406,23 @@ export default async function CatalogPage({
                         groupPrice: price.groupPrice ? Number(price.groupPrice.toString()) : null,
                       })
                     : null;
+                  // Above-the-fold candidates: first row at desktop (~5/row),
+                  // first 2 rows on mobile (2/row). 8 covers both safely so
+                  // the LCP candidate doesn't get lazy-loaded.
+                  const isAboveFold = idx < 8;
                   return (
                     <div key={p.id} className="card">
                       <Link href={`/product/${p.slug}`} className="card-img-link">
                         <div className="card-img">
                           {p.imageUrl ? (
-                            <Image src={p.imageUrl} alt={p.name} fill sizes="240px" />
+                            <Image
+                              src={p.imageUrl}
+                              alt={p.name}
+                              fill
+                              sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 240px"
+                              priority={isAboveFold}
+                              loading={isAboveFold ? "eager" : "lazy"}
+                            />
                           ) : (
                             <div className="img-ph" style={{ width: "100%", height: "100%" }} />
                           )}
@@ -503,10 +525,84 @@ export default async function CatalogPage({
                 })}
               </div>
             )}
+
+            {total > PER_PAGE && (
+              <CatalogPagination
+                locale={locale}
+                page={page}
+                totalPages={Math.max(1, Math.ceil(total / PER_PAGE))}
+                preserved={{
+                  q: query || undefined,
+                  category: categorySlug,
+                  brand: brandFilter || undefined,
+                  subscription: subscriptionOnly ? "true" : undefined,
+                  group: groupOnly ? "true" : undefined,
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+function CatalogPagination({
+  locale,
+  page,
+  totalPages,
+  preserved,
+}: {
+  locale: string;
+  page: number;
+  totalPages: number;
+  preserved: Record<string, string | undefined>;
+}) {
+  function hrefForPage(p: number) {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(preserved)) {
+      if (v) params.set(k, v);
+    }
+    if (p > 1) params.set("page", String(p));
+    const qs = params.toString();
+    return qs ? `/${locale}/catalog?${qs}` : `/${locale}/catalog`;
+  }
+
+  // Build the visible page numbers — first, last, current ±1, with ellipses.
+  const pages: (number | "…")[] = [];
+  const window = new Set<number>([1, totalPages, page, page - 1, page + 1]);
+  let prev = 0;
+  for (let p = 1; p <= totalPages; p++) {
+    if (!window.has(p)) continue;
+    if (p - prev > 1) pages.push("…");
+    pages.push(p);
+    prev = p;
+  }
+
+  return (
+    <nav className="pagination" aria-label="Страницы каталога">
+      {page > 1 ? (
+        <a href={hrefForPage(page - 1)} className="pg-btn">← Назад</a>
+      ) : (
+        <span className="pg-btn disabled" aria-disabled>← Назад</span>
+      )}
+      <div className="pg-pages">
+        {pages.map((p, i) =>
+          p === "…" ? (
+            <span key={`e${i}`} className="pg-ellipsis">…</span>
+          ) : p === page ? (
+            <span key={p} className="pg-num active" aria-current="page">{p}</span>
+          ) : (
+            <a key={p} href={hrefForPage(p)} className="pg-num">{p}</a>
+          ),
+        )}
+      </div>
+      {page < totalPages ? (
+        <a href={hrefForPage(page + 1)} className="pg-btn">Вперёд →</a>
+      ) : (
+        <span className="pg-btn disabled" aria-disabled>Вперёд →</span>
+      )}
+    </nav>
   );
 }
 

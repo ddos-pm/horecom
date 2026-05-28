@@ -453,3 +453,55 @@
     border-radius: 50%;
   }
 
+
+  /* === Pagination — server-rendered <a> links preserving filters === */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 32px 0 16px;
+    flex-wrap: wrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .pg-pages { display: inline-flex; gap: 4px; align-items: center; }
+  .pg-btn,
+  .pg-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--c-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--c-fg);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 120ms, background 120ms, color 120ms;
+  }
+  .pg-btn:hover,
+  .pg-num:hover {
+    border-color: var(--c-orange);
+    color: var(--c-orange-700);
+  }
+  .pg-num.active {
+    background: var(--c-ink);
+    color: #fff;
+    border-color: var(--c-ink);
+    cursor: default;
+  }
+  .pg-btn.disabled {
+    color: var(--c-fg-4);
+    border-color: var(--c-border);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .pg-ellipsis {
+    color: var(--c-fg-3);
+    padding: 0 4px;
+    font-weight: 600;
+  }
+  @media (max-width: 600px) {
+    .pg-num { min-width: 32px; height: 32px; padding: 0 8px; font-size: 12px; }
+    .pg-btn { height: 32px; padding: 0 10px; font-size: 12px; }
+  }
