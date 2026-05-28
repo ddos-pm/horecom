@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      // Supabase Storage (primary host post-migration from Tilda).
+      // Hostname pattern <project-ref>.supabase.co — wildcard covers
+      // any project ref we end up on, no env coupling.
+      { protocol: "https", hostname: "*.supabase.co" },
+      // Tilda CDN (origin of seed images — kept until migrate-images
+      // script flips every product.imageUrl off this host).
       { protocol: "https", hostname: "static.tildacdn.pro" },
       { protocol: "https", hostname: "static.tildacdn.com" },
       { protocol: "https", hostname: "thb.tildacdn.pro" },
