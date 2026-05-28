@@ -54,19 +54,28 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
           }) : null;
           const outOfStock = stock?.stockStatus === "OUT_OF_STOCK";
 
+          // Card is a <div>, NOT a <Link>. Two child Links (image + name)
+          // navigate to the PDP; action buttons stay outside those Links
+          // so there's no <a> nested inside <a> (the older shape caused a
+          // React #418 hydration mismatch — browsers silently un-nest the
+          // inner <a>, SSR HTML and client DOM diverge).
           return (
-            <Link key={p.id} href={`/product/${p.slug}`} className="prod">
-              <div className="prod-img">
-                {p.imageUrl && (
-                  <Image src={p.imageUrl} alt={p.name} fill sizes="200px" style={{ objectFit: "contain" }} />
-                )}
-              </div>
+            <div key={p.id} className="prod">
+              <Link href={`/product/${p.slug}`} className="prod-img-link" aria-label={p.name}>
+                <div className="prod-img">
+                  {p.imageUrl && (
+                    <Image src={p.imageUrl} alt={p.name} fill sizes="200px" style={{ objectFit: "contain" }} />
+                  )}
+                </div>
+              </Link>
               <div className="prod-info">
                 <div className="prod-meta">
                   {p.brand ? `${p.brand} · ` : ""}
                   {p.packLabel}
                 </div>
-                <div className="prod-name">{p.name}</div>
+                <Link href={`/product/${p.slug}`} className="prod-name">
+                  {p.name}
+                </Link>
 
                 {prices && (
                   <div className="prod-price-table">
@@ -117,7 +126,6 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                     <Link
                       href={`/subscription?product=${encodeURIComponent(p.sku)}`}
                       className="btn-card btn-card-outline"
-                      onClick={(e) => e.stopPropagation()}
                     >
                       Подписка
                     </Link>
@@ -126,14 +134,13 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                     <Link
                       href={`/group-buying?product=${encodeURIComponent(p.sku)}`}
                       className="btn-card btn-card-outline"
-                      onClick={(e) => e.stopPropagation()}
                     >
                       Группа
                     </Link>
                   )}
                 </div>
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>
