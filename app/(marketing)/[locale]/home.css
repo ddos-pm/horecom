@@ -468,9 +468,10 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 8px;
+    gap: 16px;
     font-size: 13px;
   }
+  .prod-price-row .val { white-space: nowrap; }
   .prod-price-row .lbl {
     color: var(--c-fg-3);
     font-size: 11px;
@@ -499,7 +500,7 @@
   /* === 3-button action row on product cards === */
   .prod-actions {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
     margin-top: 4px;
   }
@@ -510,8 +511,8 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    height: 34px;
-    padding: 0 10px;
+    height: 36px;
+    padding: 0 12px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
@@ -535,8 +536,9 @@
     border-color: var(--c-border-strong);
   }
   .btn-card-outline:hover {
-    border-color: var(--c-fg);
-    background: var(--c-bg-muted);
+    border-color: var(--c-orange);
+    color: var(--c-orange-700);
+    background: rgba(241, 128, 7, 0.04);
   }
 
   /* ---------- OPERATIONS BAND ---------- */
