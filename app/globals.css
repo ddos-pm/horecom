@@ -463,16 +463,18 @@
     border: 2px solid #fff;
   }
 
-  /* Drawer */
+  /* Drawer — portaled to <body>, so z values compete at the document
+     root level. Set above the floating cart bar (z:60) so the drawer
+     can never end up sandwiched. */
   .hc-drawer-bd {
-    position: fixed; inset: 0; z-index: 49;
+    position: fixed; inset: 0; z-index: 69;
     background: rgba(10,10,10,0.45);
     opacity: 0; pointer-events: none;
     transition: opacity 200ms ease;
   }
   .hc-drawer-bd.open { opacity: 1; pointer-events: auto; }
   .hc-drawer {
-    position: fixed; inset: 0 auto 0 0; z-index: 50;
+    position: fixed; inset: 0 auto 0 0; z-index: 70;
     width: min(86vw, 380px);
     background: #fff;
     transform: translateX(-100%);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, MessageCircle, Phone } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
@@ -16,6 +17,12 @@ const NAV = [
 
 export function MobileDrawer() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Portal target needs document.body, which is client-only.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -34,19 +41,8 @@ export function MobileDrawer() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  return (
+  const drawerJsx = (
     <>
-      <button
-        type="button"
-        className="hc-hamb show-mobile"
-        aria-label="Открыть меню"
-        onClick={() => setOpen(true)}
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 6h18M3 12h18M3 18h18" />
-        </svg>
-      </button>
-
       <div
         className={`hc-drawer-bd${open ? " open" : ""}`}
         aria-hidden={!open}
@@ -120,6 +116,28 @@ export function MobileDrawer() {
           </div>
         </div>
       </aside>
+    </>
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        className="hc-hamb show-mobile"
+        aria-label="Открыть меню"
+        onClick={() => setOpen(true)}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
+      </button>
+
+      {/* Backdrop + drawer panel render at <body> root via portal — escapes
+          the sticky <header>'s z-index:40 stacking context, so the drawer
+          (z:50) is no longer trapped behind hero content with relative
+          positioning. SSR pre-mount fallback returns null so first paint
+          matches server HTML (avoids hydration mismatch). */}
+      {mounted ? createPortal(drawerJsx, document.body) : null}
     </>
   );
 }
