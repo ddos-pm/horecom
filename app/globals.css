@@ -600,6 +600,94 @@
     }
   }
 
+  /* === Product card price-table + 3-button action row ===
+     Shared between home featured grid, /ru/catalog grid, and PDP. Lived
+     in home.css originally — moved here so catalog (which doesn't pull
+     home.css) renders the same styling. */
+  .prod-price-table {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px dashed var(--c-border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .prod-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 13px;
+  }
+  .prod-price-row .lbl {
+    color: var(--c-fg-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .prod-price-row .val {
+    font-weight: 600;
+    color: var(--c-fg);
+    white-space: nowrap;
+  }
+  .prod-price-row.sub .lbl { color: var(--c-orange); }
+  .prod-price-row.sub .val { color: var(--c-orange-700); }
+  .prod-price-row.grp .lbl { color: var(--c-blue); }
+  .prod-price-row.grp .val { color: var(--c-blue-700); }
+  .prod-price-row .save {
+    margin-left: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--c-success);
+    background: rgba(17, 122, 63, 0.1);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .prod-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .btn-card {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 120ms, color 120ms, border-color 120ms, transform 80ms;
+  }
+  .btn-card:active { transform: scale(0.96); }
+  .btn-card-primary {
+    background: var(--c-orange);
+    color: #fff;
+  }
+  .btn-card-primary:hover { background: var(--c-orange-700); }
+  .btn-card-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-card-outline {
+    background: #fff;
+    color: var(--c-fg);
+    border-color: var(--c-border-strong);
+  }
+  .btn-card-outline:hover {
+    border-color: var(--c-orange);
+    color: var(--c-orange-700);
+    background: rgba(241, 128, 7, 0.04);
+  }
+
   /* === Floating cart bar (mobile, sticky bottom) === */
   .floating-cart-bar {
     position: fixed;
