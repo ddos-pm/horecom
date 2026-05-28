@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/base-url";
 import { formatUnit } from "@/lib/units";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
+import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
 import "./catalog.css";
 
 // Catalog is filter-heavy (category, q, subscription, group). Marking it
@@ -422,6 +423,9 @@ export default async function CatalogPage({
                               sizes="(max-width: 600px) 50vw, (max-width: 1024px) 33vw, 240px"
                               priority={isAboveFold}
                               loading={isAboveFold ? "eager" : "lazy"}
+                              quality={PRODUCT_IMAGE_QUALITY}
+                              placeholder="blur"
+                              blurDataURL={PRODUCT_BLUR_DATA_URL}
                             />
                           ) : (
                             <div className="img-ph" style={{ width: "100%", height: "100%" }} />

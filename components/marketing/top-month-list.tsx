@@ -8,6 +8,7 @@ import { Link } from "@/i18n/routing";
 import { formatUnit } from "@/lib/units";
 import { useCart } from "@/lib/cart-store";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
+import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
 import type { Prisma } from "@prisma/client";
 
 type FeaturedProduct = Prisma.ProductGetPayload<{
@@ -64,7 +65,16 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
               <Link href={`/product/${p.slug}`} className="prod-img-link" aria-label={p.name}>
                 <div className="prod-img">
                   {p.imageUrl && (
-                    <Image src={p.imageUrl} alt={p.name} fill sizes="200px" style={{ objectFit: "contain" }} />
+                    <Image
+                      src={p.imageUrl}
+                      alt={p.name}
+                      fill
+                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, 200px"
+                      style={{ objectFit: "contain" }}
+                      quality={PRODUCT_IMAGE_QUALITY}
+                      placeholder="blur"
+                      blurDataURL={PRODUCT_BLUR_DATA_URL}
+                    />
                   )}
                 </div>
               </Link>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
 
 export function Gallery({ images, alt, badges }: { images: string[]; alt: string; badges?: React.ReactNode }) {
   const [active, setActive] = useState(0);
@@ -18,7 +19,15 @@ export function Gallery({ images, alt, badges }: { images: string[]; alt: string
             onClick={() => setActive(i)}
             aria-label={`Фото ${i + 1}`}
           >
-            <Image src={src} alt="" fill sizes="100px" />
+            <Image
+              src={src}
+              alt=""
+              fill
+              sizes="100px"
+              quality={PRODUCT_IMAGE_QUALITY}
+              placeholder="blur"
+              blurDataURL={PRODUCT_BLUR_DATA_URL}
+            />
           </button>
         ))}
         {images.length > 4 && (
@@ -32,7 +41,18 @@ export function Gallery({ images, alt, badges }: { images: string[]; alt: string
       </div>
       <div className="gallery-main">
         {badges && <div className="gallery-badges">{badges}</div>}
-        {main && <Image src={main} alt={alt} fill sizes="(max-width: 768px) 100vw, 580px" priority />}
+        {main && (
+          <Image
+            src={main}
+            alt={alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 580px"
+            priority
+            quality={PRODUCT_IMAGE_QUALITY}
+            placeholder="blur"
+            blurDataURL={PRODUCT_BLUR_DATA_URL}
+          />
+        )}
       </div>
     </div>
   );
