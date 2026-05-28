@@ -7,8 +7,8 @@ import { WaitlistIsland, WaitlistSkeleton } from "./waitlist-island";
 import { LiveCountdown } from "./countdown";
 import "./group-buying.css";
 
-// ISR (5 min). Auth cookies stay in WaitlistIsland (Suspense) so the
-// top-level page stays cacheable. See /subscription for the same shape.
+// Suspense-island the auth-dependent form to streamline FCP. See
+// /subscription for the PPR limitation note.
 export const revalidate = 300;
 
 export const metadata: Metadata = {

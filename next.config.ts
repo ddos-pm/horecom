@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
     // bypass the cache; only the click was broken. Playwright caught it
     // in tests/e2e/site-walkthrough.spec.ts §3.
     staleTimes: { dynamic: 0, static: 0 },
+    // Partial Prerendering would let the auth-dependent Suspense island
+    // coexist with a cached static shell, BUT it requires Next canary —
+    // stable 15.x rejects `experimental.ppr` at build time. Sticking with
+    // standard SSR for /subscription + /group-buying; FCP still benefits
+    // from the Suspense skeleton even though TTFB stays dynamic.
   },
 };
 

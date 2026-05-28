@@ -8,11 +8,11 @@ import { COMPANY } from "@/lib/company";
 import { RequestFormIsland, RequestFormSkeleton } from "./request-form-island";
 import "./subscription.css";
 
-// Top-level page is now fully ISR-cacheable: no cookies/auth read here,
-// products list is the only DB query and it's safe to lag 5 min. The
-// form (which DOES read auth cookies) is moved into a Suspense island
-// below so the cached HTML can stream while the user-specific piece
-// resolves on its own.
+// Auth cookies live in a Suspense island below — improves FCP by
+// streaming the skeleton while the form resolves. TTFB stays dynamic
+// because PPR (which would unlock the cached-shell + streamed-island
+// combo) is canary-only in Next 15.x. `revalidate` declared but
+// effectively inert until cookies stop leaking dynamic-ness upward.
 export const revalidate = 300;
 
 export const metadata: Metadata = {
