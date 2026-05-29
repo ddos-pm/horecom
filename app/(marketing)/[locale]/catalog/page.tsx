@@ -48,6 +48,7 @@ export default async function CatalogPage({
   }>;
 }) {
   const { locale } = await params;
+  const isEn = locale === "en";
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
   const categorySlug = sp.category;
@@ -136,15 +137,24 @@ export default async function CatalogPage({
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: activeCategory ? `${activeCategory.name} · Horecom` : "Каталог Horecom",
+    name: activeCategory
+      ? `${activeCategory.name} · Horecom`
+      : isEn
+        ? "Horecom catalog"
+        : "Каталог Horecom",
     numberOfItems: products.length,
     itemListElement: products.map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}/ru/product/${p.slug}`,
+      url: `${SITE_URL}/${locale}/product/${p.slug}`,
       name: p.name,
     })),
   };
+
+  function itemsLabel(n: number): string {
+    if (isEn) return n === 1 ? "product" : "products";
+    return plural(n, "товар", "товара", "товаров");
+  }
 
   return (
     <>
@@ -152,9 +162,9 @@ export default async function CatalogPage({
       <section className="cat-head">
         <div className="container-x cat-head-inner">
           <div className="breadcrumb">
-            <Link href="/">Главная</Link>
+            <Link href="/">{isEn ? "Home" : "Главная"}</Link>
             <span className="sep">/</span>
-            <span>Каталог</span>
+            <span>{isEn ? "Catalog" : "Каталог"}</span>
             {activeCategory && (
               <>
                 <span className="sep">/</span>
@@ -164,39 +174,55 @@ export default async function CatalogPage({
           </div>
 
           <h1>
-            {activeCategory ? `${activeCategory.name} · ${products.length} товаров` : `Каталог · ${total} товаров`}
+            {activeCategory
+              ? `${activeCategory.name} · ${products.length} ${itemsLabel(products.length)}`
+              : isEn
+                ? `Catalog · ${total} products`
+                : `Каталог · ${total} товаров`}
           </h1>
           <div className="sub">
             <b>
-              {products.length} {plural(products.length, "товар", "товара", "товаров")}
+              {products.length} {itemsLabel(products.length)}
             </b>{" "}
-            {activeCategory ? `в категории «${activeCategory.name}»` : `в ${categories.length} категориях`} ·{" "}
-            обновлено сегодня ·{" "}
+            {activeCategory
+              ? isEn
+                ? `in "${activeCategory.name}"`
+                : `в категории «${activeCategory.name}»`
+              : isEn
+                ? `across ${categories.length} categories`
+                : `в ${categories.length} категориях`}{" "}
+            ·{" "}
+            {isEn ? "updated today" : "обновлено сегодня"} ·{" "}
             <span style={{ color: "var(--c-success)", fontWeight: 600 }}>
-              <span className="live-dot-blue" style={{ background: "var(--c-success)" }} /> данные о наличии в реальном времени
+              <span className="live-dot-blue" style={{ background: "var(--c-success)" }} />{" "}
+              {isEn ? "live stock data" : "данные о наличии в реальном времени"}
             </span>
           </div>
 
           <div className="toolbar">
             <CatalogSearchInput
               defaultValue={query}
-              placeholder="Шоколад Barry Callebaut, мука 25 кг, пюре манго…"
+              placeholder={
+                isEn
+                  ? "Barry Callebaut chocolate, flour 25 kg, mango purée…"
+                  : "Шоколад Barry Callebaut, мука 25 кг, пюре манго…"
+              }
             />
             <div className="toolbar-right">
               <button type="button" className="filt-mobile-btn">
                 <Filter className="h-3.5 w-3.5" />
-                Фильтры
+                {isEn ? "Filters" : "Фильтры"}
               </button>
               <button type="button" className="sort">
                 <ArrowDownUp className="h-3.5 w-3.5" />
-                В наличии
+                {isEn ? "In stock" : "В наличии"}
                 <ChevronDown className="h-3 w-3" />
               </button>
               <div className="view-toggle">
-                <button type="button" className="active" aria-label="Сетка">
+                <button type="button" className="active" aria-label={isEn ? "Grid" : "Сетка"}>
                   <Grid3x3 className="h-4 w-4" />
                 </button>
-                <button type="button" aria-label="Список">
+                <button type="button" aria-label={isEn ? "List" : "Список"}>
                   <List className="h-4 w-4" />
                 </button>
               </div>
@@ -205,12 +231,12 @@ export default async function CatalogPage({
 
           {/* Mobile category strip — sidebar is hidden under 1024px so without
               this row the user has no way to switch category on phones. */}
-          <div className="cats-mobile" aria-label="Категории">
+          <div className="cats-mobile" aria-label={isEn ? "Categories" : "Категории"}>
             <a
               href={`/${locale}/catalog`}
               className={`cat-pill${!categorySlug ? " active" : ""}`}
             >
-              Все
+              {isEn ? "All" : "Все"}
             </a>
             {categories.map((c) => (
               <a
@@ -226,7 +252,7 @@ export default async function CatalogPage({
           {(categorySlug || subscriptionOnly || groupOnly || query) && (
             <div className="chips">
               <span className="t-meta" style={{ color: "var(--c-fg-3)", fontSize: 12, marginRight: 4 }}>
-                Фильтры:
+                {isEn ? "Filters:" : "Фильтры:"}
               </span>
               {/* Same-pathname chip Links use plain <a> for the same reason
                   as the category sidebar — next-intl <Link> no-ops when the
@@ -241,7 +267,7 @@ export default async function CatalogPage({
                   href={categorySlug ? `/${locale}/catalog?category=${categorySlug}` : `/${locale}/catalog`}
                   className="chip active"
                 >
-                  Подписка <span className="x">×</span>
+                  {isEn ? "Subscription" : "Подписка"} <span className="x">×</span>
                 </a>
               )}
               {groupOnly && (
@@ -249,7 +275,7 @@ export default async function CatalogPage({
                   href={categorySlug ? `/${locale}/catalog?category=${categorySlug}` : `/${locale}/catalog`}
                   className="chip active"
                 >
-                  Группа <span className="x">×</span>
+                  {isEn ? "Group buying" : "Группа"} <span className="x">×</span>
                 </a>
               )}
               {query && (
@@ -257,7 +283,7 @@ export default async function CatalogPage({
                   href={categorySlug ? `/${locale}/catalog?category=${categorySlug}` : `/${locale}/catalog`}
                   className="chip active"
                 >
-                  «{query}» <span className="x">×</span>
+                  "{query}" <span className="x">×</span>
                 </a>
               )}
               <a
@@ -265,7 +291,7 @@ export default async function CatalogPage({
                 className="t-meta"
                 style={{ fontSize: 12, color: "var(--c-blue)", fontWeight: 500 }}
               >
-                Сбросить
+                {isEn ? "Clear" : "Сбросить"}
               </a>
             </div>
           )}
@@ -276,13 +302,13 @@ export default async function CatalogPage({
         <div className="cat-layout">
           <aside className="sidebar">
             <div className="filt">
-              <h4>Категории</h4>
+              <h4>{isEn ? "Categories" : "Категории"}</h4>
               <div className="cat-list">
                 <a
                   href={`/${locale}/catalog`}
                   className={!categorySlug ? "active" : ""}
                 >
-                  <span>Все товары</span>
+                  <span>{isEn ? "All products" : "Все товары"}</span>
                   <span className="n">{total}</span>
                 </a>
                 {categories.map((c) => (
@@ -290,8 +316,7 @@ export default async function CatalogPage({
                   // onClick handler and no-ops when the pathname computes as
                   // "same" (we're going from /catalog to /catalog?…). With
                   // <a>, the browser does a real navigation that the server
-                  // handles fresh. Locale is already in the URL prefix; we
-                  // hard-code /ru since marketing layout always wraps locale.
+                  // handles fresh.
                   <a
                     key={c.id}
                     href={`/${locale}/catalog?category=${c.slug}`}
@@ -306,7 +331,7 @@ export default async function CatalogPage({
 
             {brands.length > 0 && (
               <div className="filt">
-                <h4>Бренды</h4>
+                <h4>{isEn ? "Brands" : "Бренды"}</h4>
                 <div className="brand-chips">
                   {brands.map((b) => {
                     const isActive = brandFilter === b.name;
@@ -333,14 +358,14 @@ export default async function CatalogPage({
             )}
 
             <div className="filt">
-              <h4>Наличие</h4>
+              <h4>{isEn ? "Availability" : "Наличие"}</h4>
               <label className="check">
-                <input type="checkbox" readOnly /> В наличии <span className="n">{inStockCount}</span>
+                <input type="checkbox" readOnly /> {isEn ? "In stock" : "В наличии"} <span className="n">{inStockCount}</span>
               </label>
             </div>
 
             <div className="filt" style={{ borderBottom: 0 }}>
-              <h4>Режим работы</h4>
+              <h4>{isEn ? "Mode" : "Режим работы"}</h4>
               <a
                 href={(() => {
                   const params = new URLSearchParams();
@@ -352,9 +377,9 @@ export default async function CatalogPage({
                 className="filt-toggle"
                 style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
               >
-                <input type="checkbox" checked={subscriptionOnly} readOnly /> Доступна{" "}
+                <input type="checkbox" checked={subscriptionOnly} readOnly /> {isEn ? "Available" : "Доступна"}{" "}
                 <span className="pill pill-orange" style={{ marginLeft: "auto" }}>
-                  Подписка · {subscriptionCount}
+                  {isEn ? "Subscription" : "Подписка"} · {subscriptionCount}
                 </span>
               </a>
               <a
@@ -368,9 +393,9 @@ export default async function CatalogPage({
                 className="filt-toggle"
                 style={{ display: "flex", alignItems: "center", padding: "8px 0" }}
               >
-                <input type="checkbox" checked={groupOnly} readOnly /> Доступна{" "}
+                <input type="checkbox" checked={groupOnly} readOnly /> {isEn ? "Available" : "Доступна"}{" "}
                 <span className="pill pill-blue" style={{ marginLeft: "auto" }}>
-                  Группа · {groupCount}
+                  {isEn ? "Group" : "Группа"} · {groupCount}
                 </span>
               </a>
             </div>
@@ -379,9 +404,13 @@ export default async function CatalogPage({
           <div>
             <div className="results-bar">
               <div className="count">
-                <b>{total}</b> {plural(total, "товар", "товара", "товаров")} найдено
-                {activeCategory ? ` в категории «${activeCategory.name}»` : ""}
-                {total > PER_PAGE ? ` · стр. ${page} из ${Math.max(1, Math.ceil(total / PER_PAGE))}` : ""}
+                <b>{total}</b> {itemsLabel(total)} {isEn ? "found" : "найдено"}
+                {activeCategory ? (isEn ? ` in "${activeCategory.name}"` : ` в категории «${activeCategory.name}»`) : ""}
+                {total > PER_PAGE
+                  ? isEn
+                    ? ` · page ${page} of ${Math.max(1, Math.ceil(total / PER_PAGE))}`
+                    : ` · стр. ${page} из ${Math.max(1, Math.ceil(total / PER_PAGE))}`
+                  : ""}
               </div>
             </div>
 
@@ -395,7 +424,9 @@ export default async function CatalogPage({
                   color: "var(--c-fg-3)",
                 }}
               >
-                Ничего не найдено. Попробуй сбросить фильтры или открой полный каталог.
+                {isEn
+                  ? "Nothing found. Try clearing the filters or browse the full catalog."
+                  : "Ничего не найдено. Попробуй сбросить фильтры или открой полный каталог."}
               </div>
             ) : (
               <div className="grid" data-products-grid>
@@ -456,23 +487,25 @@ export default async function CatalogPage({
                             </div>
                           </div>
                           <div>
-                            <div className="k">Стек</div>
+                            <div className="k">{isEn ? "Stock" : "Стек"}</div>
                             <div className={STOCK_CLASS[stock?.stockStatus ?? "OUT_OF_STOCK"]}>
                               {stock?.availableQty && stock.availableQty > 0
                                 ? `${stock.availableQty} ${formatUnit(p.unitType)}`
-                                : "Под заказ"}
+                                : isEn
+                                  ? "Made-to-order"
+                                  : "Под заказ"}
                             </div>
                           </div>
                         </div>
                         {prices && (
                           <div className="prod-price-table">
                             <div className="prod-price-row">
-                              <span className="lbl">Разово</span>
+                              <span className="lbl">{isEn ? "One-off" : "Разово"}</span>
                               <span className="val tabular">{formatKzt(prices.base)}</span>
                             </div>
                             {p.isSubscriptionEligible && (
                               <div className="prod-price-row sub">
-                                <span className="lbl">Подписка</span>
+                                <span className="lbl">{isEn ? "Subscription" : "Подписка"}</span>
                                 <span className="val tabular">
                                   {formatKzt(prices.subscription)}
                                   <span className="save">−{prices.subscriptionSavingsPct}%</span>
@@ -481,7 +514,7 @@ export default async function CatalogPage({
                             )}
                             {p.isGroupEligible && (
                               <div className="prod-price-row grp">
-                                <span className="lbl">Группа</span>
+                                <span className="lbl">{isEn ? "Group" : "Группа"}</span>
                                 <span className="val tabular">
                                   {formatKzt(prices.group)}
                                   <span className="save">−{prices.groupSavingsPct}%</span>
@@ -511,7 +544,7 @@ export default async function CatalogPage({
                               href={`/subscription?product=${encodeURIComponent(p.sku)}`}
                               className="btn-card btn-card-outline"
                             >
-                              Подписка
+                              {isEn ? "Subscription" : "Подписка"}
                             </Link>
                           )}
                           {p.isGroupEligible && (
@@ -519,7 +552,7 @@ export default async function CatalogPage({
                               href={`/group-buying?product=${encodeURIComponent(p.sku)}`}
                               className="btn-card btn-card-outline"
                             >
-                              Группа
+                              {isEn ? "Group" : "Группа"}
                             </Link>
                           )}
                         </div>
@@ -533,6 +566,7 @@ export default async function CatalogPage({
             {total > PER_PAGE && (
               <CatalogPagination
                 locale={locale}
+                isEn={isEn}
                 page={page}
                 totalPages={Math.max(1, Math.ceil(total / PER_PAGE))}
                 preserved={{
@@ -553,11 +587,13 @@ export default async function CatalogPage({
 
 function CatalogPagination({
   locale,
+  isEn,
   page,
   totalPages,
   preserved,
 }: {
   locale: string;
+  isEn: boolean;
   page: number;
   totalPages: number;
   preserved: Record<string, string | undefined>;
@@ -583,12 +619,15 @@ function CatalogPagination({
     prev = p;
   }
 
+  const prevLabel = isEn ? "← Previous" : "← Назад";
+  const nextLabel = isEn ? "Next →" : "Вперёд →";
+
   return (
-    <nav className="pagination" aria-label="Страницы каталога">
+    <nav className="pagination" aria-label={isEn ? "Catalog pages" : "Страницы каталога"}>
       {page > 1 ? (
-        <a href={hrefForPage(page - 1)} className="pg-btn">← Назад</a>
+        <a href={hrefForPage(page - 1)} className="pg-btn">{prevLabel}</a>
       ) : (
-        <span className="pg-btn disabled" aria-disabled>← Назад</span>
+        <span className="pg-btn disabled" aria-disabled>{prevLabel}</span>
       )}
       <div className="pg-pages">
         {pages.map((p, i) =>
@@ -602,9 +641,9 @@ function CatalogPagination({
         )}
       </div>
       {page < totalPages ? (
-        <a href={hrefForPage(page + 1)} className="pg-btn">Вперёд →</a>
+        <a href={hrefForPage(page + 1)} className="pg-btn">{nextLabel}</a>
       ) : (
-        <span className="pg-btn disabled" aria-disabled>Вперёд →</span>
+        <span className="pg-btn disabled" aria-disabled>{nextLabel}</span>
       )}
     </nav>
   );

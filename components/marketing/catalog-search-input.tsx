@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Search } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 
@@ -21,6 +22,7 @@ export function CatalogSearchInput({
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const locale = useLocale();
   const [value, setValue] = useState(defaultValue);
   const [, startTransition] = useTransition();
 
@@ -47,7 +49,7 @@ export function CatalogSearchInput({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        aria-label="Поиск товаров"
+        aria-label={locale === "en" ? "Search products" : "Поиск товаров"}
       />
       <kbd className="kbd-shortcut">⌘K</kbd>
     </label>

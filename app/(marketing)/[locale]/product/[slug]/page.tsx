@@ -47,27 +47,29 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const isEn = locale === "en";
   const product = await prisma.product.findUnique({
     where: { slug },
     include: { category: true, prices: { take: 1 } },
   });
-  if (!product) return { title: "Товар не найден" };
+  if (!product) return { title: isEn ? "Product not found" : "Товар не найден" };
 
   return {
     title: product.name,
-    description:
-      `${product.brand ?? ""} ${product.packLabel}. ${product.description ?? ""}. Оптовая цена в Horecom.`.trim(),
+    description: isEn
+      ? `${product.brand ?? ""} ${product.packLabel}. ${product.description ?? ""}. Wholesale price at Horecom.`.trim()
+      : `${product.brand ?? ""} ${product.packLabel}. ${product.description ?? ""}. Оптовая цена в Horecom.`.trim(),
     openGraph: {
       title: product.name,
       description: product.description ?? "",
       type: "website",
-      url: `https://horecom.kz/ru/product/${product.slug}`,
+      url: `https://horecom.kz/${locale}/product/${product.slug}`,
       images: product.imageUrl ? [product.imageUrl] : [],
     },
-    alternates: { canonical: `https://horecom.kz/ru/product/${product.slug}` },
+    alternates: { canonical: `https://horecom.kz/${locale}/product/${product.slug}` },
   };
 }
 
@@ -77,7 +79,12 @@ function stockStatusToSchema(s?: string | null) {
   return "https://schema.org/OutOfStock";
 }
 
-function storageLabel(s: string) {
+function storageLabel(s: string, isEn: boolean) {
+  if (isEn) {
+    return (
+      { AMBIENT: "Ambient", REFRIGERATED: "Refrigerated", FROZEN: "Frozen" } as Record<string, string>
+    )[s] ?? s;
+  }
   return (
     { AMBIENT: "Обычная температура", REFRIGERATED: "Холодильник", FROZEN: "Заморозка" } as Record<
       string,
@@ -86,14 +93,33 @@ function storageLabel(s: string) {
   )[s] ?? s;
 }
 
-const STOCK_PILL: Record<string, { cls: string; label: (qty: number, unit: string) => string }> = {
-  IN_STOCK: { cls: "pill pill-green", label: (q, u) => `В наличии · ${q} ${u}` },
-  LOW_STOCK: { cls: "pill pill-amber", label: (q, u) => `Заканчивается · ${q} ${u}` },
-  OUT_OF_STOCK: { cls: "pill pill-red", label: () => "Под заказ" },
-};
+function buildStockPill(stockKey: string, isEn: boolean) {
+  if (stockKey === "IN_STOCK") {
+    return {
+      cls: "pill pill-green",
+      label: (q: number, u: string) => (isEn ? `In stock · ${q} ${u}` : `В наличии · ${q} ${u}`),
+    };
+  }
+  if (stockKey === "LOW_STOCK") {
+    return {
+      cls: "pill pill-amber",
+      label: (q: number, u: string) =>
+        isEn ? `Low stock · ${q} ${u}` : `Заканчивается · ${q} ${u}`,
+    };
+  }
+  return {
+    cls: "pill pill-red",
+    label: () => (isEn ? "Made-to-order" : "Под заказ"),
+  };
+}
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  const isEn = locale === "en";
 
   // Stage 1: load the product (we need its categoryId before we can fetch
   // related). Each Tokyo round-trip is ~250ms from Frankfurt, so we keep
@@ -121,7 +147,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const basePrice = product.prices[0];
   const stock = product.inventorySnapshot;
   const stockKey = stock?.stockStatus ?? "OUT_OF_STOCK";
-  const stockMeta = STOCK_PILL[stockKey] ?? STOCK_PILL.OUT_OF_STOCK;
+  const stockMeta = buildStockPill(stockKey, isEn);
   const unitWord = formatUnit(product.unitType);
 
   const images = [product.imageUrl, ...product.imageUrls].filter(Boolean) as string[];
@@ -155,7 +181,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": `${SITE_URL}/ru/product/${product.slug}#product`,
+    "@id": `${SITE_URL}/${locale}/product/${product.slug}#product`,
     name: product.name,
     description: product.descriptionExtended ?? product.description,
     sku: product.sku,
@@ -167,7 +193,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ...(basePrice && {
       offers: {
         "@type": "Offer",
-        url: `${SITE_URL}/ru/product/${product.slug}`,
+        url: `${SITE_URL}/${locale}/product/${product.slug}`,
         priceCurrency: basePrice.currency,
         price: basePrice.basePrice.toString(),
         priceValidUntil,
@@ -184,7 +210,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           minValue: product.minOrderQty,
           unitText: product.unitType,
         },
-        areaServed: { "@type": "City", name: "Астана" },
+        areaServed: { "@type": "City", name: isEn ? "Astana" : "Астана" },
         deliveryLeadTime: {
           "@type": "QuantitativeValue",
           minValue: 0,
@@ -199,19 +225,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/ru` },
-      { "@type": "ListItem", position: 2, name: "Каталог", item: `${SITE_URL}/ru/catalog` },
+      { "@type": "ListItem", position: 1, name: isEn ? "Home" : "Главная", item: `${SITE_URL}/${locale}` },
+      { "@type": "ListItem", position: 2, name: isEn ? "Catalog" : "Каталог", item: `${SITE_URL}/${locale}/catalog` },
       {
         "@type": "ListItem",
         position: 3,
         name: product.category.name,
-        item: `${SITE_URL}/ru/catalog?category=${product.category.slug}`,
+        item: `${SITE_URL}/${locale}/catalog?category=${product.category.slug}`,
       },
       { "@type": "ListItem", position: 4, name: product.name },
     ],
   };
 
-  const waText = `Здравствуйте, интересует ${product.name} (${product.sku})`;
+  const waText = isEn
+    ? `Hello, I'm interested in ${product.name} (${product.sku})`
+    : `Здравствуйте, интересует ${product.name} (${product.sku})`;
   const waLink = `${COMPANY.whatsappLink}&text=${encodeURIComponent(waText)}`;
 
   return (
@@ -220,10 +248,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <JsonLd data={breadcrumbJsonLd} />
 
       <div className="container-x pdp-wrap">
-        <nav className="breadcrumb" aria-label="Хлебные крошки">
-          <Link href="/">Главная</Link>
+        <nav className="breadcrumb" aria-label={isEn ? "Breadcrumbs" : "Хлебные крошки"}>
+          <Link href="/">{isEn ? "Home" : "Главная"}</Link>
           <span className="sep">/</span>
-          <Link href="/catalog">Каталог</Link>
+          <Link href="/catalog">{isEn ? "Catalog" : "Каталог"}</Link>
           <span className="sep">/</span>
           <Link href={{ pathname: "/catalog", query: { category: product.category.slug } }}>
             {product.category.name}
@@ -238,8 +266,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             alt={product.name}
             badges={
               <>
-                {product.isSubscriptionEligible && <span className="pill pill-orange">Подписка</span>}
-                {product.isGroupEligible && <span className="pill pill-blue">Группа</span>}
+                {product.isSubscriptionEligible && (
+                  <span className="pill pill-orange">{isEn ? "Subscription" : "Подписка"}</span>
+                )}
+                {product.isGroupEligible && (
+                  <span className="pill pill-blue">{isEn ? "Group" : "Группа"}</span>
+                )}
               </>
             }
           />
@@ -260,10 +292,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             <div className="pdp-badges">
               <span className={stockMeta.cls}>{stockMeta.label(stock?.availableQty ?? 0, unitWord)}</span>
-              {product.isSubscriptionEligible && <span className="pill pill-orange">Доступна подписка</span>}
-              {product.isGroupEligible && <span className="pill pill-blue">Доступна группа</span>}
+              {product.isSubscriptionEligible && (
+                <span className="pill pill-orange">
+                  {isEn ? "Subscription available" : "Доступна подписка"}
+                </span>
+              )}
+              {product.isGroupEligible && (
+                <span className="pill pill-blue">
+                  {isEn ? "Group buying available" : "Доступна группа"}
+                </span>
+              )}
               {product.storageType !== "AMBIENT" && (
-                <span className="pill pill-outline">{storageLabel(product.storageType)}</span>
+                <span className="pill pill-outline">{storageLabel(product.storageType, isEn)}</span>
               )}
             </div>
 
@@ -276,7 +316,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div className="price-head">
                   <div className="main">
                     <span className="amount tabular">
-                      {Number(basePrice.basePrice).toLocaleString("ru-RU")} ₸
+                      {Number(basePrice.basePrice).toLocaleString(isEn ? "en-US" : "ru-RU")} ₸
                     </span>
                     <span className="per">/ {product.packLabel}</span>
                   </div>
@@ -285,19 +325,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 {(product.isSubscriptionEligible || product.isGroupEligible) && (
                   <div className="pdp-modes">
                     <div className="pdp-mode">
-                      <div className="lbl">Разово</div>
+                      <div className="lbl">{isEn ? "One-off" : "Разово"}</div>
                       <div className="val tabular">{formatKzt(modes.base)}</div>
                     </div>
                     {product.isSubscriptionEligible && (
                       <div className="pdp-mode sub">
-                        <div className="lbl">Подписка</div>
+                        <div className="lbl">{isEn ? "Subscription" : "Подписка"}</div>
                         <div className="val tabular">{formatKzt(modes.subscription)}</div>
                         <div className="save">−{modes.subscriptionSavingsPct}%</div>
                       </div>
                     )}
                     {product.isGroupEligible && (
                       <div className="pdp-mode grp">
-                        <div className="lbl">Группа</div>
+                        <div className="lbl">{isEn ? "Group" : "Группа"}</div>
                         <div className="val tabular">{formatKzt(modes.group)}</div>
                         <div className="save">−{modes.groupSavingsPct}%</div>
                       </div>
@@ -308,19 +348,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 {tiers.length > 1 && (
                   <div className="tiers">
                     <div className="tier-head">
-                      <div>От количества</div>
-                      <div>Цена за упак</div>
-                      <div>Экономия</div>
+                      <div>{isEn ? "Quantity" : "От количества"}</div>
+                      <div>{isEn ? "Price per pack" : "Цена за упак"}</div>
+                      <div>{isEn ? "Savings" : "Экономия"}</div>
                     </div>
                     {tiers.map((t, i) => (
                       <div key={i} className={`tier-row${t.current ? " active" : ""}`}>
                         <div className="qty">
                           {t.current
-                            ? `1–${(tiers[1]?.min ?? 4) - 1} шт `
-                            : `от ${t.min} шт`}
-                          {t.current && <span className="badge">Сейчас</span>}
+                            ? isEn
+                              ? `1–${(tiers[1]?.min ?? 4) - 1} pcs `
+                              : `1–${(tiers[1]?.min ?? 4) - 1} шт `
+                            : isEn
+                              ? `from ${t.min} pcs`
+                              : `от ${t.min} шт`}
+                          {t.current && <span className="badge">{isEn ? "Current" : "Сейчас"}</span>}
                         </div>
-                        <div>{t.price.toLocaleString("ru-RU")} ₸</div>
+                        <div>{t.price.toLocaleString(isEn ? "en-US" : "ru-RU")} ₸</div>
                         <div className={t.saving ? "save" : ""}>{t.saving ? `−${t.saving}%` : "—"}</div>
                       </div>
                     ))}
@@ -359,7 +403,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         href={`/subscription?product=${encodeURIComponent(product.sku)}`}
                         className="btn-card btn-card-outline"
                       >
-                        + в подписку
+                        {isEn ? "+ to subscription" : "+ в подписку"}
                       </Link>
                     )}
                     {product.isGroupEligible && (
@@ -367,15 +411,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         href={`/group-buying?product=${encodeURIComponent(product.sku)}`}
                         className="btn-card btn-card-outline"
                       >
-                        + в групповой заказ
+                        {isEn ? "+ to group buy" : "+ в групповой заказ"}
                       </Link>
                     )}
                   </div>
                 )}
 
                 <div className="moq-note">
-                  <b>Минимальный заказ:</b> {product.minOrderQty} {unitWord} ·
-                  Бесплатная доставка от 20 000 ₸
+                  <b>{isEn ? "Minimum order:" : "Минимальный заказ:"}</b> {product.minOrderQty} {unitWord} ·{" "}
+                  {isEn ? "Free delivery from 20,000 ₸" : "Бесплатная доставка от 20 000 ₸"}
                 </div>
               </div>
               );
@@ -383,16 +427,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             <div className="ops">
               <div>
-                <div className="k">В наличии</div>
+                <div className="k">{isEn ? "In stock" : "В наличии"}</div>
                 <div className={`v ${stockKey === "IN_STOCK" ? "green" : stockKey === "LOW_STOCK" ? "amber" : "red"} live`}>
                   {stock?.availableQty ?? 0} {unitWord}
                 </div>
-                <div className="sub">обновлено {stock?.updatedAt ? new Date(stock.updatedAt).toLocaleString("ru-RU") : "—"}</div>
+                <div className="sub">
+                  {isEn ? "updated " : "обновлено "}
+                  {stock?.updatedAt
+                    ? new Date(stock.updatedAt).toLocaleString(isEn ? "en-US" : "ru-RU")
+                    : "—"}
+                </div>
               </div>
               <div>
-                <div className="k">Доставка</div>
-                <div className="v">завтра до 12:00</div>
-                <div className="sub">самовывоз сегодня после 14:00</div>
+                <div className="k">{isEn ? "Delivery" : "Доставка"}</div>
+                <div className="v">{isEn ? "tomorrow by 12:00" : "завтра до 12:00"}</div>
+                <div className="sub">
+                  {isEn ? "pickup today after 14:00" : "самовывоз сегодня после 14:00"}
+                </div>
               </div>
             </div>
 
@@ -402,8 +453,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <ShieldCheck className="h-4 w-4" />
                 </div>
                 <div>
-                  <b>Без молчаливой замены.</b> Если на складе закончится — предложим аналог в WhatsApp с
-                  разницей в цене и подождём «ок».
+                  {isEn ? (
+                    <>
+                      <b>No silent substitution.</b> If we run out — we propose an alternative on WhatsApp with the price delta and wait for your "ok".
+                    </>
+                  ) : (
+                    <>
+                      <b>Без молчаливой замены.</b> Если на складе закончится — предложим аналог в WhatsApp с разницей в цене и подождём «ок».
+                    </>
+                  )}
                 </div>
               </div>
               <div className="trust-row">
@@ -411,8 +469,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <FileText className="h-4 w-4" />
                 </div>
                 <div>
-                  <b>Документы для бухгалтерии</b> приходят на email сразу после оплаты: счёт-фактура,
-                  накладная, договор.
+                  {isEn ? (
+                    <>
+                      <b>Documents for accounting</b> arrive by email right after payment: invoice, waybill, contract.
+                    </>
+                  ) : (
+                    <>
+                      <b>Документы для бухгалтерии</b> приходят на email сразу после оплаты: счёт-фактура, накладная, договор.
+                    </>
+                  )}
                 </div>
               </div>
               <div className="trust-row">
@@ -420,7 +485,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <Clock className="h-4 w-4" />
                 </div>
                 <div>
-                  <b>Отгрузки каждые 3 часа.</b> Заказы до 14:00 — сегодня. После 14:00 — завтра утром.
+                  {isEn ? (
+                    <>
+                      <b>Dispatch every 3 hours.</b> Orders before 14:00 — same day. After 14:00 — next morning.
+                    </>
+                  ) : (
+                    <>
+                      <b>Отгрузки каждые 3 часа.</b> Заказы до 14:00 — сегодня. После 14:00 — завтра утром.
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -436,7 +509,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <section className="pdp-sec">
             <div className="show-md-grid">
               <div>
-                <h2>Описание</h2>
+                <h2>{isEn ? "Description" : "Описание"}</h2>
                 <div className="pdp-desc">
                   {product.descriptionExtended ? (
                     <p>{product.descriptionExtended}</p>
@@ -446,7 +519,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   {product.useCases && (
                     <div className="pdp-use" style={{ marginTop: 16 }}>
                       <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--c-fg-2)", marginBottom: 6 }}>
-                        Когда использовать
+                        {isEn ? "When to use" : "Когда использовать"}
                       </h3>
                       <p style={{ color: "var(--c-fg-2)" }}>{product.useCases}</p>
                     </div>
@@ -454,7 +527,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   {product.composition && (
                     <div className="pdp-comp" style={{ marginTop: 16 }}>
                       <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--c-fg-2)", marginBottom: 6 }}>
-                        Состав
+                        {isEn ? "Composition" : "Состав"}
                       </h3>
                       <p style={{ color: "var(--c-fg-2)" }}>{product.composition}</p>
                     </div>
@@ -462,28 +535,28 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
               </div>
               <div>
-                <h2>Характеристики</h2>
+                <h2>{isEn ? "Specifications" : "Характеристики"}</h2>
                 <div className="specs">
                   {(product.brandResolved ?? product.brand) && (
                     <div className="spec">
-                      <span className="k">Бренд</span>
+                      <span className="k">{isEn ? "Brand" : "Бренд"}</span>
                       <span className="v">{product.brandResolved ?? product.brand}</span>
                     </div>
                   )}
                   <div className="spec">
-                    <span className="k">Категория</span>
+                    <span className="k">{isEn ? "Category" : "Категория"}</span>
                     <span className="v">{product.category.name}</span>
                   </div>
                   <div className="spec">
-                    <span className="k">Фасовка</span>
+                    <span className="k">{isEn ? "Pack" : "Фасовка"}</span>
                     <span className="v">{product.packLabel}</span>
                   </div>
                   <div className="spec">
-                    <span className="k">Хранение</span>
-                    <span className="v">{product.storageInfo ?? storageLabel(product.storageType)}</span>
+                    <span className="k">{isEn ? "Storage" : "Хранение"}</span>
+                    <span className="v">{product.storageInfo ?? storageLabel(product.storageType, isEn)}</span>
                   </div>
                   <div className="spec">
-                    <span className="k">Мин. заказ</span>
+                    <span className="k">{isEn ? "Min. order" : "Мин. заказ"}</span>
                     <span className="v">
                       {product.minOrderQty} {unitWord}
                     </span>
@@ -499,17 +572,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         )}
 
         <section className="pdp-sec">
-          <h2>Если что-то пойдёт не так</h2>
+          <h2>{isEn ? "If something goes wrong" : "Если что-то пойдёт не так"}</h2>
           <div className="policy">
             <div className="pol-item">
               <div className="ic">
                 <RefreshCcw className="h-4 w-4" />
               </div>
               <div>
-                <div className="ttl">Замена — только с вашего «ок»</div>
+                <div className="ttl">
+                  {isEn ? "Substitutions only with your approval" : "Замена — только с вашего «ок»"}
+                </div>
                 <div className="txt">
-                  Если на складе не оказалось — предложим аналог в WhatsApp с разницей в цене. Без согласия не
-                  отправляем.
+                  {isEn
+                    ? "If a product is out of stock — we propose an alternative on WhatsApp with the price delta. We don't ship without your approval."
+                    : "Если на складе не оказалось — предложим аналог в WhatsApp с разницей в цене. Без согласия не отправляем."}
                 </div>
               </div>
             </div>
@@ -518,10 +594,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <ShieldCheck className="h-4 w-4" />
               </div>
               <div>
-                <div className="ttl">Брак / пересорт</div>
+                <div className="ttl">{isEn ? "Defective or wrong item" : "Брак / пересорт"}</div>
                 <div className="txt">
-                  Сообщите в WhatsApp в течение 24 часов с фото — заменим или вернём деньги в течение 3 рабочих
-                  дней.
+                  {isEn
+                    ? "Message us on WhatsApp within 24 hours with a photo — we'll replace it or refund within 3 business days."
+                    : "Сообщите в WhatsApp в течение 24 часов с фото — заменим или вернём деньги в течение 3 рабочих дней."}
                 </div>
               </div>
             </div>
@@ -530,10 +607,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <Clock className="h-4 w-4" />
               </div>
               <div>
-                <div className="ttl">Частичная отгрузка</div>
+                <div className="ttl">{isEn ? "Partial shipment" : "Частичная отгрузка"}</div>
                 <div className="txt">
-                  Если в заказе чего-то не хватает — отправим что есть и допоставим остаток без дополнительной
-                  оплаты доставки.
+                  {isEn
+                    ? "If something is missing from the order — we ship what we have and bring the rest separately, with no extra delivery charge."
+                    : "Если в заказе чего-то не хватает — отправим что есть и допоставим остаток без дополнительной оплаты доставки."}
                 </div>
               </div>
             </div>
@@ -542,7 +620,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
         {related.length > 0 && (
           <section className="pdp-sec">
-            <h2>Часто покупают вместе</h2>
+            <h2>{isEn ? "Frequently bought together" : "Часто покупают вместе"}</h2>
             <div className="rel-grid">
               {related.map((r) => {
                 const rp = r.prices[0];
@@ -558,7 +636,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                       </div>
                       <div className="n">{r.name}</div>
                       <div className="p">
-                        {rp ? Number(rp.basePrice).toLocaleString("ru-RU") : "—"} ₸
+                        {rp ? Number(rp.basePrice).toLocaleString(isEn ? "en-US" : "ru-RU") : "—"} ₸
                       </div>
                     </div>
                   </Link>

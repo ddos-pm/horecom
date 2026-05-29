@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Minus, Plus } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/lib/cart-store";
 import { formatUnit } from "@/lib/units";
@@ -12,6 +13,8 @@ type Props = {
 };
 
 export function AddToCartButton({ product }: Props) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const addItem = useCart((s) => s.addItem);
   const [qty, setQty] = useState(product.minOrderQty);
 
@@ -25,7 +28,7 @@ export function AddToCartButton({ product }: Props) {
   }
   function add() {
     addItem({ ...product, quantity: qty });
-    toast.success("Добавлено в корзину", {
+    toast.success(isEn ? "Added to cart" : "Добавлено в корзину", {
       description: `${product.name} · ${qty} ${formatUnit(product.unitType)}`,
     });
   }
@@ -38,7 +41,7 @@ export function AddToCartButton({ product }: Props) {
           onClick={dec}
           disabled={qty <= product.minOrderQty}
           className="px-3 hover:bg-muted disabled:opacity-50"
-          aria-label="Уменьшить"
+          aria-label={isEn ? "Decrease" : "Уменьшить"}
         >
           <Minus className="h-4 w-4" />
         </button>
@@ -49,13 +52,19 @@ export function AddToCartButton({ product }: Props) {
           type="button"
           onClick={inc}
           className="px-3 hover:bg-muted"
-          aria-label="Увеличить"
+          aria-label={isEn ? "Increase" : "Увеличить"}
         >
           <Plus className="h-4 w-4" />
         </button>
       </div>
       <Button size="lg" className="flex-1" onClick={add} disabled={outOfStock}>
-        {outOfStock ? "Нет в наличии" : "Добавить в корзину"}
+        {outOfStock
+          ? isEn
+            ? "Out of stock"
+            : "Нет в наличии"
+          : isEn
+            ? "Add to cart"
+            : "Добавить в корзину"}
       </Button>
     </div>
   );

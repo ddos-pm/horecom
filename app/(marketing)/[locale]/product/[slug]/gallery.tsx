@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
 
 export function Gallery({ images, alt, badges }: { images: string[]; alt: string; badges?: React.ReactNode }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const [active, setActive] = useState(0);
   const main = images[active] ?? images[0];
 
@@ -17,7 +20,7 @@ export function Gallery({ images, alt, badges }: { images: string[]; alt: string
             key={src}
             className={`thumb${i === active ? " active" : ""}`}
             onClick={() => setActive(i)}
-            aria-label={`Фото ${i + 1}`}
+            aria-label={isEn ? `Photo ${i + 1}` : `Фото ${i + 1}`}
           >
             <Image
               src={src}
