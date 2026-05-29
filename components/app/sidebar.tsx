@@ -1,14 +1,25 @@
 import Link from "next/link";
 import { LayoutDashboard, ShoppingBag, Repeat, User, Shield } from "lucide-react";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
-const NAV = [
+const NAV_RU = [
   { href: "/dashboard", label: "Обзор", icon: LayoutDashboard },
   { href: "/orders", label: "Заказы", icon: ShoppingBag },
   { href: "/subscription/manage", label: "Подписки", icon: Repeat },
   { href: "/profile", label: "Профиль", icon: User },
 ];
 
-export function AppSidebar() {
+const NAV_EN = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/subscription/manage", label: "Subscriptions", icon: Repeat },
+  { href: "/profile", label: "Profile", icon: User },
+];
+
+export async function AppSidebar() {
+  const locale = await getLocaleFromCookie();
+  const NAV = locale === "en" ? NAV_EN : NAV_RU;
+
   return (
     <>
       {/* Desktop sidebar */}

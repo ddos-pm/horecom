@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useLocaleCookie } from "@/lib/use-locale-cookie";
 
 function StandaloneLogo() {
   return (
@@ -25,12 +26,18 @@ function StandaloneLogo() {
 function LoginForm() {
   const params = useSearchParams();
   const router = useRouter();
+  const locale = useLocaleCookie();
+  const isEn = locale === "en";
   const redirectTo = params.get("redirectTo") ?? "/dashboard";
   const errorParam = params.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
-    errorParam === "auth_failed" ? "Ссылка устарела или уже использовалась. Запросите новую." : null,
+    errorParam === "auth_failed"
+      ? isEn
+        ? "The link expired or was already used. Request a new one."
+        : "Ссылка устарела или уже использовалась. Запросите новую."
+      : null,
   );
   const [loading, setLoading] = useState(false);
 
@@ -55,9 +62,11 @@ function LoginForm() {
       <div className="mx-auto w-full max-w-md space-y-4">
         <StandaloneLogo />
         <div className="text-center">
-          <h1 className="text-2xl font-semibold">Вход в Horecom</h1>
+          <h1 className="text-2xl font-semibold">
+            {isEn ? "Sign in to Horecom" : "Вход в Horecom"}
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Введите email и пароль.
+            {isEn ? "Enter your email and password." : "Введите email и пароль."}
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -73,7 +82,7 @@ function LoginForm() {
           />
           <input
             type="password"
-            placeholder="Пароль"
+            placeholder={isEn ? "Password" : "Пароль"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -82,12 +91,18 @@ function LoginForm() {
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" size="lg" disabled={loading || !email || !password} className="w-full">
-            {loading ? "Входим…" : "Войти"}
+            {loading
+              ? isEn
+                ? "Signing in…"
+                : "Входим…"
+              : isEn
+                ? "Sign in"
+                : "Войти"}
           </Button>
         </form>
         <div className="text-center">
-          <a href="/ru" className="text-sm text-muted-foreground hover:text-foreground">
-            ← На главную
+          <a href={`/${locale}`} className="text-sm text-muted-foreground hover:text-foreground">
+            {isEn ? "← Back home" : "← На главную"}
           </a>
         </div>
       </div>

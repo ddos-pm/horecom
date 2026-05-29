@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { completeOnboarding, type OnboardingInput } from "./actions";
+import { useLocaleCookie } from "@/lib/use-locale-cookie";
 
-const SEGMENTS = [
+const SEGMENTS_RU = [
   {
     value: "ENTERPRISE" as const,
     title: "Ресторан / кафе / отель",
@@ -23,8 +24,29 @@ const SEGMENTS = [
   },
 ];
 
+const SEGMENTS_EN = [
+  {
+    value: "ENTERPRISE" as const,
+    title: "Restaurant / cafe / hotel",
+    desc: "Large orders, regular suppliers, need fast repeat orders.",
+  },
+  {
+    value: "SMB_REPLENISHMENT" as const,
+    title: "Bakery / pastry shop",
+    desc: "Don't want to forget critical ingredients, need a predictable schedule.",
+  },
+  {
+    value: "MICRO_GROUPBUY" as const,
+    title: "Independent pastry maker",
+    desc: "Made-to-order business, want wholesale prices without my own warehouse.",
+  },
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
+  const locale = useLocaleCookie();
+  const isEn = locale === "en";
+  const SEGMENTS = isEn ? SEGMENTS_EN : SEGMENTS_RU;
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,20 +82,22 @@ export default function OnboardingPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
           <Dot active={step >= 1} />
-          <span>Сегмент</span>
+          <span>{isEn ? "Segment" : "Сегмент"}</span>
           <span>·</span>
           <Dot active={step >= 2} />
-          <span>Компания</span>
+          <span>{isEn ? "Company" : "Компания"}</span>
           <span>·</span>
           <Dot active={step >= 3} />
-          <span>Адрес</span>
+          <span>{isEn ? "Address" : "Адрес"}</span>
         </div>
 
         {step === 1 && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-semibold">Кто вы?</h1>
+            <h1 className="text-2xl font-semibold">{isEn ? "Who are you?" : "Кто вы?"}</h1>
             <p className="text-sm text-muted-foreground">
-              Выберите сегмент — мы подберём подходящий режим работы.
+              {isEn
+                ? "Pick a segment — we'll match the right workflow."
+                : "Выберите сегмент — мы подберём подходящий режим работы."}
             </p>
             <div className="grid gap-3">
               {SEGMENTS.map((s) => (
@@ -100,7 +124,7 @@ export default function OnboardingPage() {
             </div>
             <div className="flex justify-end">
               <Button size="lg" disabled={!data.segment} onClick={() => setStep(2)}>
-                Дальше
+                {isEn ? "Next" : "Дальше"}
               </Button>
             </div>
           </section>
@@ -108,40 +132,42 @@ export default function OnboardingPage() {
 
         {step === 2 && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-semibold">О компании</h1>
+            <h1 className="text-2xl font-semibold">{isEn ? "About the company" : "О компании"}</h1>
             <p className="text-sm text-muted-foreground">
-              Название компании обязательно. БИН/ИИН можно указать позже в профиле.
+              {isEn
+                ? "Company name is required. BIN/IIN can be added later in profile."
+                : "Название компании обязательно. БИН/ИИН можно указать позже в профиле."}
             </p>
             <div className="space-y-3">
-              <Field label="Название компании *">
+              <Field label={isEn ? "Company name *" : "Название компании *"}>
                 <input
                   type="text"
                   value={data.companyName}
                   onChange={(e) => update("companyName", e.target.value)}
-                  placeholder='Например: ТОО «Cake Studio»'
+                  placeholder={isEn ? "e.g.: Cake Studio LLP" : 'Например: ТОО «Cake Studio»'}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </Field>
-              <Field label="БИН / ИИН (необязательно)">
+              <Field label={isEn ? "BIN / IIN (optional)" : "БИН / ИИН (необязательно)"}>
                 <input
                   type="text"
                   value={data.binOrIin}
                   onChange={(e) => update("binOrIin", e.target.value)}
-                  placeholder="12 цифр"
+                  placeholder={isEn ? "12 digits" : "12 цифр"}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </Field>
             </div>
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setStep(1)}>
-                Назад
+                {isEn ? "Back" : "Назад"}
               </Button>
               <Button
                 size="lg"
                 disabled={data.companyName.trim().length < 2}
                 onClick={() => setStep(3)}
               >
-                Дальше
+                {isEn ? "Next" : "Дальше"}
               </Button>
             </div>
           </section>
@@ -149,21 +175,25 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-semibold">Первый адрес доставки</h1>
+            <h1 className="text-2xl font-semibold">
+              {isEn ? "First delivery address" : "Первый адрес доставки"}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Можно будет добавить ещё в профиле. Сейчас работаем по Астане.
+              {isEn
+                ? "You can add more in profile later. Currently we deliver within Astana."
+                : "Можно будет добавить ещё в профиле. Сейчас работаем по Астане."}
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Улица *">
+              <Field label={isEn ? "Street *" : "Улица *"}>
                 <input
                   type="text"
                   value={data.addressStreet}
                   onChange={(e) => update("addressStreet", e.target.value)}
-                  placeholder="Например: ул. Кенесары"
+                  placeholder={isEn ? "e.g.: Kenesary St." : "Например: ул. Кенесары"}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </Field>
-              <Field label="Дом *">
+              <Field label={isEn ? "House *" : "Дом *"}>
                 <input
                   type="text"
                   value={data.addressHouse}
@@ -172,21 +202,25 @@ export default function OnboardingPage() {
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </Field>
-              <Field label="Квартира / офис / этаж (необязательно)">
+              <Field label={isEn ? "Apartment / office / floor (optional)" : "Квартира / офис / этаж (необязательно)"}>
                 <input
                   type="text"
                   value={data.addressDetails}
                   onChange={(e) => update("addressDetails", e.target.value)}
-                  placeholder="оф. 12, 3 этаж"
+                  placeholder={isEn ? "Apt 12, 3rd floor" : "оф. 12, 3 этаж"}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </Field>
             </div>
-            <Field label="Комментарий курьеру (необязательно)">
+            <Field label={isEn ? "Note for the courier (optional)" : "Комментарий курьеру (необязательно)"}>
               <textarea
                 value={data.addressComment}
                 onChange={(e) => update("addressComment", e.target.value)}
-                placeholder="Например: позвонить за 15 минут, въезд со двора"
+                placeholder={
+                  isEn
+                    ? "e.g.: call 15 min ahead, entrance from courtyard"
+                    : "Например: позвонить за 15 минут, въезд со двора"
+                }
                 rows={3}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
@@ -194,14 +228,20 @@ export default function OnboardingPage() {
             {error && <p className="text-sm text-destructive">{error}</p>}
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setStep(2)} disabled={busy}>
-                Назад
+                {isEn ? "Back" : "Назад"}
               </Button>
               <Button
                 size="lg"
                 disabled={busy || !data.addressStreet.trim() || !data.addressHouse.trim()}
                 onClick={handleFinish}
               >
-                {busy ? "Сохраняю…" : "Готово"}
+                {busy
+                  ? isEn
+                    ? "Saving…"
+                    : "Сохраняю…"
+                  : isEn
+                    ? "Done"
+                    : "Готово"}
               </Button>
             </div>
           </section>

@@ -7,8 +7,9 @@ import { ChevronDown, LogOut, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export function UserMenu({ email }: { email: string | null }) {
+export function UserMenu({ email, locale }: { email: string | null; locale: string }) {
   const router = useRouter();
+  const isEn = locale === "en";
   const [open, setOpen] = useState(false);
   const [signing, setSigning] = useState(false);
 
@@ -16,7 +17,7 @@ export function UserMenu({ email }: { email: string | null }) {
     return (
       <Link href="/login">
         <Button variant="ghost" size="sm">
-          Войти
+          {isEn ? "Sign in" : "Войти"}
         </Button>
       </Link>
     );
@@ -49,7 +50,7 @@ export function UserMenu({ email }: { email: string | null }) {
             onMouseDown={(e) => e.preventDefault()}
           >
             <User className="h-4 w-4 text-muted-foreground" />
-            Профиль
+            {isEn ? "Profile" : "Профиль"}
           </Link>
           <button
             type="button"
@@ -59,7 +60,13 @@ export function UserMenu({ email }: { email: string | null }) {
             className="flex w-full items-center gap-2 border-t border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
           >
             <LogOut className="h-4 w-4 text-muted-foreground" />
-            {signing ? "Выхожу…" : "Выйти"}
+            {signing
+              ? isEn
+                ? "Signing out…"
+                : "Выхожу…"
+              : isEn
+                ? "Sign out"
+                : "Выйти"}
           </button>
         </div>
       )}
