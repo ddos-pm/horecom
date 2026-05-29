@@ -22,10 +22,14 @@ export const metadata: Metadata = {
 };
 
 export default async function SubscriptionPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ product?: string }>;
 }) {
+  const { locale } = await params;
+  const isEn = locale === "en";
   const sp = await searchParams;
 
   const products = await prisma.product.findMany({
@@ -50,22 +54,32 @@ export default async function SubscriptionPage({
             <div>
               <div className="sub-eyebrow">
                 <span className="dot" />
-                <span>Для кондитерских без склада</span>
+                <span>{isEn ? "For bakeries without storage" : "Для кондитерских без склада"}</span>
               </div>
 
               <h1>
-                Доставляем <em>до того</em> как
-                <br />у&nbsp;вас закончилось.
+                {isEn ? (
+                  <>
+                    We deliver <em>before</em> you
+                    <br />run&nbsp;out.
+                  </>
+                ) : (
+                  <>
+                    Доставляем <em>до того</em> как
+                    <br />у&nbsp;вас закончилось.
+                  </>
+                )}
               </h1>
 
               <p className="lede">
-                Подписка на поставку с предиктивным движком: считаем рост заказов и сами предлагаем что подвезти. За день до
-                отгрузки — WhatsApp с составом. Подтверждаете в один тап.
+                {isEn
+                  ? "Supply subscription with a predictive engine: we track order growth and suggest what to bring. A day before shipment — a WhatsApp with the basket. You confirm in one tap."
+                  : "Подписка на поставку с предиктивным движком: считаем рост заказов и сами предлагаем что подвезти. За день до отгрузки — WhatsApp с составом. Подтверждаете в один тап."}
               </p>
 
               <div className="ctas">
                 <a href="#request" className="btn btn-orange btn-lg">
-                  Подать запрос
+                  {isEn ? "Submit request" : "Подать запрос"}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </a>
                 <a
@@ -74,21 +88,21 @@ export default async function SubscriptionPage({
                   rel="noopener noreferrer"
                   className="btn btn-ghost btn-lg"
                 >
-                  Спросить менеджера
+                  {isEn ? "Ask a manager" : "Спросить менеджера"}
                 </a>
               </div>
 
               <div className="meta">
                 <span>
-                  <b>Бесплатно</b> · платите только за товары
+                  <b>{isEn ? "Free" : "Бесплатно"}</b> {isEn ? "· pay only for the goods" : "· платите только за товары"}
                 </span>
                 <span>·</span>
                 <span>
-                  <b>10+</b> кондитерских уже на подписке
+                  <b>10+</b> {isEn ? "bakeries already subscribed" : "кондитерских уже на подписке"}
                 </span>
                 <span>·</span>
                 <span>
-                  Edit / Skip / Pause <b>в один тап</b>
+                  Edit / Skip / Pause <b>{isEn ? "in one tap" : "в один тап"}</b>
                 </span>
               </div>
             </div>
@@ -98,10 +112,13 @@ export default async function SubscriptionPage({
               <div className="pred-head">
                 <div className="ttl">
                   <span className="live-dot" />
-                  План подписки · Кофейня «Куст»
+                  {isEn ? 'Subscription plan · "Kust" coffee shop' : "План подписки · Кофейня «Куст»"}
                 </div>
                 <div className="sub">
-                  12 позиций · следующая доставка <b style={{ color: "var(--c-fg)" }}>ср, 27 мая · 10:30</b>
+                  {isEn ? "12 items · next delivery " : "12 позиций · следующая доставка "}
+                  <b style={{ color: "var(--c-fg)" }}>
+                    {isEn ? "Wed, May 27 · 10:30" : "ср, 27 мая · 10:30"}
+                  </b>
                 </div>
               </div>
               <div className="pred-body">
@@ -143,7 +160,7 @@ export default async function SubscriptionPage({
                       textAnchor="end"
                       fontWeight="600"
                     >
-                      порог дозакупа · 20%
+                      {isEn ? "reorder threshold · 20%" : "порог дозакупа · 20%"}
                     </text>
                     <g stroke="#F18007" strokeWidth="1" strokeDasharray="2 3" opacity="0.4">
                       <line x1="100" y1="20" x2="100" y2="220" />
@@ -192,30 +209,30 @@ export default async function SubscriptionPage({
                         textAnchor="middle"
                         fontWeight="700"
                       >
-                        Следующая · ср 27 мая
+                        {isEn ? "Next · Wed May 27" : "Следующая · ср 27 мая"}
                       </text>
                     </g>
                     <g fontFamily="Inter, sans-serif" fontSize="10" fill="#6F6B62" textAnchor="middle">
-                      <text x="40" y="232">3 нед назад</text>
-                      <text x="100" y="232">2 нед</text>
-                      <text x="220" y="232">1 нед</text>
+                      <text x="40" y="232">{isEn ? "3 wks ago" : "3 нед назад"}</text>
+                      <text x="100" y="232">{isEn ? "2 wks" : "2 нед"}</text>
+                      <text x="220" y="232">{isEn ? "1 wk" : "1 нед"}</text>
                       <text x="340" y="232" fontWeight="700" fill="#0A0A0A">
-                        сегодня
+                        {isEn ? "today" : "сегодня"}
                       </text>
                       <text x="460" y="232" fontWeight="600" fill="#C86400">
-                        +1 нед
+                        {isEn ? "+1 wk" : "+1 нед"}
                       </text>
-                      <text x="580" y="232">+2 нед</text>
+                      <text x="580" y="232">{isEn ? "+2 wks" : "+2 нед"}</text>
                     </g>
                   </svg>
                 </div>
 
                 <div className="pred-legend">
                   <div className="it">
-                    <span className="sw b" /> Уровень запасов
+                    <span className="sw b" /> {isEn ? "Stock level" : "Уровень запасов"}
                   </div>
                   <div className="it">
-                    <span className="sw o" /> Доставка по подписке
+                    <span className="sw o" /> {isEn ? "Subscription delivery" : "Доставка по подписке"}
                   </div>
                   <div className="it">
                     <span
@@ -228,23 +245,23 @@ export default async function SubscriptionPage({
                         marginTop: 5,
                       }}
                     />{" "}
-                    Прогноз
+                    {isEn ? "Forecast" : "Прогноз"}
                   </div>
                 </div>
               </div>
 
               <div className="pred-foot">
                 <div>
-                  <span className="k">Частота</span>
-                  <span className="v">1 раз / неделя</span>
+                  <span className="k">{isEn ? "Frequency" : "Частота"}</span>
+                  <span className="v">{isEn ? "1× / week" : "1 раз / неделя"}</span>
                 </div>
                 <div>
-                  <span className="k">Сред. чек</span>
-                  <span className="v">187 200 ₸</span>
+                  <span className="k">{isEn ? "Avg. order" : "Сред. чек"}</span>
+                  <span className="v">{isEn ? "187,200 ₸" : "187 200 ₸"}</span>
                 </div>
                 <div>
-                  <span className="k">Экономия</span>
-                  <span className="v green">−14% / мес</span>
+                  <span className="k">{isEn ? "Savings" : "Экономия"}</span>
+                  <span className="v green">{isEn ? "−14% / mo" : "−14% / мес"}</span>
                 </div>
               </div>
             </div>
@@ -256,11 +273,14 @@ export default async function SubscriptionPage({
       <section className="s">
         <div className="container-x">
           <div className="sec-head">
-            <div className="sec-eyebrow">За 24 часа до отгрузки</div>
-            <h2>WhatsApp вместо звонков и таблиц.</h2>
+            <div className="sec-eyebrow">
+              {isEn ? "24 hours before shipment" : "За 24 часа до отгрузки"}
+            </div>
+            <h2>{isEn ? "WhatsApp instead of phone calls and spreadsheets." : "WhatsApp вместо звонков и таблиц."}</h2>
             <p className="sub">
-              За день до доставки приходит сообщение с составом следующего заказа. Подтверждаете, меняете
-              количество или пропускаете эту неделю — без открытия приложения, без логинов.
+              {isEn
+                ? "A day before delivery a message arrives with the next order's contents. You confirm, adjust quantities, or skip this week — no app to open, no logins."
+                : "За день до доставки приходит сообщение с составом следующего заказа. Подтверждаете, меняете количество или пропускаете эту неделю — без открытия приложения, без логинов."}
             </p>
           </div>
 
@@ -279,17 +299,25 @@ export default async function SubscriptionPage({
                 </div>
                 <div>
                   <div className="nm">Horecom</div>
-                  <div className="st">онлайн · отвечает за ≈ 4 мин</div>
+                  <div className="st">
+                    {isEn ? "online · replies in ≈ 4 min" : "онлайн · отвечает за ≈ 4 мин"}
+                  </div>
                 </div>
               </div>
 
               <div className="wa-thread">
-                <div className="day-sep">вторник, 26 мая · 09:00</div>
+                <div className="day-sep">
+                  {isEn ? "Tuesday, May 26 · 09:00" : "вторник, 26 мая · 09:00"}
+                </div>
 
                 <div className="wa-bub btns-card">
                   <div className="body">
-                    <div style={{ fontWeight: 700, marginBottom: 6 }}>📦 Доставка завтра, ср 27 мая</div>
-                    <div style={{ color: "#666", marginBottom: 8 }}>10:30–12:30 · ул. Сейфуллина 14</div>
+                    <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                      {isEn ? "📦 Delivery tomorrow, Wed May 27" : "📦 Доставка завтра, ср 27 мая"}
+                    </div>
+                    <div style={{ color: "#666", marginBottom: 8 }}>
+                      {isEn ? "10:30–12:30 · 14 Seifullin St." : "10:30–12:30 · ул. Сейфуллина 14"}
+                    </div>
 
                     <div
                       style={{
@@ -303,20 +331,20 @@ export default async function SubscriptionPage({
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span>Сгущёнка ГОСТ 20 кг</span>
-                        <b>1 уп · 33 800 ₸</b>
+                        <span>{isEn ? "Sweetened condensed milk 20 kg" : "Сгущёнка ГОСТ 20 кг"}</span>
+                        <b>{isEn ? "1 pack · 33,800 ₸" : "1 уп · 33 800 ₸"}</b>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span>Сироп карамель 1883 1 л</span>
-                        <b>4 уп · 16 800 ₸</b>
+                        <span>{isEn ? "Caramel syrup 1883 1 L" : "Сироп карамель 1883 1 л"}</span>
+                        <b>{isEn ? "4 packs · 16,800 ₸" : "4 уп · 16 800 ₸"}</b>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span>Конфитюр Абрикос 12 кг</span>
-                        <b>2 уп · 46 800 ₸</b>
+                        <span>{isEn ? "Apricot jam 12 kg" : "Конфитюр Абрикос 12 кг"}</span>
+                        <b>{isEn ? "2 packs · 46,800 ₸" : "2 уп · 46 800 ₸"}</b>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span>+ 9 позиций</span>
-                        <b>89 800 ₸</b>
+                        <span>{isEn ? "+ 9 items" : "+ 9 позиций"}</span>
+                        <b>{isEn ? "89,800 ₸" : "89 800 ₸"}</b>
                       </div>
                       <div
                         style={{
@@ -328,82 +356,124 @@ export default async function SubscriptionPage({
                           fontWeight: 700,
                         }}
                       >
-                        <span>Итого</span>
-                        <span style={{ color: "#117A3F" }}>187 200 ₸</span>
+                        <span>{isEn ? "Total" : "Итого"}</span>
+                        <span style={{ color: "#117A3F" }}>{isEn ? "187,200 ₸" : "187 200 ₸"}</span>
                       </div>
                     </div>
                   </div>
                   <div className="row">
-                    <button type="button">✅ Подтвердить</button>
-                    <button type="button">✏️ Изменить</button>
-                    <button type="button">⏭ Пропустить</button>
+                    <button type="button">{isEn ? "✅ Confirm" : "✅ Подтвердить"}</button>
+                    <button type="button">{isEn ? "✏️ Edit" : "✏️ Изменить"}</button>
+                    <button type="button">{isEn ? "⏭ Skip" : "⏭ Пропустить"}</button>
                   </div>
                 </div>
 
                 <div className="wa-bub me">
-                  ✅ Подтвердить
+                  {isEn ? "✅ Confirm" : "✅ Подтвердить"}
                   <div className="time">
                     09:12 <span className="ck">✓✓</span>
                   </div>
                 </div>
 
                 <div className="wa-bub">
-                  Отлично! Заказ зафиксирован. Курьер выезжает завтра в 10:00. Счёт уже на почте: <b>kust@gmail.com</b>
+                  {isEn
+                    ? <>Great! Order is locked in. Courier dispatches tomorrow at 10:00. Invoice already in your inbox: <b>kust@gmail.com</b></>
+                    : <>Отлично! Заказ зафиксирован. Курьер выезжает завтра в 10:00. Счёт уже на почте: <b>kust@gmail.com</b></>}
                   <div className="time">09:13</div>
                 </div>
 
-                <div className="day-sep">среда, 27 мая · 10:18</div>
+                <div className="day-sep">
+                  {isEn ? "Wednesday, May 27 · 10:18" : "среда, 27 мая · 10:18"}
+                </div>
 
                 <div className="wa-bub">
-                  🚚 Курьер в пути, ETA 10:34
+                  {isEn ? "🚚 Courier on the way, ETA 10:34" : "🚚 Курьер в пути, ETA 10:34"}
                   <div className="time">10:18</div>
                 </div>
               </div>
             </div>
 
             <div className="wa-explain">
-              {[
-                {
-                  n: 1,
-                  ttl: "За 24 часа — состав следующей доставки",
-                  txt: (
-                    <>
-                      WhatsApp со списком позиций и итогом. <b>Если цена изменилась</b> — отметим красным, можно
-                      отказаться. <b>Если товара нет</b> — предложим аналог.
-                    </>
-                  ),
-                },
-                {
-                  n: 2,
-                  ttl: "Три кнопки: Подтвердить · Изменить · Пропустить",
-                  txt: (
-                    <>
-                      Прямо в WhatsApp, без открытия сайта. Если <b>не ответили за 2 часа до cutoff</b> —
-                      отменяем доставку, не списываем (default-fallback в вашу пользу).
-                    </>
-                  ),
-                },
-                {
-                  n: 3,
-                  ttl: "Изменяете состав в одно сообщение",
-                  txt: "«Уберите конфитюр, добавьте 2 муки» — менеджер пересчитает и пришлёт обновлённый счёт. Можно и через ЛК, кому удобнее.",
-                },
-                {
-                  n: 4,
-                  ttl: "Курьер в пути — уведомление с ETA",
-                  txt: (
-                    <>
-                      В день доставки приходит сообщение со временем выезда и ETA. <b>После доставки</b> — фото и
-                      накладная сразу в чат.
-                    </>
-                  ),
-                },
-                {
-                  n: 5,
-                  ttl: "Edit / Skip / Pause — без штрафов и контрактов",
-                  txt: "Уехали в отпуск? Поставьте на паузу. Сменили рецепт? Уберите товар. Совсем не нужно? Отмените — никаких неустоек.",
-                },
-              ].map((s) => (
+              {(isEn
+                ? [
+                    {
+                      n: 1,
+                      ttl: "24 hours ahead — next delivery's contents",
+                      txt: (
+                        <>
+                          A WhatsApp with the line items and total. <b>If the price changed</b> — flagged in red, you can decline. <b>If something is out of stock</b> — we propose an alternative.
+                        </>
+                      ),
+                    },
+                    {
+                      n: 2,
+                      ttl: "Three buttons: Confirm · Edit · Skip",
+                      txt: (
+                        <>
+                          Right inside WhatsApp, no site to open. If <b>you don't reply within 2 hours of cutoff</b> — we cancel the delivery without charging (default-fallback in your favor).
+                        </>
+                      ),
+                    },
+                    {
+                      n: 3,
+                      ttl: "Adjust the basket in one message",
+                      txt: '"Drop the jam, add 2 flour" — your account manager recalculates and resends the invoice. The dashboard works too, whichever you prefer.',
+                    },
+                    {
+                      n: 4,
+                      ttl: "Courier en route — ETA notification",
+                      txt: (
+                        <>
+                          On delivery day a message arrives with dispatch time and ETA. <b>After delivery</b> — a photo and waybill land in the chat.
+                        </>
+                      ),
+                    },
+                    {
+                      n: 5,
+                      ttl: "Edit / Skip / Pause — no penalties, no contracts",
+                      txt: "Going on vacation? Pause it. Changed the recipe? Drop the item. Don't need it at all? Cancel — no fees.",
+                    },
+                  ]
+                : [
+                    {
+                      n: 1,
+                      ttl: "За 24 часа — состав следующей доставки",
+                      txt: (
+                        <>
+                          WhatsApp со списком позиций и итогом. <b>Если цена изменилась</b> — отметим красным, можно отказаться. <b>Если товара нет</b> — предложим аналог.
+                        </>
+                      ),
+                    },
+                    {
+                      n: 2,
+                      ttl: "Три кнопки: Подтвердить · Изменить · Пропустить",
+                      txt: (
+                        <>
+                          Прямо в WhatsApp, без открытия сайта. Если <b>не ответили за 2 часа до cutoff</b> — отменяем доставку, не списываем (default-fallback в вашу пользу).
+                        </>
+                      ),
+                    },
+                    {
+                      n: 3,
+                      ttl: "Изменяете состав в одно сообщение",
+                      txt: "«Уберите конфитюр, добавьте 2 муки» — менеджер пересчитает и пришлёт обновлённый счёт. Можно и через ЛК, кому удобнее.",
+                    },
+                    {
+                      n: 4,
+                      ttl: "Курьер в пути — уведомление с ETA",
+                      txt: (
+                        <>
+                          В день доставки приходит сообщение со временем выезда и ETA. <b>После доставки</b> — фото и накладная сразу в чат.
+                        </>
+                      ),
+                    },
+                    {
+                      n: 5,
+                      ttl: "Edit / Skip / Pause — без штрафов и контрактов",
+                      txt: "Уехали в отпуск? Поставьте на паузу. Сменили рецепт? Уберите товар. Совсем не нужно? Отмените — никаких неустоек.",
+                    },
+                  ]
+              ).map((s) => (
                 <div key={s.n} className="wa-step">
                   <div className="n">{s.n}</div>
                   <div>
@@ -422,30 +492,42 @@ export default async function SubscriptionPage({
         <div className="container-x">
           <div className="sec-head">
             <div className="sec-eyebrow" style={{ color: "var(--c-blue)" }}>
-              Подписка на поставку vs Разовый заказ
+              {isEn ? "Supply subscription vs One-off order" : "Подписка на поставку vs Разовый заказ"}
             </div>
-            <h2>Сколько вы сэкономите за месяц.</h2>
+            <h2>{isEn ? "How much you save per month." : "Сколько вы сэкономите за месяц."}</h2>
             <p className="sub">
-              Сравнение на реальном чеке: 12 позиций, 4 доставки в месяц, типовая корзина небольшой кондитерской.
+              {isEn
+                ? "Comparison on a real basket: 12 SKUs, 4 deliveries a month, the typical cart of a small pastry shop."
+                : "Сравнение на реальном чеке: 12 позиций, 4 доставки в месяц, типовая корзина небольшой кондитерской."}
             </p>
           </div>
 
           <div className="cmp">
             <div className="cmp-card">
               <div className="cmp-h">
-                <div className="name">Разовый заказ</div>
+                <div className="name">{isEn ? "One-off order" : "Разовый заказ"}</div>
                 <div className="price">
-                  <span className="tabular">218 400</span> ₸<span className="per">/ месяц</span>
+                  <span className="tabular">{isEn ? "218,400" : "218 400"}</span> ₸<span className="per">{isEn ? "/ month" : "/ месяц"}</span>
                 </div>
               </div>
-              {[
-                { ok: true, label: "Самостоятельный сбор корзины каждую неделю", v: <><b>~15 мин</b> × 4</> },
-                { ok: false, label: "Без напоминания за день", v: "" },
-                { ok: false, label: "Без оптовой ступеньки на регулярные товары", v: "" },
-                { ok: true, label: "Бесплатная доставка", v: <>от <b>20 000 ₸</b></> },
-                { ok: false, label: "Без предиктивных дозакупов", v: "" },
-                { ok: true, label: "Документы для бухгалтерии", v: "все форматы" },
-              ].map((row, idx) => (
+              {(isEn
+                ? [
+                    { ok: true, label: "Manual cart-building every week", v: <><b>~15 min</b> × 4</> },
+                    { ok: false, label: "No day-before reminder", v: "" },
+                    { ok: false, label: "No wholesale tier for recurring SKUs", v: "" },
+                    { ok: true, label: "Free delivery", v: <>from <b>20,000 ₸</b></> },
+                    { ok: false, label: "No predictive reorders", v: "" },
+                    { ok: true, label: "Accounting documents", v: "all formats" },
+                  ]
+                : [
+                    { ok: true, label: "Самостоятельный сбор корзины каждую неделю", v: <><b>~15 мин</b> × 4</> },
+                    { ok: false, label: "Без напоминания за день", v: "" },
+                    { ok: false, label: "Без оптовой ступеньки на регулярные товары", v: "" },
+                    { ok: true, label: "Бесплатная доставка", v: <>от <b>20 000 ₸</b></> },
+                    { ok: false, label: "Без предиктивных дозакупов", v: "" },
+                    { ok: true, label: "Документы для бухгалтерии", v: "все форматы" },
+                  ]
+              ).map((row, idx) => (
                 <div key={idx} className={`cmp-row${row.ok ? "" : " dim"}`}>
                   <div className={`ic${row.ok ? "" : " x"}`}>{row.ok ? "✓" : "×"}</div>
                   <div className="label">{row.label}</div>
@@ -456,22 +538,34 @@ export default async function SubscriptionPage({
 
             <div className="cmp-card hi">
               <div className="cmp-h">
-                <div className="name" style={{ color: "var(--c-orange-700)" }}>Подписка на поставку</div>
+                <div className="name" style={{ color: "var(--c-orange-700)" }}>
+                  {isEn ? "Supply subscription" : "Подписка на поставку"}
+                </div>
                 <div className="price">
-                  <span className="tabular">187 200</span> ₸<span className="per">/ месяц</span>
+                  <span className="tabular">{isEn ? "187,200" : "187 200"}</span> ₸<span className="per">{isEn ? "/ month" : "/ месяц"}</span>
                 </div>
                 <div style={{ marginTop: 6, fontSize: 13, color: "var(--c-success)", fontWeight: 700 }}>
-                  −31 200 ₸ / месяц · экономия 14.3%
+                  {isEn ? "−31,200 ₸ / month · 14.3% savings" : "−31 200 ₸ / месяц · экономия 14.3%"}
                 </div>
               </div>
-              {[
-                { label: "Корзина собирается автоматически", v: <><b>~30 сек</b> на подтверждение</> },
-                { label: "WhatsApp за 24 часа до отгрузки", v: <><b>Confirm / Edit / Skip</b></> },
-                { label: "Оптовая ступенька на регулярные товары", v: <span className="badge">−7%</span> },
-                { label: "Бесплатная доставка", v: <>от <b>7 000 ₸</b></> },
-                { label: "Предиктивный движок: что закончится", v: "после 2 доставок" },
-                { label: "Документы для бухгалтерии", v: "все форматы" },
-              ].map((row, idx) => (
+              {(isEn
+                ? [
+                    { label: "Cart assembles automatically", v: <><b>~30 sec</b> to confirm</> },
+                    { label: "WhatsApp 24 hours before shipment", v: <><b>Confirm / Edit / Skip</b></> },
+                    { label: "Wholesale tier for recurring SKUs", v: <span className="badge">−7%</span> },
+                    { label: "Free delivery", v: <>from <b>7,000 ₸</b></> },
+                    { label: "Predictive engine: what's running out", v: "after 2 deliveries" },
+                    { label: "Accounting documents", v: "all formats" },
+                  ]
+                : [
+                    { label: "Корзина собирается автоматически", v: <><b>~30 сек</b> на подтверждение</> },
+                    { label: "WhatsApp за 24 часа до отгрузки", v: <><b>Confirm / Edit / Skip</b></> },
+                    { label: "Оптовая ступенька на регулярные товары", v: <span className="badge">−7%</span> },
+                    { label: "Бесплатная доставка", v: <>от <b>7 000 ₸</b></> },
+                    { label: "Предиктивный движок: что закончится", v: "после 2 доставок" },
+                    { label: "Документы для бухгалтерии", v: "все форматы" },
+                  ]
+              ).map((row, idx) => (
                 <div key={idx} className="cmp-row">
                   <div className="ic">✓</div>
                   <div className="label">{row.label}</div>
@@ -490,7 +584,9 @@ export default async function SubscriptionPage({
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            Сценарий: 12 позиций · 4 доставки / мес · средняя корзина 50 000 ₸ · апрель–май 2026
+            {isEn
+              ? "Scenario: 12 items · 4 deliveries / mo · average basket 50,000 ₸ · April–May 2026"
+              : "Сценарий: 12 позиций · 4 доставки / мес · средняя корзина 50 000 ₸ · апрель–май 2026"}
           </div>
         </div>
       </section>
@@ -499,11 +595,12 @@ export default async function SubscriptionPage({
       <section className="s" id="request" style={{ scrollMarginTop: 80 }}>
         <div className="container-x" style={{ maxWidth: 760 }}>
           <div className="sec-head">
-            <div className="sec-eyebrow">Подать запрос</div>
-            <h2>Подключите подписку прямо сейчас.</h2>
+            <div className="sec-eyebrow">{isEn ? "Submit request" : "Подать запрос"}</div>
+            <h2>{isEn ? "Activate the subscription right now." : "Подключите подписку прямо сейчас."}</h2>
             <p className="sub">
-              Мы свяжемся в WhatsApp в течение дня, уточним детали и подтвердим. После этого подписка станет
-              активной.
+              {isEn
+                ? "We'll reach out on WhatsApp within a day, confirm details, and your subscription becomes active."
+                : "Мы свяжемся в WhatsApp в течение дня, уточним детали и подтвердим. После этого подписка станет активной."}
             </p>
           </div>
           <Suspense fallback={<RequestFormSkeleton />}>

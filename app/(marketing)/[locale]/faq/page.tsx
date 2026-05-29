@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Способы оплаты, доставка по Астане, как работает подписка на поставку, что делать если товара нет.",
 };
 
-const FAQ = [
+const FAQ_RU = [
   {
     question: "Сколько стоит доставка?",
     answer:
@@ -60,7 +60,68 @@ const FAQ = [
   },
 ];
 
-export default function FaqPage() {
+const FAQ_EN = [
+  {
+    question: "How much is delivery?",
+    answer:
+      "Free delivery across Astana for orders from 20,000 ₸. Smaller orders — 1,000 ₸ delivery fee. For supply subscriptions — free from 7,000 ₸.",
+  },
+  {
+    question: "How fast do you deliver?",
+    answer:
+      "We dispatch every 3 hours within Astana. Orders placed before 14:00 ship the same day. After 14:00 — next morning. Delivery window is picked at checkout.",
+  },
+  {
+    question: "How does the subscription work?",
+    answer:
+      "You set up a plan: products, frequency (weekly, twice a week, or every other week), and delivery day/time. A day before each delivery you receive a WhatsApp message where you can confirm, adjust quantities, or skip that delivery. You can pause or cancel at any time. The subscription service is free.",
+  },
+  {
+    question: "What is group buying?",
+    answer:
+      "Several pastry chefs team up to buy one SKU at the wholesale price. Once the combined volume hits the threshold, the wholesale price activates for everyone. If the group doesn't fill by the deadline — no charge, and you can buy at the regular price.",
+  },
+  {
+    question: "What payment methods do you accept?",
+    answer:
+      "Kaspi Pay for individuals and legal entities, bank transfer for companies by invoice. We don't store card details — payment goes through Kaspi's secure window.",
+  },
+  {
+    question: "What if a product is out of stock?",
+    answer:
+      "If a requested item isn't in the warehouse, we'll send a WhatsApp with a specific substitution proposal. You can accept, decline, or wait for restock. We never substitute silently — your approval is required.",
+  },
+  {
+    question: "Do you provide invoices?",
+    answer:
+      "Yes, for legal entities and sole proprietors we provide a full document set: invoice, waybill, one-off or recurring contract. Documents arrive by email right after payment and are available in your dashboard.",
+  },
+  {
+    question: "Can I return a product?",
+    answer:
+      "If a product arrives defective or doesn't match the description, we'll replace it or refund. Notify us within 24 hours of receipt via WhatsApp or in your dashboard → \"Order problem\".",
+  },
+  {
+    question: "Do you deliver to other cities?",
+    answer:
+      "Currently we deliver only within Astana. Plans for a second city — happy to discuss one-on-one. Message us on WhatsApp if you're outside Astana and want to know more.",
+  },
+  {
+    question: "Can you work both with and without VAT?",
+    answer:
+      "Yes, we work with both VAT-registered companies and non-VAT entities. At checkout enter your BIN/IIN — the system selects the right document format automatically.",
+  },
+];
+
+export default async function FaqPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  const FAQ = isEn ? FAQ_EN : FAQ_RU;
+
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -79,9 +140,11 @@ export default function FaqPage() {
       <JsonLd data={faqJsonLd} />
 
       <div className="container-tight py-8">
-        <h1 className="mb-2 text-2xl font-bold tracking-tight md:text-3xl">Частые вопросы</h1>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight md:text-3xl">
+          {isEn ? "Frequently asked questions" : "Частые вопросы"}
+        </h1>
         <p className="mb-8 text-muted-foreground">
-          Если не нашли ответ — напишите в{" "}
+          {isEn ? "Can't find the answer? Message us on " : "Если не нашли ответ — напишите в "}
           <a
             href="https://api.whatsapp.com/send/?phone=77078607779"
             target="_blank"
@@ -90,7 +153,7 @@ export default function FaqPage() {
           >
             WhatsApp
           </a>
-          , ответим в течение часа в рабочее время.
+          {isEn ? ", we reply within an hour during business hours." : ", ответим в течение часа в рабочее время."}
         </p>
 
         <div className="space-y-3">
