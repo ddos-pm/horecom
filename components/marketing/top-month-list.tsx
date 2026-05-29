@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { formatUnit } from "@/lib/units";
 import { useCart } from "@/lib/cart-store";
@@ -20,6 +21,8 @@ type FeaturedProduct = Prisma.ProductGetPayload<{
 }>;
 
 export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const [expanded, setExpanded] = useState(false);
   const addItem = useCart((s) => s.addItem);
   const INITIAL = 6;
@@ -41,7 +44,7 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
       packLabel: p.packLabel,
       unitType: p.unitType,
     });
-    toast.success("В корзине", { description: p.name });
+    toast.success(isEn ? "Added to cart" : "В корзине", { description: p.name });
   }
 
   return (
@@ -90,12 +93,12 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                 {prices && (
                   <div className="prod-price-table">
                     <div className="prod-price-row">
-                      <span className="lbl">Разово</span>
+                      <span className="lbl">{isEn ? "One-off" : "Разово"}</span>
                       <span className="val tabular">{formatKzt(prices.base)}</span>
                     </div>
                     {p.isSubscriptionEligible && (
                       <div className="prod-price-row sub">
-                        <span className="lbl">Подписка</span>
+                        <span className="lbl">{isEn ? "Subscription" : "Подписка"}</span>
                         <span className="val tabular">
                           {formatKzt(prices.subscription)}
                           <span className="save">−{prices.subscriptionSavingsPct}%</span>
@@ -104,7 +107,7 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                     )}
                     {p.isGroupEligible && (
                       <div className="prod-price-row grp">
-                        <span className="lbl">Группа</span>
+                        <span className="lbl">{isEn ? "Group" : "Группа"}</span>
                         <span className="val tabular">
                           {formatKzt(prices.group)}
                           <span className="save">−{prices.groupSavingsPct}%</span>
@@ -127,17 +130,17 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                     className="btn-card btn-card-primary"
                     onClick={(e) => handleAdd(e, p)}
                     disabled={outOfStock || !price}
-                    aria-label="Добавить в корзину"
+                    aria-label={isEn ? "Add to cart" : "Добавить в корзину"}
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    Корзина
+                    {isEn ? "Cart" : "Корзина"}
                   </button>
                   {p.isSubscriptionEligible && (
                     <Link
                       href={`/subscription?product=${encodeURIComponent(p.sku)}`}
                       className="btn-card btn-card-outline"
                     >
-                      Подписка
+                      {isEn ? "Subscription" : "Подписка"}
                     </Link>
                   )}
                   {p.isGroupEligible && (
@@ -145,7 +148,7 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
                       href={`/group-buying?product=${encodeURIComponent(p.sku)}`}
                       className="btn-card btn-card-outline"
                     >
-                      Группа
+                      {isEn ? "Group" : "Группа"}
                     </Link>
                   )}
                 </div>
@@ -158,7 +161,7 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
       {hasMore && !expanded && (
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <button type="button" onClick={() => setExpanded(true)} className="btn btn-ghost">
-            ЕЩЁ
+            {isEn ? "MORE" : "ЕЩЁ"}
           </button>
         </div>
       )}

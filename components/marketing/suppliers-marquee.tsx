@@ -1,3 +1,5 @@
+import { getLocale } from "next-intl/server";
+
 /**
  * Suppliers marquee for the home page.
  *
@@ -11,7 +13,7 @@
  * for <Image> — animation + structure stay identical.
  */
 
-const SUPPLIERS = [
+const SUPPLIERS_RU = [
   "Barry Callebaut",
   "IRCA",
   "Sicao",
@@ -24,19 +26,41 @@ const SUPPLIERS = [
   "Цесна",
 ];
 
-export function SuppliersMarquee() {
+const SUPPLIERS_EN = [
+  "Barry Callebaut",
+  "IRCA",
+  "Sicao",
+  "1883 Maison Routin",
+  "AmeriColor",
+  "Andros",
+  "Berybert",
+  "Veliche",
+  "Lyubimo",
+  "Tsesna",
+];
+
+export async function SuppliersMarquee() {
+  const locale = await getLocale();
+  const isEn = locale === "en";
+  const suppliers = isEn ? SUPPLIERS_EN : SUPPLIERS_RU;
+
   // Render the list twice for a seamless infinite scroll: when the first
   // copy scrolls fully off-screen left, the second copy is already
   // on-screen, and the animation snaps back to start without a jump.
   return (
     <section className="suppliers-band">
       <div className="container-x">
-        <div className="suppliers-eyebrow">Работаем напрямую с поставщиками</div>
+        <div className="suppliers-eyebrow">
+          {isEn ? "Direct supplier contracts" : "Работаем напрямую с поставщиками"}
+        </div>
       </div>
-      <div className="suppliers-marquee" aria-label="Логотипы поставщиков Horecom">
+      <div
+        className="suppliers-marquee"
+        aria-label={isEn ? "Horecom supplier logos" : "Логотипы поставщиков Horecom"}
+      >
         <div className="suppliers-track">
-          {[...SUPPLIERS, ...SUPPLIERS].map((name, i) => (
-            <span key={i} className="suppliers-cell" aria-hidden={i >= SUPPLIERS.length}>
+          {[...suppliers, ...suppliers].map((name, i) => (
+            <span key={i} className="suppliers-cell" aria-hidden={i >= suppliers.length}>
               {name}
             </span>
           ))}

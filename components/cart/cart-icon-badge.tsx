@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useCart } from "@/lib/cart-store";
 
 /**
@@ -16,15 +17,20 @@ import { useCart } from "@/lib/cart-store";
  * /ru/cart and 404.
  */
 export function CartIconBadge({ className }: { className?: string }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const count = useCart((s) => s.items.reduce((n, i) => n + i.quantity, 0));
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   return (
-    <a href="/cart" className={className ?? "hc-cart"} aria-label="Корзина">
+    <a href="/cart" className={className ?? "hc-cart"} aria-label={isEn ? "Cart" : "Корзина"}>
       <ShoppingCart className="h-5 w-5" />
       {mounted && count > 0 && (
-        <span className="hc-cart-count" aria-label={`${count} в корзине`}>
+        <span
+          className="hc-cart-count"
+          aria-label={isEn ? `${count} in cart` : `${count} в корзине`}
+        >
           {count > 99 ? "99+" : count}
         </span>
       )}
