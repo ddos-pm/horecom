@@ -6,11 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 import { CartCard } from "./cart-card";
 
 export const metadata = { title: "Обзор" };
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_RU: Record<string, string> = {
   CREATED: "Создан",
   CONFIRMED: "Подтверждён",
   PARTIALLY_CONFIRMED: "Часть подтверждена",
@@ -20,11 +21,28 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Отменён",
 };
 
-const SUB_STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_EN: Record<string, string> = {
+  CREATED: "Created",
+  CONFIRMED: "Confirmed",
+  PARTIALLY_CONFIRMED: "Partially confirmed",
+  PICKING: "Picking",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
+const SUB_STATUS_LABEL_RU: Record<string, string> = {
   ACTIVE: "Активна",
   PAUSED: "На паузе",
   REVIEW_REQUIRED: "На рассмотрении",
   CANCELLED: "Отменена",
+};
+
+const SUB_STATUS_LABEL_EN: Record<string, string> = {
+  ACTIVE: "Active",
+  PAUSED: "Paused",
+  REVIEW_REQUIRED: "Under review",
+  CANCELLED: "Cancelled",
 };
 
 export default async function DashboardPage({
@@ -40,11 +58,18 @@ export default async function DashboardPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?redirectTo=/dashboard");
 
-  const dbUser = await prisma.user.findUnique({
-    where: { supabaseId: user.id },
-    include: { company: true },
-  });
+  const [dbUser, locale] = await Promise.all([
+    prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      include: { company: true },
+    }),
+    getLocaleFromCookie(),
+  ]);
   if (!dbUser?.companyId || !dbUser.company) redirect("/onboarding");
+  const isEn = locale === "en";
+  const STATUS_LABEL = isEn ? STATUS_LABEL_EN : STATUS_LABEL_RU;
+  const SUB_STATUS_LABEL = isEn ? SUB_STATUS_LABEL_EN : SUB_STATUS_LABEL_RU;
+  const numFmt = isEn ? "en-US" : "ru-RU";
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -63,9 +88,6 @@ export default async function DashboardPage({
     prisma.subscriptionPlan.findFirst({
       where: { companyId: dbUser.companyId, status: "ACTIVE" },
     }),
-    // Last 30 days of non-cancelled orders. the team's brief — single
-    // "Сумма за месяц" number on the dashboard. Cancelled excluded so
-    // refunds don't double-count.
     prisma.order.aggregate({
       where: {
         companyId: dbUser.companyId,
@@ -86,9 +108,13 @@ export default async function DashboardPage({
           <div className="flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
             <div>
-              <div className="font-semibold text-success">Добро пожаловать в Horecom</div>
+              <div className="font-semibold text-success">
+                {isEn ? "Welcome to Horecom" : "Добро пожаловать в Horecom"}
+              </div>
               <div className="mt-1 text-sm">
-                Профиль создан. Откройте каталог и оформите первый заказ — менеджер подтвердит в WhatsApp.
+                {isEn
+                  ? "Profile created. Open the catalog and place your first order — an account manager confirms on WhatsApp."
+                  : "Профиль создан. Откройте каталог и оформите первый заказ — менеджер подтвердит в WhatsApp."}
               </div>
             </div>
           </div>
@@ -97,30 +123,30 @@ export default async function DashboardPage({
 
       <header className="mb-6">
         <p className="text-xs text-muted-foreground">{dbUser.company.name}</p>
-        <h1 className="text-2xl font-bold md:text-3xl">Обзор</h1>
+        <h1 className="text-2xl font-bold md:text-3xl">{isEn ? "Overview" : "Обзор"}</h1>
       </header>
 
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <LastOrderCard order={lastOrder} />
-        <MonthlySpendCard total={monthlySpend} orderCount={monthlyOrderCount} />
-        <SubscriptionCard sub={activeSub} />
+        <LastOrderCard order={lastOrder} isEn={isEn} numFmt={numFmt} STATUS_LABEL={STATUS_LABEL} locale={locale} />
+        <MonthlySpendCard total={monthlySpend} orderCount={monthlyOrderCount} isEn={isEn} numFmt={numFmt} />
+        <SubscriptionCard sub={activeSub} isEn={isEn} numFmt={numFmt} SUB_STATUS_LABEL={SUB_STATUS_LABEL} locale={locale} />
         <CartCard />
       </div>
 
       <section>
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-base font-semibold">Последние заказы</h2>
+          <h2 className="text-base font-semibold">{isEn ? "Recent orders" : "Последние заказы"}</h2>
           {recentOrders.length > 0 && (
             <Link href="/orders" className="text-sm text-primary hover:underline">
-              Все заказы →
+              {isEn ? "All orders →" : "Все заказы →"}
             </Link>
           )}
         </div>
         {recentOrders.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-6 text-center">
-            <p className="text-sm text-muted-foreground">Заказов ещё нет.</p>
-            <Link href="/catalog" className="mt-3 inline-block">
-              <Button>Открыть каталог</Button>
+            <p className="text-sm text-muted-foreground">{isEn ? "No orders yet." : "Заказов ещё нет."}</p>
+            <Link href={`/${locale}/catalog`} className="mt-3 inline-block">
+              <Button>{isEn ? "Open catalog" : "Открыть каталог"}</Button>
             </Link>
           </div>
         ) : (
@@ -139,12 +165,12 @@ export default async function DashboardPage({
                       </Badge>
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
-                      {new Date(o.createdAt).toLocaleDateString("ru-RU", {
+                      {new Date(o.createdAt).toLocaleDateString(numFmt, {
                         day: "numeric",
                         month: "short",
                       })}
                       {" · "}
-                      {o.items.length} поз.
+                      {o.items.length} {isEn ? (o.items.length === 1 ? "item" : "items") : "поз."}
                     </div>
                   </div>
                   <div className="tabular-nums text-sm font-semibold">
@@ -160,19 +186,29 @@ export default async function DashboardPage({
   );
 }
 
-type OrderLite =
-  | (Awaited<ReturnType<typeof prisma.order.findFirst>> & { __unused?: never })
-  | null;
+type OrderLite = Awaited<ReturnType<typeof prisma.order.findFirst>> | null;
 
-function LastOrderCard({ order }: { order: OrderLite }) {
+function LastOrderCard({
+  order,
+  isEn,
+  numFmt,
+  STATUS_LABEL,
+  locale,
+}: {
+  order: OrderLite;
+  isEn: boolean;
+  numFmt: string;
+  STATUS_LABEL: Record<string, string>;
+  locale: string;
+}) {
   if (!order) {
     return (
       <div className="rounded-lg border border-border bg-card p-4">
-        <div className="text-xs text-muted-foreground">Последний заказ</div>
-        <div className="mt-2 text-lg font-semibold">Ещё нет</div>
-        <Link href="/catalog" className="mt-3 inline-block">
+        <div className="text-xs text-muted-foreground">{isEn ? "Last order" : "Последний заказ"}</div>
+        <div className="mt-2 text-lg font-semibold">{isEn ? "Not yet" : "Ещё нет"}</div>
+        <Link href={`/${locale}/catalog`} className="mt-3 inline-block">
           <Button size="sm" variant="outline">
-            Сделать первый
+            {isEn ? "Place first order" : "Сделать первый"}
           </Button>
         </Link>
       </div>
@@ -180,39 +216,53 @@ function LastOrderCard({ order }: { order: OrderLite }) {
   }
   return (
     <div className="rounded-lg border border-border bg-card p-4">
-      <div className="text-xs text-muted-foreground">Последний заказ</div>
+      <div className="text-xs text-muted-foreground">{isEn ? "Last order" : "Последний заказ"}</div>
       <div className="mt-2 text-lg font-semibold tabular-nums">{formatPrice(order.total.toString())}</div>
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
         <Clock className="h-3 w-3" />
-        {new Date(order.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+        {new Date(order.createdAt).toLocaleDateString(numFmt, { day: "numeric", month: "short" })}
         {" · "}
         {STATUS_LABEL[order.status] ?? order.status}
       </div>
       <Link href={`/orders/${order.id}`} className="mt-3 inline-block">
-        <Button size="sm">Открыть</Button>
+        <Button size="sm">{isEn ? "Open" : "Открыть"}</Button>
       </Link>
     </div>
   );
 }
 
-function MonthlySpendCard({ total, orderCount }: { total: number; orderCount: number }) {
+function MonthlySpendCard({
+  total,
+  orderCount,
+  isEn,
+  numFmt,
+}: {
+  total: number;
+  orderCount: number;
+  isEn: boolean;
+  numFmt: string;
+}) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
-      <div className="text-xs text-muted-foreground">Сумма за 30 дней</div>
-      <div className="mt-2 text-lg font-semibold tabular-nums">
-        {total.toLocaleString("ru-RU")} ₸
+      <div className="text-xs text-muted-foreground">
+        {isEn ? "Total over 30 days" : "Сумма за 30 дней"}
       </div>
+      <div className="mt-2 text-lg font-semibold tabular-nums">{total.toLocaleString(numFmt)} ₸</div>
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
         <TrendingUp className="h-3 w-3" />
         {orderCount === 0
-          ? "Заказов не было"
-          : `${orderCount} ${pluralOrders(orderCount)}`}
+          ? isEn
+            ? "No orders"
+            : "Заказов не было"
+          : isEn
+            ? `${orderCount} ${orderCount === 1 ? "order" : "orders"}`
+            : `${orderCount} ${pluralOrdersRu(orderCount)}`}
       </div>
     </div>
   );
 }
 
-function pluralOrders(n: number): string {
+function pluralOrdersRu(n: number): string {
   const m10 = n % 10;
   const m100 = n % 100;
   if (m10 === 1 && m100 !== 11) return "заказ";
@@ -222,15 +272,27 @@ function pluralOrders(n: number): string {
 
 type SubLite = Awaited<ReturnType<typeof prisma.subscriptionPlan.findFirst>>;
 
-function SubscriptionCard({ sub }: { sub: SubLite }) {
+function SubscriptionCard({
+  sub,
+  isEn,
+  numFmt,
+  SUB_STATUS_LABEL,
+  locale,
+}: {
+  sub: SubLite;
+  isEn: boolean;
+  numFmt: string;
+  SUB_STATUS_LABEL: Record<string, string>;
+  locale: string;
+}) {
   if (!sub) {
     return (
       <div className="rounded-lg border border-border bg-card p-4">
-        <div className="text-xs text-muted-foreground">Подписка</div>
-        <div className="mt-2 text-lg font-semibold">Не подключена</div>
-        <Link href="/subscription" className="mt-3 inline-block">
+        <div className="text-xs text-muted-foreground">{isEn ? "Subscription" : "Подписка"}</div>
+        <div className="mt-2 text-lg font-semibold">{isEn ? "Not active" : "Не подключена"}</div>
+        <Link href={`/${locale}/subscription`} className="mt-3 inline-block">
           <Button size="sm" variant="outline">
-            Подключить
+            {isEn ? "Activate" : "Подключить"}
           </Button>
         </Link>
       </div>
@@ -238,13 +300,14 @@ function SubscriptionCard({ sub }: { sub: SubLite }) {
   }
   return (
     <div className="rounded-lg border border-border bg-card p-4">
-      <div className="text-xs text-muted-foreground">Подписка</div>
+      <div className="text-xs text-muted-foreground">{isEn ? "Subscription" : "Подписка"}</div>
       <div className="mt-2 text-lg font-semibold">{SUB_STATUS_LABEL[sub.status] ?? sub.status}</div>
       <div className="text-xs text-muted-foreground">
-        Следующая: {new Date(sub.nextDeliveryDate).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+        {isEn ? "Next: " : "Следующая: "}
+        {new Date(sub.nextDeliveryDate).toLocaleDateString(numFmt, { day: "numeric", month: "short" })}
       </div>
       <Link href="/subscription/manage" className="mt-3 inline-block">
-        <Button size="sm">Управлять</Button>
+        <Button size="sm">{isEn ? "Manage" : "Управлять"}</Button>
       </Link>
     </div>
   );

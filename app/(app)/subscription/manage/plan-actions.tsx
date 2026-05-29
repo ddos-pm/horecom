@@ -17,12 +17,15 @@ import { toggleSubscriptionStatus, cancelSubscription } from "./actions";
  * queue and toggling them client-side would skip the review gate.
  */
 export function PlanActions({
+  locale,
   planId,
   status,
 }: {
+  locale: string;
   planId: string;
   status: "ACTIVE" | "PAUSED" | "REVIEW_REQUIRED" | "CANCELLED";
 }) {
+  const isEn = locale === "en";
   const [pending, startTransition] = useTransition();
 
   // Cancelled plans show no actions.
@@ -34,26 +37,40 @@ export function PlanActions({
     startTransition(async () => {
       const res = await toggleSubscriptionStatus(planId);
       if (!res.ok) {
-        toast.error(res.error ?? "Не удалось переключить статус");
+        toast.error(res.error ?? (isEn ? "Could not toggle status" : "Не удалось переключить статус"));
         return;
       }
-      toast.success(res.status === "PAUSED" ? "Подписка приостановлена" : "Подписка возобновлена");
+      toast.success(
+        res.status === "PAUSED"
+          ? isEn
+            ? "Subscription paused"
+            : "Подписка приостановлена"
+          : isEn
+            ? "Subscription resumed"
+            : "Подписка возобновлена",
+      );
     });
   }
 
   function handleCancel() {
     if (typeof window !== "undefined") {
-      if (!window.confirm("Отменить подписку? Действие необратимо — план перестанет работать, история сохранится.")) {
+      if (
+        !window.confirm(
+          isEn
+            ? "Cancel the subscription? This is irreversible — the plan stops, history is kept."
+            : "Отменить подписку? Действие необратимо — план перестанет работать, история сохранится.",
+        )
+      ) {
         return;
       }
     }
     startTransition(async () => {
       const res = await cancelSubscription(planId);
       if (!res.ok) {
-        toast.error(res.error ?? "Не удалось отменить");
+        toast.error(res.error ?? (isEn ? "Could not cancel" : "Не удалось отменить"));
         return;
       }
-      toast.success("Подписка отменена");
+      toast.success(isEn ? "Subscription cancelled" : "Подписка отменена");
     });
   }
 
@@ -61,7 +78,17 @@ export function PlanActions({
     <div className="flex flex-wrap items-center gap-1">
       <Button size="sm" variant="ghost" onClick={handleToggle} disabled={pending}>
         {isActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-        {pending ? "Сохраняю…" : isActive ? "Приостановить" : "Возобновить"}
+        {pending
+          ? isEn
+            ? "Saving…"
+            : "Сохраняю…"
+          : isActive
+            ? isEn
+              ? "Pause"
+              : "Приостановить"
+            : isEn
+              ? "Resume"
+              : "Возобновить"}
       </Button>
       <Button
         size="sm"
@@ -71,7 +98,7 @@ export function PlanActions({
         className="text-destructive hover:bg-destructive/10"
       >
         <X className="h-3.5 w-3.5" />
-        Отменить
+        {isEn ? "Cancel" : "Отменить"}
       </Button>
     </div>
   );

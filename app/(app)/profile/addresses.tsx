@@ -24,26 +24,30 @@ const EMPTY: Omit<Address, "id" | "isDefault"> = {
   comment: "",
 };
 
-export function AddressList({ initial }: { initial: Address[] }) {
+export function AddressList({ locale, initial }: { locale: string; initial: Address[] }) {
+  const isEn = locale === "en";
   const [editing, setEditing] = useState<null | { mode: "new" } | { mode: "edit"; address: Address }>(null);
 
   return (
     <section className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Адреса доставки</h2>
+        <h2 className="text-base font-semibold">{isEn ? "Delivery addresses" : "Адреса доставки"}</h2>
         <Button size="sm" variant="outline" onClick={() => setEditing({ mode: "new" })}>
           <Plus className="h-4 w-4" />
-          Добавить адрес
+          {isEn ? "Add address" : "Добавить адрес"}
         </Button>
       </div>
 
       {initial.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Адресов пока нет. Добавьте первый.</p>
+        <p className="text-sm text-muted-foreground">
+          {isEn ? "No addresses yet. Add the first one." : "Адресов пока нет. Добавьте первый."}
+        </p>
       ) : (
         <ul className="space-y-2">
           {initial.map((a) => (
             <AddressRow
               key={a.id}
+              isEn={isEn}
               address={a}
               onEdit={() => setEditing({ mode: "edit", address: a })}
             />
@@ -53,6 +57,7 @@ export function AddressList({ initial }: { initial: Address[] }) {
 
       {editing && (
         <AddressEditor
+          isEn={isEn}
           initial={editing.mode === "edit" ? editing.address : null}
           onClose={() => setEditing(null)}
         />
@@ -61,7 +66,7 @@ export function AddressList({ initial }: { initial: Address[] }) {
   );
 }
 
-function AddressRow({ address, onEdit }: { address: Address; onEdit: () => void }) {
+function AddressRow({ isEn, address, onEdit }: { isEn: boolean; address: Address; onEdit: () => void }) {
   const [pending, startTransition] = useTransition();
 
   function handleSetDefault() {
@@ -72,10 +77,10 @@ function AddressRow({ address, onEdit }: { address: Address; onEdit: () => void 
   }
 
   function handleDelete() {
-    if (!confirm("Удалить адрес?")) return;
+    if (!confirm(isEn ? "Delete address?" : "Удалить адрес?")) return;
     startTransition(async () => {
       const result = await deleteAddress(address.id);
-      if (result.success) toast.success("Удалено");
+      if (result.success) toast.success(isEn ? "Deleted" : "Удалено");
       else toast.error(result.error);
     });
   }
@@ -88,7 +93,7 @@ function AddressRow({ address, onEdit }: { address: Address; onEdit: () => void 
           {address.isDefault && (
             <span className="inline-flex items-center gap-0.5 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
               <Star className="h-3 w-3" />
-              По умолчанию
+              {isEn ? "Default" : "По умолчанию"}
             </span>
           )}
         </div>
@@ -102,11 +107,17 @@ function AddressRow({ address, onEdit }: { address: Address; onEdit: () => void 
       </div>
       <div className="flex items-center gap-1">
         {!address.isDefault && (
-          <Button size="sm" variant="ghost" onClick={handleSetDefault} disabled={pending} title="По умолчанию">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleSetDefault}
+            disabled={pending}
+            title={isEn ? "Set as default" : "По умолчанию"}
+          >
             <Star className="h-4 w-4" />
           </Button>
         )}
-        <Button size="sm" variant="ghost" onClick={onEdit} title="Редактировать">
+        <Button size="sm" variant="ghost" onClick={onEdit} title={isEn ? "Edit" : "Редактировать"}>
           <Pencil className="h-4 w-4" />
         </Button>
         <Button
@@ -114,7 +125,7 @@ function AddressRow({ address, onEdit }: { address: Address; onEdit: () => void 
           variant="ghost"
           onClick={handleDelete}
           disabled={pending}
-          title="Удалить"
+          title={isEn ? "Delete" : "Удалить"}
           className="hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 className="h-4 w-4" />
@@ -125,9 +136,11 @@ function AddressRow({ address, onEdit }: { address: Address; onEdit: () => void 
 }
 
 function AddressEditor({
+  isEn,
   initial,
   onClose,
 }: {
+  isEn: boolean;
   initial: Address | null;
   onClose: () => void;
 }) {
@@ -148,7 +161,15 @@ function AddressEditor({
     startTransition(async () => {
       const result = await upsertAddress({ id: initial?.id, ...data });
       if (result.success) {
-        toast.success(initial ? "Адрес обновлён" : "Адрес добавлен");
+        toast.success(
+          initial
+            ? isEn
+              ? "Address updated"
+              : "Адрес обновлён"
+            : isEn
+              ? "Address added"
+              : "Адрес добавлен",
+        );
         onClose();
       } else {
         toast.error(result.error);
@@ -160,9 +181,15 @@ function AddressEditor({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md space-y-3 rounded-lg bg-card p-5 shadow-xl">
         <h3 className="text-lg font-semibold">
-          {initial ? "Редактировать адрес" : "Новый адрес"}
+          {initial
+            ? isEn
+              ? "Edit address"
+              : "Редактировать адрес"
+            : isEn
+              ? "New address"
+              : "Новый адрес"}
         </h3>
-        <Field label="Метка (например: «Кафе» / «Склад»)">
+        <Field label={isEn ? 'Label (e.g.: "Cafe" / "Warehouse")' : "Метка (например: «Кафе» / «Склад»)"}>
           <input
             type="text"
             value={data.label}
@@ -173,7 +200,7 @@ function AddressEditor({
         </Field>
         <div className="grid grid-cols-3 gap-2">
           <div className="col-span-2">
-            <Field label="Улица">
+            <Field label={isEn ? "Street" : "Улица"}>
               <input
                 type="text"
                 value={data.street}
@@ -182,7 +209,7 @@ function AddressEditor({
               />
             </Field>
           </div>
-          <Field label="Дом">
+          <Field label={isEn ? "House" : "Дом"}>
             <input
               type="text"
               value={data.house}
@@ -191,7 +218,7 @@ function AddressEditor({
             />
           </Field>
         </div>
-        <Field label="Кв. / офис / этаж">
+        <Field label={isEn ? "Apt. / office / floor" : "Кв. / офис / этаж"}>
           <input
             type="text"
             value={data.details}
@@ -199,7 +226,7 @@ function AddressEditor({
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           />
         </Field>
-        <Field label="Комментарий курьеру">
+        <Field label={isEn ? "Note for the courier" : "Комментарий курьеру"}>
           <textarea
             value={data.comment}
             onChange={(e) => update("comment", e.target.value)}
@@ -209,10 +236,16 @@ function AddressEditor({
         </Field>
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="ghost" onClick={onClose} disabled={pending}>
-            Отмена
+            {isEn ? "Cancel" : "Отмена"}
           </Button>
           <Button onClick={handleSave} disabled={pending || !data.label || !data.street || !data.house}>
-            {pending ? "Сохраняю…" : "Сохранить"}
+            {pending
+              ? isEn
+                ? "Saving…"
+                : "Сохраняю…"
+              : isEn
+                ? "Save"
+                : "Сохранить"}
           </Button>
         </div>
       </div>

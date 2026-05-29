@@ -5,10 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 export const metadata = { title: "Мои заказы" };
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_RU: Record<string, string> = {
   CREATED: "Создан",
   INVOICE_SENT: "Счёт выставлен",
   WAITING_PAYMENT: "Ждёт оплату",
@@ -21,6 +22,19 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Отменён",
 };
 
+const STATUS_LABEL_EN: Record<string, string> = {
+  CREATED: "Created",
+  INVOICE_SENT: "Invoice sent",
+  WAITING_PAYMENT: "Awaiting payment",
+  PAID: "Paid",
+  CONFIRMED: "Confirmed",
+  PARTIALLY_CONFIRMED: "Partially confirmed",
+  PICKING: "Picking",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
 export default async function OrdersPage() {
   const supabase = await createClient();
   const {
@@ -28,8 +42,13 @@ export default async function OrdersPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?redirectTo=/orders");
 
-  const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+  const [dbUser, locale] = await Promise.all([
+    prisma.user.findUnique({ where: { supabaseId: user.id } }),
+    getLocaleFromCookie(),
+  ]);
   if (!dbUser?.companyId) redirect("/onboarding");
+  const isEn = locale === "en";
+  const STATUS_LABEL = isEn ? STATUS_LABEL_EN : STATUS_LABEL_RU;
 
   const orders = await prisma.order.findMany({
     where: { companyId: dbUser.companyId },
@@ -41,12 +60,14 @@ export default async function OrdersPage() {
   if (orders.length === 0) {
     return (
       <div className="container-tight py-12 text-center">
-        <h1 className="text-2xl font-semibold">Заказов пока нет</h1>
+        <h1 className="text-2xl font-semibold">
+          {isEn ? "No orders yet" : "Заказов пока нет"}
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Откройте каталог и оформите первый заказ.
+          {isEn ? "Open the catalog and place your first order." : "Откройте каталог и оформите первый заказ."}
         </p>
-        <Link href="/catalog" className="mt-4 inline-block">
-          <Button size="lg">Открыть каталог</Button>
+        <Link href={`/${locale}/catalog`} className="mt-4 inline-block">
+          <Button size="lg">{isEn ? "Open catalog" : "Открыть каталог"}</Button>
         </Link>
       </div>
     );
@@ -54,7 +75,7 @@ export default async function OrdersPage() {
 
   return (
     <div className="container-tight py-6 md:py-10">
-      <h1 className="mb-6 text-2xl font-bold md:text-3xl">Мои заказы</h1>
+      <h1 className="mb-6 text-2xl font-bold md:text-3xl">{isEn ? "My orders" : "Мои заказы"}</h1>
 
       <div className="space-y-2">
         {orders.map((order) => (
@@ -71,7 +92,7 @@ export default async function OrdersPage() {
                 </Badge>
               </div>
               <div className="mt-0.5 text-xs text-muted-foreground">
-                {new Date(order.createdAt).toLocaleString("ru-RU", {
+                {new Date(order.createdAt).toLocaleString(isEn ? "en-US" : "ru-RU", {
                   day: "numeric",
                   month: "short",
                   year: "numeric",
@@ -79,7 +100,7 @@ export default async function OrdersPage() {
                   minute: "2-digit",
                 })}
                 {" · "}
-                {order.items.length} поз.
+                {order.items.length} {isEn ? (order.items.length === 1 ? "item" : "items") : "поз."}
               </div>
             </div>
             <div className="text-right text-sm">

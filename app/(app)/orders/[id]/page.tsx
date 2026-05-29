@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 import { COMPANY } from "@/lib/company";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 import { ReorderButton } from "./reorder-button";
 
 export const metadata = { title: "Заказ" };
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_RU: Record<string, string> = {
   CREATED: "Создан",
   INVOICE_SENT: "Счёт выставлен",
   WAITING_PAYMENT: "Ждёт оплату",
@@ -23,6 +24,19 @@ const STATUS_LABEL: Record<string, string> = {
   OUT_FOR_DELIVERY: "В доставке",
   DELIVERED: "Доставлен",
   CANCELLED: "Отменён",
+};
+
+const STATUS_LABEL_EN: Record<string, string> = {
+  CREATED: "Created",
+  INVOICE_SENT: "Invoice sent",
+  WAITING_PAYMENT: "Awaiting payment",
+  PAID: "Paid",
+  CONFIRMED: "Confirmed",
+  PARTIALLY_CONFIRMED: "Partially confirmed",
+  PICKING: "Picking",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
 };
 
 const STATUS_ORDER = [
@@ -49,8 +63,14 @@ export default async function OrderDetailPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/login?redirectTo=/orders/${id}`);
 
-  const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+  const [dbUser, locale] = await Promise.all([
+    prisma.user.findUnique({ where: { supabaseId: user.id } }),
+    getLocaleFromCookie(),
+  ]);
   if (!dbUser?.companyId) redirect("/onboarding");
+  const isEn = locale === "en";
+  const STATUS_LABEL = isEn ? STATUS_LABEL_EN : STATUS_LABEL_RU;
+  const numFmt = isEn ? "en-US" : "ru-RU";
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -60,13 +80,7 @@ export default async function OrderDetailPage({
     },
   });
   if (!order) notFound();
-  if (order.companyId !== dbUser.companyId && !dbUser.companyId) {
-    notFound();
-  }
-  if (order.companyId !== dbUser.companyId) {
-    // Strict: not your company → 404 to avoid info leaks
-    notFound();
-  }
+  if (order.companyId !== dbUser.companyId) notFound();
 
   const window = order.deliveryWindow as { date?: string; slot?: string; deliveryFee?: number };
   const justCreated = just_created === "true";
@@ -74,7 +88,9 @@ export default async function OrderDetailPage({
   const total = Number(order.total);
   const deliveryFee = window.deliveryFee ?? Math.max(total - subtotal, 0);
 
-  const waText = `Здравствуйте! Я только что оформил заказ ${order.number} в Horecom. Свяжитесь со мной для подтверждения.`;
+  const waText = isEn
+    ? `Hello! I just placed order ${order.number} on Horecom. Please reach out to confirm.`
+    : `Здравствуйте! Я только что оформил заказ ${order.number} в Horecom. Свяжитесь со мной для подтверждения.`;
   const waLink = `https://api.whatsapp.com/send/?phone=77078607779&text=${encodeURIComponent(waText)}`;
 
   const currentStatusIdx = STATUS_ORDER.indexOf(order.status);
@@ -88,10 +104,12 @@ export default async function OrderDetailPage({
             <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-success" />
             <div>
               <h2 className="text-xl font-semibold text-success">
-                Заказ {order.number} принят
+                {isEn ? `Order ${order.number} accepted` : `Заказ ${order.number} принят`}
               </h2>
               <p className="mt-1 text-sm text-foreground">
-                Менеджер свяжется с вами в течение часа в WhatsApp для подтверждения и расчёта.
+                {isEn
+                  ? "An account manager will reach out within an hour on WhatsApp to confirm and price the order."
+                  : "Менеджер свяжется с вами в течение часа в WhatsApp для подтверждения и расчёта."}
               </p>
             </div>
           </div>
@@ -99,12 +117,12 @@ export default async function OrderDetailPage({
             <a href={waLink} target="_blank" rel="noopener noreferrer" className="sm:flex-1">
               <Button size="lg" className="w-full">
                 <MessageCircle className="h-4 w-4" />
-                Открыть чат в WhatsApp
+                {isEn ? "Open WhatsApp chat" : "Открыть чат в WhatsApp"}
               </Button>
             </a>
             <a href="#details" className="sm:flex-1">
               <Button size="lg" variant="outline" className="w-full">
-                Посмотреть детали заказа
+                {isEn ? "View order details" : "Посмотреть детали заказа"}
               </Button>
             </a>
           </div>
@@ -113,9 +131,12 @@ export default async function OrderDetailPage({
 
       <header id="details" className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">Заказ {order.number}</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">
+            {isEn ? `Order ${order.number}` : `Заказ ${order.number}`}
+          </h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            Создан {new Date(order.createdAt).toLocaleString("ru-RU")}
+            {isEn ? "Created " : "Создан "}
+            {new Date(order.createdAt).toLocaleString(numFmt)}
           </p>
         </div>
         <Badge variant={isCancelled ? "danger" : "info"}>
@@ -125,7 +146,7 @@ export default async function OrderDetailPage({
 
       {!isCancelled && (
         <div className="mb-6 rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-sm font-medium">Статус</h3>
+          <h3 className="mb-3 text-sm font-medium">{isEn ? "Status" : "Статус"}</h3>
           <ol className="flex items-center gap-2 overflow-x-auto text-xs">
             {STATUS_ORDER.map((s, idx) => {
               const done = idx <= currentStatusIdx;
@@ -156,7 +177,7 @@ export default async function OrderDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <section className="space-y-3">
-          <h3 className="text-sm font-medium">Позиции</h3>
+          <h3 className="text-sm font-medium">{isEn ? "Items" : "Позиции"}</h3>
           <ul className="space-y-2">
             {order.items.map((item) => (
               <li
@@ -192,7 +213,9 @@ export default async function OrderDetailPage({
 
         <aside className="h-fit space-y-3 rounded-lg border border-border bg-card p-4">
           <div>
-            <div className="text-xs font-medium text-muted-foreground">Доставка</div>
+            <div className="text-xs font-medium text-muted-foreground">
+              {isEn ? "Delivery" : "Доставка"}
+            </div>
             <div className="mt-1 text-sm">
               {order.address.street}, {order.address.house}
               {order.address.details ? `, ${order.address.details}` : ""}
@@ -201,7 +224,7 @@ export default async function OrderDetailPage({
               <Clock className="h-3 w-3" />
               {window.date && (
                 <>
-                  {new Date(window.date).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+                  {new Date(window.date).toLocaleDateString(numFmt, { day: "numeric", month: "short" })}
                   {", "}
                   {window.slot}
                 </>
@@ -211,19 +234,27 @@ export default async function OrderDetailPage({
 
           {order.comment && (
             <div>
-              <div className="text-xs font-medium text-muted-foreground">Комментарий</div>
+              <div className="text-xs font-medium text-muted-foreground">
+                {isEn ? "Note" : "Комментарий"}
+              </div>
               <div className="mt-1 text-sm">{order.comment}</div>
             </div>
           )}
 
           <div className="space-y-1 border-t border-border pt-3 text-sm">
-            <Row label="Товары" value={formatPrice(subtotal.toString())} />
+            <Row label={isEn ? "Items" : "Товары"} value={formatPrice(subtotal.toString())} />
             <Row
-              label="Доставка"
-              value={deliveryFee === 0 ? "бесплатно" : formatPrice(deliveryFee.toString())}
+              label={isEn ? "Delivery" : "Доставка"}
+              value={
+                deliveryFee === 0
+                  ? isEn
+                    ? "free"
+                    : "бесплатно"
+                  : formatPrice(deliveryFee.toString())
+              }
             />
             <div className="my-2 h-px bg-border" />
-            <Row label="Итого" value={formatPrice(total.toString())} bold />
+            <Row label={isEn ? "Total" : "Итого"} value={formatPrice(total.toString())} bold />
           </div>
 
           <ReorderButton
@@ -242,7 +273,7 @@ export default async function OrderDetailPage({
           <a href={waLink} target="_blank" rel="noopener noreferrer">
             <Button size="lg" variant="outline" className="w-full">
               <MessageCircle className="h-4 w-4" />
-              Открыть чат с {COMPANY.shortName}
+              {isEn ? `Chat with ${COMPANY.shortName}` : `Открыть чат с ${COMPANY.shortName}`}
             </Button>
           </a>
         </aside>
@@ -250,7 +281,7 @@ export default async function OrderDetailPage({
 
       <div className="mt-6">
         <Link href="/orders">
-          <Button variant="ghost">← Все заказы</Button>
+          <Button variant="ghost">{isEn ? "← All orders" : "← Все заказы"}</Button>
         </Link>
       </div>
     </div>
