@@ -532,8 +532,17 @@
   .rel .img {
     aspect-ratio: 1; background: var(--c-bg-soft);
     display: flex; align-items: center; justify-content: center;
+    /* Same trap as .thumb / .gallery-main / .card-img — next/image fill
+       positions absolute against the nearest positioned ancestor. Without
+       this, the related-product thumbnails on the PDP escape their cards
+       and sprawl across the page. */
+    position: relative;
+    overflow: hidden;
   }
-  .rel .img img { width: 80%; height: 80%; object-fit: contain; }
+  .rel .img img {
+    object-fit: contain !important;
+    padding: 8px;
+  }
   .rel-info {
     padding: 12px;
     display: flex; flex-direction: column; gap: 4px;
