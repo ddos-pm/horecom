@@ -52,8 +52,18 @@
     overflow: hidden;
     cursor: pointer;
     flex-shrink: 0;
+    /* CRITICAL — next/image fill positions absolute relative to the
+       nearest positioned ancestor. Without position:relative here, the
+       thumbnail <Image fill> escapes the 72×72 button and stretches to
+       the viewport ("photos flashing across the screen" bug). */
+    position: relative;
   }
-  .thumb img { width: 90%; height: 90%; object-fit: contain; }
+  .thumb img {
+    /* Override the next/image fill defaults so the contained product photo
+       fits inside the 72px tile with breathing room. */
+    object-fit: contain !important;
+    padding: 6px;
+  }
   .thumb.active { border-color: var(--c-ink); border-width: 2px; }
   .thumb.video {
     position: relative;
