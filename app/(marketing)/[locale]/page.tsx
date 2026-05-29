@@ -209,7 +209,7 @@ export default async function HomePage({
               <div className="hero-card">
                 <div className="hero-card-head">
                   <span className="pill" style={{ height: 20, padding: "0 8px", borderRadius: 6 }}>
-                    Так выглядит карточка
+                    {isEn ? "What a product card looks like" : "Так выглядит карточка"}
                   </span>
                   <span style={{ marginLeft: "auto" }}>PDP · {hero?.sku ?? "HC-DAIRY-0067"}</span>
                 </div>
@@ -217,7 +217,7 @@ export default async function HomePage({
                   <Link
                     href={`/product/${hero?.slug ?? "maslo-rogachev-82-5-5kg"}`}
                     className="hero-card-img"
-                    aria-label={hero?.name ?? "Открыть карточку товара"}
+                    aria-label={hero?.name ?? (isEn ? "Open product card" : "Открыть карточку товара")}
                   >
                     {hero?.imageUrl && (
                       <Image
@@ -232,39 +232,39 @@ export default async function HomePage({
                   </Link>
                   <div className="hero-card-info">
                     <div className="meta">
-                      {hero?.brand ?? "Рогачёв"} · {hero?.category.name ?? "Молочная"}
+                      {hero?.brand ?? "Рогачёв"} · {hero?.category.name ?? (isEn ? "Dairy" : "Молочная")}
                     </div>
-                    <div className="name">{hero?.name ?? 'Масло "Рогачев" 82,5% 5кг'}</div>
+                    <div className="name">{hero?.name ?? (isEn ? 'Butter "Rogachev" 82.5% 5 kg' : 'Масло "Рогачев" 82,5% 5кг')}</div>
                     <div className="price">
                       <b>
                         {hero?.prices[0]
-                          ? Number(hero.prices[0].basePrice).toLocaleString("ru-RU")
-                          : "33 800"}{" "}
+                          ? Number(hero.prices[0].basePrice).toLocaleString(isEn ? "en-US" : "ru-RU")
+                          : (isEn ? "33,800" : "33 800")}{" "}
                         ₸
                       </b>
-                      <span>/ {hero?.packLabel ?? "упак"}</span>
+                      <span>/ {hero?.packLabel ?? (isEn ? "pack" : "упак")}</span>
                     </div>
                   </div>
                 </div>
                 <div className="hero-card-data">
                   <div>
                     <div className="k">MOQ</div>
-                    <div className="v">{hero?.minOrderQty ?? 1} уп.</div>
+                    <div className="v">{hero?.minOrderQty ?? 1} {isEn ? "pack" : "уп."}</div>
                   </div>
                   <div>
-                    <div className="k">В наличии</div>
+                    <div className="k">{isEn ? "In stock" : "В наличии"}</div>
                     <div className="v green">
                       {hero?.inventorySnapshot?.availableQty ?? 47} {formatUnit(hero?.unitType) || "кг"}
                     </div>
                   </div>
                   <div>
-                    <div className="k">Доставка</div>
-                    <div className="v">завтра до 12:00</div>
+                    <div className="k">{isEn ? "Delivery" : "Доставка"}</div>
+                    <div className="v">{isEn ? "tomorrow by 12:00" : "завтра до 12:00"}</div>
                   </div>
                 </div>
                 <div className="hero-card-foot">
                   <Link href={`/product/${hero?.slug ?? "maslo-rogachev-82-5-5kg"}`} className="btn btn-primary" style={{ flex: 1 }}>
-                    В корзину
+                    {isEn ? "Add to cart" : "В корзину"}
                   </Link>
                   <a
                     href={COMPANY.whatsappLink}
@@ -286,29 +286,29 @@ export default async function HomePage({
         <div className="container-x">
           <div className="trust-grid">
             <div className="trust-item">
-              <div className="num">10<span className="u">лет</span></div>
-              <div className="lbl"><b>на рынке</b><br />с 2016 года</div>
+              <div className="num">10<span className="u">{isEn ? "yrs" : "лет"}</span></div>
+              <div className="lbl"><b>{isEn ? "on the market" : "на рынке"}</b><br />{isEn ? "since 2016" : "с 2016 года"}</div>
             </div>
             <div className="trust-item">
               <div className="num">50<span className="u">+</span></div>
-              <div className="lbl"><b>B2B-клиентов</b><br />регулярные заказы</div>
+              <div className="lbl"><b>{isEn ? "B2B customers" : "B2B-клиентов"}</b><br />{isEn ? "recurring orders" : "регулярные заказы"}</div>
             </div>
             <div className="trust-item">
-              <div className="num">{skuCount}<span className="u">товаров</span></div>
-              <div className="lbl"><b>в каталоге</b><br />11 категорий, реальные остатки</div>
+              <div className="num">{skuCount}<span className="u">{isEn ? "SKUs" : "товаров"}</span></div>
+              <div className="lbl"><b>{isEn ? "in the catalog" : "в каталоге"}</b><br />{isEn ? "11 categories, live stock levels" : "11 категорий, реальные остатки"}</div>
             </div>
             <div className="trust-item">
               <div className="num">76<span className="u">K</span></div>
-              <div className="lbl"><b>подписчиков</b><br />@horecom.kz в Instagram</div>
+              <div className="lbl"><b>{isEn ? "followers" : "подписчиков"}</b><br />{isEn ? "@horecom.kz on Instagram" : "@horecom.kz в Instagram"}</div>
             </div>
             <div className="trust-item">
-              <div className="num">3<span className="u">ч</span></div>
-              <div className="lbl"><b>окно доставки</b><br />по Астане</div>
+              <div className="num">3<span className="u">{isEn ? "h" : "ч"}</span></div>
+              <div className="lbl"><b>{isEn ? "delivery window" : "окно доставки"}</b><br />{isEn ? "across Astana" : "по Астане"}</div>
             </div>
           </div>
 
           <div className="src-strip">
-            <b>Прямые контракты:</b>
+            <b>{isEn ? "Direct contracts:" : "Прямые контракты:"}</b>
             <div className="src-list">
               <span>Barry&nbsp;Callebaut</span><span>·</span>
               <span>IRCA</span><span>·</span>
@@ -318,7 +318,7 @@ export default async function HomePage({
               <span>Andros</span><span>·</span>
               <span className="show-md">Berybert</span>
               <span className="show-md">·</span>
-              <span className="show-md">Любимо</span>
+              <span className="show-md">{isEn ? "Lyubimo" : "Любимо"}</span>
             </div>
           </div>
         </div>
@@ -328,84 +328,96 @@ export default async function HomePage({
       <section className="s">
         <div className="container-x">
           <div className="s-head">
-            <div className="eyebrow">Один каталог · три сценария</div>
-            <h2>Как закупиться?</h2>
+            <div className="eyebrow">
+              {isEn ? "One catalog · three workflows" : "Один каталог · три сценария"}
+            </div>
+            <h2>{isEn ? "How to buy?" : "Как закупиться?"}</h2>
             <p className="sub">
-              Ресторан, кондитерская и домашний кондитер закупают по-разному. Мы построили три рабочих
-              процесса на одной складской инфраструктуре — выберите свой.
+              {isEn
+                ? "Restaurants, pastry shops, and independent pastry makers each buy differently. We built three workflows on one warehouse — pick yours."
+                : "Ресторан, кондитерская и домашний кондитер закупают по-разному. Мы построили три рабочих процесса на одной складской инфраструктуре — выберите свой."}
             </p>
           </div>
 
           <div className="segs">
             <Link href="/catalog?segment=enterprise" className="seg seg-1">
               <div className="seg-top">
-                <span className="pill pill-blue">Рестораны и кафе</span>
+                <span className="pill pill-blue">{isEn ? "Restaurants and cafes" : "Рестораны и кафе"}</span>
                 <span className="seg-num">01</span>
               </div>
-              <h3>Быстрый оптовый заказ</h3>
+              <h3>{isEn ? "Fast wholesale order" : "Быстрый оптовый заказ"}</h3>
               <div className="who">
-                <b>Для тех у кого есть склад и закупщик.</b> Собрать корзину за 3 минуты, повторить заказ
-                прошлой недели, скачать накладную.
+                {isEn ? (
+                  <><b>For teams with a warehouse and a buyer.</b> Build a cart in 3 minutes, repeat last week's order, download the waybill.</>
+                ) : (
+                  <><b>Для тех у кого есть склад и закупщик.</b> Собрать корзину за 3 минуты, повторить заказ прошлой недели, скачать накладную.</>
+                )}
               </div>
               <div className="seg-mock">
-                <div className="seg-mock-row"><span>Повтор заказа #1247</span><b>74 позиции · 285&nbsp;400 ₸</b></div>
-                <div className="seg-mock-row"><span>Замена: Какао JB → Sicao</span><b style={{ color: "var(--c-orange)" }}>ждёт ответа</b></div>
-                <div className="seg-mock-row"><span>К отгрузке завтра</span><b>11:00–14:00</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Repeat order #1247" : "Повтор заказа #1247"}</span><b>{isEn ? "74 items · 285,400 ₸" : "74 позиции · 285 400 ₸"}</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Substitution: Cocoa JB → Sicao" : "Замена: Какао JB → Sicao"}</span><b style={{ color: "var(--c-orange)" }}>{isEn ? "awaiting reply" : "ждёт ответа"}</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Shipping tomorrow" : "К отгрузке завтра"}</span><b>11:00–14:00</b></div>
               </div>
               <ul className="ul-clean seg-feat">
-                <li>Поиск и фильтры по {skuCount} товаров</li>
-                <li>Сохранённые корзины · повтор заказа</li>
-                <li>Накладные, СФ, договоры в ЛК</li>
+                <li>{isEn ? `Search and filters across ${skuCount} SKUs` : `Поиск и фильтры по ${skuCount} товаров`}</li>
+                <li>{isEn ? "Saved carts · order repeat" : "Сохранённые корзины · повтор заказа"}</li>
+                <li>{isEn ? "Waybills, invoices, contracts inside the dashboard" : "Накладные, СФ, договоры в ЛК"}</li>
               </ul>
-              <span className="seg-cta">Перейти в каталог</span>
+              <span className="seg-cta">{isEn ? "Open the catalog" : "Перейти в каталог"}</span>
             </Link>
 
             <Link href="/subscription" className="seg seg-2">
               <div className="seg-top">
-                <span className="pill pill-orange">Кондитерские без склада</span>
+                <span className="pill pill-orange">{isEn ? "Bakeries without storage" : "Кондитерские без склада"}</span>
                 <span className="seg-num">02</span>
               </div>
-              <h3>Подписка на поставку</h3>
+              <h3>{isEn ? "Supply subscription" : "Подписка на поставку"}</h3>
               <div className="who">
-                <b>Для маленьких пекарен где негде хранить.</b> Доставляем каждую неделю — за день до отгрузки
-                спросим, что подвезти.
+                {isEn ? (
+                  <><b>For small bakeries that can't store stock.</b> We deliver weekly — the day before shipment we ask what to bring.</>
+                ) : (
+                  <><b>Для маленьких пекарен где негде хранить.</b> Доставляем каждую неделю — за день до отгрузки спросим, что подвезти.</>
+                )}
               </div>
               <div className="seg-mock">
-                <div className="seg-mock-row"><span>Следующая доставка</span><b>среда, 10:30</b></div>
-                <div className="seg-mock-row"><span>Состав 12 позиций</span><b>187&nbsp;200 ₸</b></div>
-                <div className="seg-mock-row"><span>WhatsApp с подтверждением</span><b style={{ color: "var(--c-success)" }}>завтра 09:00</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Next delivery" : "Следующая доставка"}</span><b>{isEn ? "Wed, 10:30" : "среда, 10:30"}</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "12 items in basket" : "Состав 12 позиций"}</span><b>{isEn ? "187,200 ₸" : "187 200 ₸"}</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "WhatsApp confirmation" : "WhatsApp с подтверждением"}</span><b style={{ color: "var(--c-success)" }}>{isEn ? "tomorrow 09:00" : "завтра 09:00"}</b></div>
               </div>
               <ul className="ul-clean seg-feat">
-                <li>Гибкий график: дни и время</li>
-                <li>Предиктивный движок дозакупа</li>
-                <li>Edit · Skip · Pause в один тап</li>
+                <li>{isEn ? "Flexible schedule: day and time" : "Гибкий график: дни и время"}</li>
+                <li>{isEn ? "Predictive replenishment engine" : "Предиктивный движок дозакупа"}</li>
+                <li>{isEn ? "Edit · Skip · Pause in one tap" : "Edit · Skip · Pause в один тап"}</li>
               </ul>
-              <span className="seg-cta" style={{ color: "var(--c-orange-700)" }}>Как работает подписка на поставку</span>
+              <span className="seg-cta" style={{ color: "var(--c-orange-700)" }}>{isEn ? "How the supply subscription works" : "Как работает подписка на поставку"}</span>
             </Link>
 
             <Link href="/group-buying" className="seg seg-3">
               <div className="seg-top">
-                <span className="pill pill-dark">Самозанятые кондитеры</span>
+                <span className="pill pill-dark">{isEn ? "Independent pastry makers" : "Самозанятые кондитеры"}</span>
                 <span className="seg-num">03</span>
               </div>
-              <h3>Групповая закупка</h3>
+              <h3>{isEn ? "Group buying" : "Групповая закупка"}</h3>
               <div className="who">
-                <b>Для домашних кондитеров.</b> Объединитесь с 3–5 коллегами и получите оптовую цену — без
-                склада и тонны муки в одиночку.
+                {isEn ? (
+                  <><b>For home pastry chefs.</b> Team up with 3–5 colleagues to unlock the wholesale price — without your own warehouse or a tonne of flour to yourself.</>
+                ) : (
+                  <><b>Для домашних кондитеров.</b> Объединитесь с 3–5 коллегами и получите оптовую цену — без склада и тонны муки в одиночку.</>
+                )}
               </div>
               <div className="seg-mock">
-                <div className="seg-mock-row"><span>Закупка · Мука 25 кг</span><b>4 / 6 чел</b></div>
-                <div className="seg-mock-row"><span>До дедлайна</span><b>2 дня 14 часов</b></div>
-                <div className="seg-mock-row"><span>Цена опт vs розница</span><b style={{ color: "var(--c-success)" }}>−18%</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Group · Flour 25 kg" : "Закупка · Мука 25 кг"}</span><b>{isEn ? "4 / 6 people" : "4 / 6 чел"}</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Until deadline" : "До дедлайна"}</span><b>{isEn ? "2 d 14 h" : "2 дня 14 часов"}</b></div>
+                <div className="seg-mock-row"><span>{isEn ? "Wholesale vs retail" : "Цена опт vs розница"}</span><b style={{ color: "var(--c-success)" }}>−18%</b></div>
               </div>
               <ul className="ul-clean seg-feat">
-                <li>Цена защищена при старте группы</li>
-                <li>Share-ссылка в Instagram / WhatsApp</li>
-                <li>Без рисков если группа не собралась</li>
+                <li>{isEn ? "Price locked at group start" : "Цена защищена при старте группы"}</li>
+                <li>{isEn ? "Share link via Instagram / WhatsApp" : "Share-ссылка в Instagram / WhatsApp"}</li>
+                <li>{isEn ? "No risk if the group doesn't fill" : "Без рисков если группа не собралась"}</li>
               </ul>
               <span className="seg-cta">
-                <span className="pill pill-orange" style={{ fontSize: 10 }}>Скоро</span>
-                <span style={{ marginLeft: 8 }}>Войти в пилот</span>
+                <span className="pill pill-orange" style={{ fontSize: 10 }}>{isEn ? "Soon" : "Скоро"}</span>
+                <span style={{ marginLeft: 8 }}>{isEn ? "Join the pilot" : "Войти в пилот"}</span>
               </span>
             </Link>
           </div>
@@ -419,10 +431,14 @@ export default async function HomePage({
         <div className="container-x">
           <div className="s-head cats-head">
             <div>
-              <div className="eyebrow">Каталог</div>
-              <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)" }}>11 категорий · {skuCount} товаров</h2>
+              <div className="eyebrow">{isEn ? "Catalog" : "Каталог"}</div>
+              <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)" }}>
+                {isEn ? `11 categories · ${skuCount} products` : `11 категорий · ${skuCount} товаров`}
+              </h2>
             </div>
-            <Link href="/catalog" className="btn btn-ghost show-md">Открыть полный каталог →</Link>
+            <Link href="/catalog" className="btn btn-ghost show-md">
+              {isEn ? "Open the full catalog →" : "Открыть полный каталог →"}
+            </Link>
           </div>
 
           <div className="cats">
@@ -434,7 +450,9 @@ export default async function HomePage({
                 <div className="cat-name">{c.name}</div>
                 <div className="cat-count">
                   <b>{c._count.products}</b>{" "}
-                  {plural(c._count.products, "позиция", "позиции", "позиций")}
+                  {isEn
+                    ? (c._count.products === 1 ? "item" : "items")
+                    : plural(c._count.products, "позиция", "позиции", "позиций")}
                 </div>
               </Link>
             ))}
@@ -442,8 +460,10 @@ export default async function HomePage({
               <div className="cat-icon">
                 <ArrowRight className="h-7 w-7" />
               </div>
-              <div className="cat-name">Весь<br />каталог</div>
-              <div className="cat-count"><b>{skuCount}</b> товаров</div>
+              <div className="cat-name">
+                {isEn ? <>Full<br />catalog</> : <>Весь<br />каталог</>}
+              </div>
+              <div className="cat-count"><b>{skuCount}</b> {isEn ? "products" : "товаров"}</div>
             </Link>
           </div>
         </div>
@@ -454,10 +474,14 @@ export default async function HomePage({
         <div className="container-x">
           <div className="s-head cats-head">
             <div>
-              <div className="eyebrow">Топ за месяц</div>
-              <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)" }}>Что заказывают чаще всего</h2>
+              <div className="eyebrow">{isEn ? "Top of the month" : "Топ за месяц"}</div>
+              <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)" }}>
+                {isEn ? "Most-ordered SKUs" : "Что заказывают чаще всего"}
+              </h2>
             </div>
-            <Link href="/catalog" className="btn btn-ghost show-md">Все товары →</Link>
+            <Link href="/catalog" className="btn btn-ghost show-md">
+              {isEn ? "All products →" : "Все товары →"}
+            </Link>
           </div>
 
           <TopMonthList products={featured} />
@@ -470,79 +494,76 @@ export default async function HomePage({
           <div className="ops-grid">
             <div>
               <div className="eyebrow ops-eyebrow">
-                <span className="ops-eyebrow-line" /> Как работает заказ
+                <span className="ops-eyebrow-line" /> {isEn ? "How an order flows" : "Как работает заказ"}
               </div>
               <h2 className="ops-h2">
-                Быстрое оформление.
+                {isEn ? "Fast checkout." : "Быстрое оформление."}
               </h2>
               <p className="ops-p">
-                Без звонков и ожидания. Наш чат-бот оформит ваш заказ за минуту. Добавьте товары в корзину
-                → подтвердите заявку в WhatsApp → получите накладную.
+                {isEn
+                  ? "No phone calls, no waiting. Our chat bot processes your order in a minute. Add products to the cart → confirm on WhatsApp → receive the waybill."
+                  : "Без звонков и ожидания. Наш чат-бот оформит ваш заказ за минуту. Добавьте товары в корзину → подтвердите заявку в WhatsApp → получите накладную."}
               </p>
 
               <div className="flow">
-                <div className="flow-step done">
-                  <div className="n">1</div>
-                  <div>
-                    <div className="ttl">Собрали корзину в каталоге</div>
-                    <div className="sub">14 позиций · 187 200 ₸ · мин. заказ соблюдён</div>
+                {(isEn
+                  ? [
+                      { state: "done", n: "1", ttl: "Built the cart in the catalog", sub: "14 items · 187,200 ₸ · MOQ respected", time: "10:24" },
+                      { state: "done", n: "2", ttl: "Confirmed on WhatsApp", sub: "\"Confirmed · ship tomorrow 11:00\"", time: "10:28" },
+                      { state: "active", n: "3", ttl: "KaspiPay link or invoice on request", sub: "Bank transfer — invoice already in your inbox", time: "now" },
+                      { state: "", n: "4", ttl: "Shipment and delivery", sub: "Every 3 hours · pickup or courier", time: "tomorrow" },
+                      { state: "", n: "5", ttl: "Waybill and invoice inside the dashboard", sub: "Automatically after delivery", time: "+0 h" },
+                    ]
+                  : [
+                      { state: "done", n: "1", ttl: "Собрали корзину в каталоге", sub: "14 позиций · 187 200 ₸ · мин. заказ соблюдён", time: "10:24" },
+                      { state: "done", n: "2", ttl: "Подтвердили в WhatsApp", sub: "«Подтверждено · отгрузка завтра 11:00»", time: "10:28" },
+                      { state: "active", n: "3", ttl: "Ссылка на KaspiPay или счёт на оплату по запросу", sub: "Безнал по реквизитам — счёт уже на почте", time: "сейчас" },
+                      { state: "", n: "4", ttl: "Отгрузка и доставка", sub: "Каждые 3 часа · самовывоз или курьер", time: "завтра" },
+                      { state: "", n: "5", ttl: "Накладная и СФ в личный кабинет", sub: "Автоматически после доставки", time: "+0 ч" },
+                    ]
+                ).map((s) => (
+                  <div key={s.n} className={`flow-step${s.state ? ` ${s.state}` : ""}`}>
+                    <div className="n">{s.n}</div>
+                    <div>
+                      <div className="ttl">{s.ttl}</div>
+                      <div className="sub">{s.sub}</div>
+                    </div>
+                    <div className="time">{s.time}</div>
                   </div>
-                  <div className="time">10:24</div>
-                </div>
-                <div className="flow-step done">
-                  <div className="n">2</div>
-                  <div>
-                    <div className="ttl">Подтвердили в WhatsApp</div>
-                    <div className="sub">«Подтверждено · отгрузка завтра 11:00»</div>
-                  </div>
-                  <div className="time">10:28</div>
-                </div>
-                <div className="flow-step active">
-                  <div className="n">3</div>
-                  <div>
-                    <div className="ttl">Ссылка на KaspiPay или счёт на оплату по запросу</div>
-                    <div className="sub">Безнал по реквизитам — счёт уже на почте</div>
-                  </div>
-                  <div className="time">сейчас</div>
-                </div>
-                <div className="flow-step">
-                  <div className="n">4</div>
-                  <div>
-                    <div className="ttl">Отгрузка и доставка</div>
-                    <div className="sub">Каждые 3 часа · самовывоз или курьер</div>
-                  </div>
-                  <div className="time">завтра</div>
-                </div>
-                <div className="flow-step">
-                  <div className="n">5</div>
-                  <div>
-                    <div className="ttl">Накладная и СФ в личный кабинет</div>
-                    <div className="sub">Автоматически после доставки</div>
-                  </div>
-                  <div className="time">+0 ч</div>
-                </div>
+                ))}
               </div>
             </div>
 
             <div>
               <div className="eyebrow ops-eyebrow">
-                <span className="ops-eyebrow-line" /> То что у нас правильно
+                <span className="ops-eyebrow-line" /> {isEn ? "What we get right" : "То что у нас правильно"}
               </div>
               <h2 className="ops-h2">
-                Без маркетинговых обещаний — только системные процессы.
+                {isEn
+                  ? "No marketing promises — just systemic processes."
+                  : "Без маркетинговых обещаний — только системные процессы."}
               </h2>
               <p className="ops-p">
-                10 лет работы научили нас, какие именно мелочи ломают день кондитера. Мы их пофиксили в
-                продукте.
+                {isEn
+                  ? "10 years in this business taught us exactly which small things ruin a pastry chef's day. We fixed them in the product."
+                  : "10 лет работы научили нас, какие именно мелочи ломают день кондитера. Мы их пофиксили в продукте."}
               </p>
 
               <div className="ops-list">
-                {[
-                  { ttl: "Без молчаливой замены", txt: "Если товара нет — отдельное предложение аналога в WhatsApp с разницей в цене. Ждём вашего «ок»." },
-                  { ttl: "Цена и наличие — в реальном времени.", txt: "Минимальный заказ, упаковка и оптовые цены видны сразу — ещё до добавления товара в корзину." },
-                  { ttl: "Documents-ready для бухгалтерии", txt: "Счёт-фактура, накладная, договор. ИП без НДС или ТОО с НДС — оба формата." },
-                  { ttl: "50 поставщиков напрямую", txt: "Barry Callebaut, IRCA, Sicao, 1883 — без посредников. Поэтому держим оптовые цены." },
-                ].map((row) => (
+                {(isEn
+                  ? [
+                      { ttl: "No silent substitution", txt: "If a product is out of stock — a separate proposal of an alternative on WhatsApp with the price delta. We wait for your \"ok\"." },
+                      { ttl: "Real-time price and availability.", txt: "Minimum order, pack size, and wholesale prices are visible up front — before adding the item to the cart." },
+                      { ttl: "Documents-ready for accounting", txt: "Invoice, waybill, contract. Sole proprietor without VAT or LLC with VAT — both formats." },
+                      { ttl: "50 direct supplier contracts", txt: "Barry Callebaut, IRCA, Sicao, 1883 — no middlemen. That's how we hold wholesale prices." },
+                    ]
+                  : [
+                      { ttl: "Без молчаливой замены", txt: "Если товара нет — отдельное предложение аналога в WhatsApp с разницей в цене. Ждём вашего «ок»." },
+                      { ttl: "Цена и наличие — в реальном времени.", txt: "Минимальный заказ, упаковка и оптовые цены видны сразу — ещё до добавления товара в корзину." },
+                      { ttl: "Documents-ready для бухгалтерии", txt: "Счёт-фактура, накладная, договор. ИП без НДС или ТОО с НДС — оба формата." },
+                      { ttl: "50 поставщиков напрямую", txt: "Barry Callebaut, IRCA, Sicao, 1883 — без посредников. Поэтому держим оптовые цены." },
+                    ]
+                ).map((row) => (
                   <div key={row.ttl} className="ops-row">
                     <div className="ic">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -565,24 +586,28 @@ export default async function HomePage({
       <section className="s">
         <div className="container-x">
           <div className="s-head" style={{ marginBottom: 32 }}>
-            <div className="eyebrow">10 лет в Астане</div>
+            <div className="eyebrow">{isEn ? "10 years in Astana" : "10 лет в Астане"}</div>
             <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)" }}>
-              ~ $0.6M оборота за 14 месяцев. 50+ постоянных клиентов.
+              {isEn
+                ? "~$0.6M turnover over 14 months. 50+ recurring customers."
+                : "~ $0.6M оборота за 14 месяцев. 50+ постоянных клиентов."}
             </h2>
           </div>
 
           <div className="proof">
             <div className="quote">
               <div>
-                «Раньше каждый понедельник час уходил на обзвон поставщиков — у кого мука, у кого
-                креветочные брикеты. Теперь собираю заказ в Horecom за 5 минут, накладная сразу на почте.
-                Что важно — если чего-то нет, мне предлагают замену, а не вписывают тихо что-то другое.»
+                {isEn
+                  ? "\"I used to spend an hour every Monday calling suppliers — who's got flour, who's got shrimp briquettes. Now I put together an order on Horecom in 5 minutes and the waybill is in my inbox right away. The important part — if something's missing they offer a substitution instead of quietly swapping in something else.\""
+                  : "«Раньше каждый понедельник час уходил на обзвон поставщиков — у кого мука, у кого креветочные брикеты. Теперь собираю заказ в Horecom за 5 минут, накладная сразу на почте. Что важно — если чего-то нет, мне предлагают замену, а не вписывают тихо что-то другое.»"}
               </div>
               <div className="who">
-                <div className="av">АН</div>
+                <div className="av">{isEn ? "AM" : "АН"}</div>
                 <div>
-                  <div className="nm">Анара Мырзабекова</div>
-                  <div className="ti">Шеф-кондитер, кофейня «Куст», Астана</div>
+                  <div className="nm">{isEn ? "Anara Myrzabekova" : "Анара Мырзабекова"}</div>
+                  <div className="ti">
+                    {isEn ? 'Pastry chef, "Kust" coffee shop, Astana' : "Шеф-кондитер, кофейня «Куст», Астана"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -590,19 +615,19 @@ export default async function HomePage({
             <div className="stats">
               <div className="it">
                 <div className="n">$0.6<span className="u">M</span></div>
-                <div className="l">Оборот за 14 месяцев</div>
+                <div className="l">{isEn ? "Turnover over 14 months" : "Оборот за 14 месяцев"}</div>
               </div>
               <div className="it">
                 <div className="n">40K<span className="u">₸</span></div>
-                <div className="l">Средний чек заказа</div>
+                <div className="l">{isEn ? "Average order value" : "Средний чек заказа"}</div>
               </div>
               <div className="it">
                 <div className="n">10<span className="u">+</span></div>
-                <div className="l">Кондитерских на подписке</div>
+                <div className="l">{isEn ? "Bakeries on subscription" : "Кондитерских на подписке"}</div>
               </div>
               <div className="it">
                 <div className="n">5,000<span className="u" /></div>
-                <div className="l">Уникальных WhatsApp-контактов</div>
+                <div className="l">{isEn ? "Unique WhatsApp contacts" : "Уникальных WhatsApp-контактов"}</div>
               </div>
             </div>
           </div>
@@ -615,15 +640,22 @@ export default async function HomePage({
         <div className="container-x">
           <div className="inner">
             <div>
-              <h2>Готовы попробовать?<br />Каталог открыт прямо сейчас.</h2>
+              <h2>
+                {isEn ? (
+                  <>Ready to try?<br />The catalog is open right now.</>
+                ) : (
+                  <>Готовы попробовать?<br />Каталог открыт прямо сейчас.</>
+                )}
+              </h2>
               <p>
-                Без регистрации, без минимальных обязательств. Один заказ — без подписки. Понравится —
-                настроите регулярную доставку или групповую закупку.
+                {isEn
+                  ? "No registration, no minimum commitment. One-time order — no subscription required. Like it — set up scheduled delivery or a group buy."
+                  : "Без регистрации, без минимальных обязательств. Один заказ — без подписки. Понравится — настроите регулярную доставку или групповую закупку."}
               </p>
             </div>
             <div className="ctas">
               <Link href="/catalog" className="btn btn-orange btn-lg">
-                Открыть каталог
+                {isEn ? "Open catalog" : "Открыть каталог"}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
               <a
@@ -633,7 +665,7 @@ export default async function HomePage({
                 className="btn btn-lg cta-wa-btn"
               >
                 <MessageCircle className="h-4 w-4" style={{ color: "#25D366" }} />
-                Написать в WhatsApp
+                {isEn ? "Message on WhatsApp" : "Написать в WhatsApp"}
               </a>
             </div>
           </div>
