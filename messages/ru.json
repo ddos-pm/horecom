@@ -1,44 +1,69 @@
 {
   "header": {
-    "phoneWhatsApp": "WhatsApp",
-    "phoneVoice": "Звонки",
-    "searchPlaceholder": "Поиск товаров",
-    "openMenu": "Меню",
+    "logoAria": "Horecom — главная",
+    "searchPlaceholder": "Barry Callebaut, мука 25 кг, пюре манго…",
+    "drawerSearchPlaceholder": "Поиск по 190 товарам…",
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть",
     "nav": {
       "catalog": "Каталог",
+      "catalogHint": "190 товаров",
       "subscription": "Подписка на поставку",
       "groupBuying": "Групповая закупка",
-      "about": "О нас",
-      "faq": "FAQ",
-      "delivery": "Доставка"
+      "about": "О компании",
+      "faq": "Частые вопросы"
     },
-    "cart": "Корзина",
-    "account": "Кабинет",
-    "login": "Войти"
+    "login": "Войти",
+    "loginRegister": "Войти / Регистрация",
+    "contacts": "Контакты",
+    "contactsCaption": {
+      "whatsapp": "WhatsApp · приём заказов",
+      "voice": "Звонки",
+      "pickup": "самовывоз 09:00–19:00"
+    }
   },
   "footer": {
-    "tagline": "B2B-поставка ингредиентов для кондитерских и HoReCa в Астане. 10 лет на рынке.",
+    "tagline": "B2B-поставка ингредиентов для кондитерских и HoReCa в Астане. 10 лет на рынке, 50+ клиентов, 50 поставщиков.",
+    "logoAria": "Horecom — главная",
     "columns": {
       "catalog": "Каталог",
-      "info": "Информация",
+      "platform": "Платформа",
       "contacts": "Контакты"
     },
-    "links": {
-      "about": "О компании",
-      "howOrdering": "Как заказать",
+    "catalogLinks": {
+      "all": "Все товары · 190",
+      "chocolate": "Шоколад и глазури",
+      "syrups": "Сиропы · 31",
+      "ingredients": "Сырьё · 40",
+      "dairy": "Молочная продукция",
+      "frozen": "Заморозка и пюре"
+    },
+    "platformLinks": {
       "subscription": "Подписка на поставку",
       "groupBuying": "Групповая закупка",
+      "howOrdering": "Как заказать",
       "delivery": "Доставка и оплата",
-      "faq": "Вопросы и ответы",
-      "privacy": "Политика конфиденциальности"
+      "faq": "Частые вопросы",
+      "about": "О компании"
     },
-    "trust": "10 лет на рынке · 50+ клиентов · доставка по Астане",
-    "legal": "© {year} Horecom"
+    "contactsCaption": {
+      "whatsapp": "WhatsApp · приём заказов",
+      "voice": "Звонки"
+    },
+    "hours": "09:00–19:00 без выходных",
+    "bottom": {
+      "legal": "© {year} Horecom · реквизиты и БИН/ИИН — в счёте после регистрации",
+      "systemsOk": "Все системы работают",
+      "privacy": "Конфиденциальность",
+      "offer": "Оферта",
+      "forAi": "Для AI-агентов",
+      "forAiTitle": "Описание каталога и MCP server для AI-агентов"
+    }
   },
   "home": {
     "hero": {
-      "title": "Опт для кондитеров и HoReCa в Астане",
-      "subtitle": "Доставка ингредиентов и упаковки на ваш склад. Подписка, оптовые цены, документы под ИП и ТОО.",
+      "title": "Поставки для пекарен, кофеен и кондитеров в Астане.",
+      "subtitle": "оптом и в наличии.",
       "openCatalog": "Открыть каталог",
       "subscription": "Подписка на поставку"
     },

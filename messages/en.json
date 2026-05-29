@@ -1,40 +1,65 @@
 {
   "_TODO_REVIEW": "Translation provided for routing/scaffold purposes. Components currently render hardcoded Russian — these strings will become live as components migrate to useTranslations(). Reviewed once; native-speaker pass on commerce terminology pending.",
   "header": {
-    "phoneWhatsApp": "WhatsApp",
-    "phoneVoice": "Calls",
-    "searchPlaceholder": "Search products",
-    "openMenu": "Menu",
+    "logoAria": "Horecom — home",
+    "searchPlaceholder": "Barry Callebaut, flour 25 kg, mango purée…",
+    "drawerSearchPlaceholder": "Search across 190 products…",
+    "openMenu": "Open menu",
+    "closeMenu": "Close",
     "nav": {
       "catalog": "Catalog",
+      "catalogHint": "190 products",
       "subscription": "Supply subscription",
       "groupBuying": "Group buying",
       "about": "About",
-      "faq": "FAQ",
-      "delivery": "Delivery"
+      "faq": "FAQ"
     },
-    "cart": "Cart",
-    "account": "Account",
-    "login": "Sign in"
+    "login": "Sign in",
+    "loginRegister": "Sign in / Register",
+    "contacts": "Contacts",
+    "contactsCaption": {
+      "whatsapp": "WhatsApp · order intake",
+      "voice": "Calls",
+      "pickup": "pickup 09:00–19:00"
+    }
   },
   "footer": {
-    "tagline": "B2B wholesale supply of ingredients for bakeries and HoReCa in Astana. 10 years on the market.",
+    "tagline": "B2B wholesale supply of ingredients for bakeries and HoReCa in Astana. 10 years on the market, 50+ customers, 50 suppliers.",
+    "logoAria": "Horecom — home",
     "columns": {
       "catalog": "Catalog",
-      "info": "Information",
+      "platform": "Platform",
       "contacts": "Contacts"
     },
-    "links": {
-      "about": "About",
-      "howOrdering": "How to order",
+    "catalogLinks": {
+      "all": "All products · 190",
+      "chocolate": "Chocolate and glazes",
+      "syrups": "Syrups · 31",
+      "ingredients": "Raw ingredients · 40",
+      "dairy": "Dairy",
+      "frozen": "Frozen and purées"
+    },
+    "platformLinks": {
       "subscription": "Supply subscription",
       "groupBuying": "Group buying",
+      "howOrdering": "How to order",
       "delivery": "Delivery and payment",
-      "faq": "Questions and answers",
-      "privacy": "Privacy policy"
+      "faq": "FAQ",
+      "about": "About"
     },
-    "trust": "10 years on the market · 50+ customers · delivery across Astana",
-    "legal": "© {year} Horecom"
+    "contactsCaption": {
+      "whatsapp": "WhatsApp · order intake",
+      "voice": "Calls"
+    },
+    "hours": "09:00–19:00, open daily",
+    "bottom": {
+      "legal": "© {year} Horecom · company details and tax ID appear on the invoice after registration",
+      "systemsOk": "All systems operational",
+      "privacy": "Privacy",
+      "offer": "Terms of offer",
+      "forAi": "For AI agents",
+      "forAiTitle": "Catalog description and MCP server for AI agents"
+    }
   },
   "home": {
     "hero": {
@@ -44,7 +69,7 @@
       "subscription": "Supply subscription"
     },
     "segments": {
-      "title": "How to buy",
+      "title": "What fits you",
       "s1": {
         "title": "Restaurant / cafe / hotel",
         "desc": "Regular wholesale supply, dedicated account manager, e-invoices.",

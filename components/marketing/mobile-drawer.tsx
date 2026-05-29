@@ -3,19 +3,13 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, MessageCircle, Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 import { HeaderSearchInput } from "./header-search-input";
 
-const NAV = [
-  { href: "/catalog", label: "Каталог", hint: "190 товаров" },
-  { href: "/subscription", label: "Подписка на поставку" },
-  { href: "/group-buying", label: "Групповая закупка" },
-  { href: "/about", label: "О компании" },
-  { href: "/faq", label: "Частые вопросы" },
-];
-
 export function MobileDrawer() {
+  const t = useTranslations("header");
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -41,6 +35,14 @@ export function MobileDrawer() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  const NAV: { href: string; label: string; hint?: string }[] = [
+    { href: "/catalog", label: t("nav.catalog"), hint: t("nav.catalogHint") },
+    { href: "/subscription", label: t("nav.subscription") },
+    { href: "/group-buying", label: t("nav.groupBuying") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/faq", label: t("nav.faq") },
+  ];
+
   const drawerJsx = (
     <>
       <div
@@ -61,7 +63,7 @@ export function MobileDrawer() {
           <button
             type="button"
             className="hc-icon-btn"
-            aria-label="Закрыть"
+            aria-label={t("closeMenu")}
             onClick={() => setOpen(false)}
           >
             <X className="h-5 w-5" />
@@ -70,7 +72,7 @@ export function MobileDrawer() {
 
         <HeaderSearchInput
           className="hc-drawer-search"
-          placeholder="Поиск по 190 товарам…"
+          placeholder={t("drawerSearchPlaceholder")}
           onAfterSubmit={() => setOpen(false)}
         />
 
@@ -82,14 +84,14 @@ export function MobileDrawer() {
             </Link>
           ))}
           <a href="/login" onClick={() => setOpen(false)}>
-            <span>Войти / Регистрация</span>
+            <span>{t("loginRegister")}</span>
           </a>
         </nav>
 
         <div className="hc-drawer-divider" />
 
         <div className="hc-drawer-contacts">
-          <div className="t-eyebrow" style={{ marginBottom: 10 }}>Контакты</div>
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>{t("contacts")}</div>
           <a
             href={COMPANY.whatsappLink}
             target="_blank"
@@ -99,20 +101,20 @@ export function MobileDrawer() {
             <MessageCircle className="h-5 w-5" style={{ color: "#25D366" }} />
             <div>
               <div className="ttl">{COMPANY.phoneWhatsAppDisplay}</div>
-              <div className="sub">WhatsApp · приём заказов</div>
+              <div className="sub">{t("contactsCaption.whatsapp")}</div>
             </div>
           </a>
           <a href={`tel:${COMPANY.phoneCallback}`} className="hc-drawer-contact">
             <Phone className="h-5 w-5" style={{ color: "#394AD4" }} />
             <div>
               <div className="ttl">{COMPANY.phoneCallbackDisplay}</div>
-              <div className="sub">Звонки</div>
+              <div className="sub">{t("contactsCaption.voice")}</div>
             </div>
           </a>
           <div className="hc-drawer-meta">
             {COMPANY.physicalAddress}
             <br />
-            самовывоз 09:00–19:00
+            {t("contactsCaption.pickup")}
           </div>
         </div>
       </aside>
@@ -124,7 +126,7 @@ export function MobileDrawer() {
       <button
         type="button"
         className="hc-hamb show-mobile"
-        aria-label="Открыть меню"
+        aria-label={t("openMenu")}
         onClick={() => setOpen(true)}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

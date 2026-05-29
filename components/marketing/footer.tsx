@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MessageCircle, Instagram, AtSign } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 
@@ -8,12 +9,15 @@ import { COMPANY } from "@/lib/company";
 // rendered on public surfaces — they appear only in invoices and on the
 // privacy page on request.
 
-export function MarketingFooter() {
+export async function MarketingFooter() {
+  const t = await getTranslations("footer");
+  const year = new Date().getFullYear();
+
   return (
     <footer className="hc-footer">
       <div className="container-x hc-footer-top">
         <div className="hc-footer-brand">
-          <Link href="/" className="hc-logo hc-logo-dark inline-block" aria-label="Horecom — главная">
+          <Link href="/" className="hc-logo hc-logo-dark inline-block" aria-label={t("logoAria")}>
             <Image
               src="/logos/logo-horizontal-transparent.png"
               alt="Horecom"
@@ -24,10 +28,7 @@ export function MarketingFooter() {
               priority
             />
           </Link>
-          <p className="t-body">
-            B2B-поставка ингредиентов для кондитерских и HoReCa в Астане. 10 лет на рынке, 50+ клиентов, 50
-            поставщиков.
-          </p>
+          <p className="t-body">{t("tagline")}</p>
           <div className="hc-footer-socials">
             <a
               href={COMPANY.whatsappLink}
@@ -60,31 +61,31 @@ export function MarketingFooter() {
         </div>
 
         <div>
-          <h4 className="hc-footer-h">Каталог</h4>
+          <h4 className="hc-footer-h">{t("columns.catalog")}</h4>
           <ul className="ul-clean hc-footer-links">
-            <li><Link href="/catalog">Все товары · 190</Link></li>
-            <li><Link href="/catalog?category=chocolate-glazes">Шоколад и глазури</Link></li>
-            <li><Link href="/catalog?category=syrups">Сиропы · 31</Link></li>
-            <li><Link href="/catalog?category=ingredients">Сырьё · 40</Link></li>
-            <li><Link href="/catalog?category=dairy">Молочная продукция</Link></li>
-            <li><Link href="/catalog?category=frozen">Заморозка и пюре</Link></li>
+            <li><Link href="/catalog">{t("catalogLinks.all")}</Link></li>
+            <li><Link href="/catalog?category=chocolate-glazes">{t("catalogLinks.chocolate")}</Link></li>
+            <li><Link href="/catalog?category=syrups">{t("catalogLinks.syrups")}</Link></li>
+            <li><Link href="/catalog?category=ingredients">{t("catalogLinks.ingredients")}</Link></li>
+            <li><Link href="/catalog?category=dairy">{t("catalogLinks.dairy")}</Link></li>
+            <li><Link href="/catalog?category=frozen">{t("catalogLinks.frozen")}</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="hc-footer-h">Платформа</h4>
+          <h4 className="hc-footer-h">{t("columns.platform")}</h4>
           <ul className="ul-clean hc-footer-links">
-            <li><Link href="/subscription">Подписка на поставку</Link></li>
-            <li><Link href="/group-buying">Групповая закупка</Link></li>
-            <li><Link href="/how-ordering-works">Как заказать</Link></li>
-            <li><Link href="/delivery-and-payment">Доставка и оплата</Link></li>
-            <li><Link href="/faq">Частые вопросы</Link></li>
-            <li><Link href="/about">О компании</Link></li>
+            <li><Link href="/subscription">{t("platformLinks.subscription")}</Link></li>
+            <li><Link href="/group-buying">{t("platformLinks.groupBuying")}</Link></li>
+            <li><Link href="/how-ordering-works">{t("platformLinks.howOrdering")}</Link></li>
+            <li><Link href="/delivery-and-payment">{t("platformLinks.delivery")}</Link></li>
+            <li><Link href="/faq">{t("platformLinks.faq")}</Link></li>
+            <li><Link href="/about">{t("platformLinks.about")}</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="hc-footer-h">Контакты</h4>
+          <h4 className="hc-footer-h">{t("columns.contacts")}</h4>
           <ul className="ul-clean hc-footer-links">
             <li>
               <a
@@ -94,13 +95,13 @@ export function MarketingFooter() {
                 className="hc-contact-row"
               >
                 <span style={{ color: "#F18007" }}>{COMPANY.phoneWhatsAppDisplay}</span>
-                <span className="t-meta">WhatsApp · приём заказов</span>
+                <span className="t-meta">{t("contactsCaption.whatsapp")}</span>
               </a>
             </li>
             <li>
               <a href={`tel:${COMPANY.phoneCallback}`} className="hc-contact-row">
                 <span style={{ color: "#5564E0" }}>{COMPANY.phoneCallbackDisplay}</span>
-                <span className="t-meta">Звонки</span>
+                <span className="t-meta">{t("contactsCaption.voice")}</span>
               </a>
             </li>
             <li>
@@ -109,30 +110,28 @@ export function MarketingFooter() {
             <li className="t-meta" style={{ marginTop: 8 }}>
               {COMPANY.physicalAddress}
               <br />
-              09:00–19:00 без выходных
+              {t("hours")}
             </li>
           </ul>
         </div>
       </div>
 
       <div className="container-x hc-footer-bottom">
-        <span>
-          © {new Date().getFullYear()} Horecom · реквизиты и БИН/ИИН — в счёте после регистрации
-        </span>
+        <span>{t("bottom.legal", { year })}</span>
         <span className="hc-footer-meta">
           <span>
-            <span className="live-dot" /> Все системы работают
+            <span className="live-dot" /> {t("bottom.systemsOk")}
           </span>
           <span aria-hidden="true">·</span>
-          <Link href="/privacy">Конфиденциальность</Link>
+          <Link href="/privacy">{t("bottom.privacy")}</Link>
           <span aria-hidden="true">·</span>
-          <Link href="/offer">Оферта</Link>
+          <Link href="/offer">{t("bottom.offer")}</Link>
           <span aria-hidden="true">·</span>
           <a
             href="/llms.txt"
-            title="Описание каталога и MCP server для AI-агентов"
+            title={t("bottom.forAiTitle")}
           >
-            Для AI-агентов
+            {t("bottom.forAi")}
           </a>
         </span>
       </div>
