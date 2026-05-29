@@ -1,0 +1,124 @@
+{
+  "_TODO_REVIEW": "Translation provided for routing/scaffold purposes. Components currently render hardcoded Russian — these strings will become live as components migrate to useTranslations(). Reviewed once; native-speaker pass on commerce terminology pending.",
+  "header": {
+    "phoneWhatsApp": "WhatsApp",
+    "phoneVoice": "Calls",
+    "searchPlaceholder": "Search products",
+    "openMenu": "Menu",
+    "nav": {
+      "catalog": "Catalog",
+      "subscription": "Supply subscription",
+      "groupBuying": "Group buying",
+      "about": "About",
+      "faq": "FAQ",
+      "delivery": "Delivery"
+    },
+    "cart": "Cart",
+    "account": "Account",
+    "login": "Sign in"
+  },
+  "footer": {
+    "tagline": "B2B wholesale supply of ingredients for bakeries and HoReCa in Astana. 10 years on the market.",
+    "columns": {
+      "catalog": "Catalog",
+      "info": "Information",
+      "contacts": "Contacts"
+    },
+    "links": {
+      "about": "About",
+      "howOrdering": "How to order",
+      "subscription": "Supply subscription",
+      "groupBuying": "Group buying",
+      "delivery": "Delivery and payment",
+      "faq": "Questions and answers",
+      "privacy": "Privacy policy"
+    },
+    "trust": "10 years on the market · 50+ customers · delivery across Astana",
+    "legal": "© {year} Horecom"
+  },
+  "home": {
+    "hero": {
+      "title": "Wholesale supply for bakeries, cafes, and pastry chefs in Astana.",
+      "subtitle": "Wholesale and in stock.",
+      "openCatalog": "Open catalog",
+      "subscription": "Supply subscription"
+    },
+    "segments": {
+      "title": "How to buy",
+      "s1": {
+        "title": "Restaurant / cafe / hotel",
+        "desc": "Regular wholesale supply, dedicated account manager, e-invoices.",
+        "cta": "Catalog"
+      },
+      "s2": {
+        "title": "Bakery / pastry shop",
+        "desc": "Supply subscription: scheduled delivery and WhatsApp reminders.",
+        "cta": "Supply subscription"
+      },
+      "s3": {
+        "title": "Independent pastry maker",
+        "desc": "Wholesale prices without your own warehouse — through group buying.",
+        "cta": "Group buying"
+      }
+    },
+    "categoriesTitle": "Categories",
+    "categoriesCount": "{count, plural, one {# item} other {# items}}",
+    "featuredTitle": "Top of the month",
+    "viewAll": "All products →"
+  },
+  "catalog": {
+    "title": "Catalog",
+    "found": "Found: {count}",
+    "filters": {
+      "search": "Search",
+      "category": "Category",
+      "allCategories": "All categories",
+      "clear": "Clear"
+    },
+    "moq": "Min. order: {qty}",
+    "addToCart": "Add to cart",
+    "stock": {
+      "IN_STOCK": "In stock",
+      "LOW_STOCK": "Low stock",
+      "OUT_OF_STOCK": "Out of stock"
+    }
+  },
+  "product": {
+    "sku": "SKU",
+    "moq": "Minimum order: {qty} {unit}",
+    "addToCart": "Add to cart",
+    "askWhatsApp": "Ask on WhatsApp",
+    "askMessage": "Hello! I'm interested in {name} ({sku})",
+    "increase": "Increase",
+    "decrease": "Decrease",
+    "subscriptionEligible": "Subscription available",
+    "groupEligible": "Group buying available",
+    "from": "From {qty} {unit}: {price} {unitLabel}",
+    "savePerUnit": "Save {amount} per unit"
+  },
+  "subscriptionLanding": {
+    "title": "Supply subscription",
+    "lead": "Tired of tracking when you'll run out? Set up a subscription — we'll deliver on schedule and remind you ahead of time.",
+    "submitRequest": "Submit request",
+    "openCatalog": "Open catalog"
+  },
+  "groupBuyingLanding": {
+    "title": "Group buying",
+    "comingSoon": "Launching soon",
+    "lead": "Small bakeries and independent pastry makers pool orders to buy a single SKU at the wholesale price.",
+    "joinPilot": "Join the pilot"
+  },
+  "common": {
+    "back": "← Back",
+    "continue": "Continue",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "search": "Search",
+    "send": "Send",
+    "open": "Open"
+  }
+}

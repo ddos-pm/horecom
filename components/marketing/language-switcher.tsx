@@ -3,49 +3,60 @@
 /**
  * Language switcher.
  *
- * V0 behaviour: the /kz routes exist and are reachable (so any external
- * link or pre-indexed URL still resolves), but the catalog/marketing content
- * isn't translated yet. To avoid showing the same Russian copy on a KZ URL —
- * which would look broken to a reviewer — KZ is rendered as a disabled
- * "Қазақша · скоро" label. The switcher will become interactive once
- * messages/kz.json gets a native-speaker pass.
+ * Three locales:
+ *   - ru — full UI (source of truth)
+ *   - en — partial UI (home hero in English, rest still Russian until
+ *          components migrate to useTranslations). Banner explains this.
+ *   - kz — route reservation only. Content still Russian, native-speaker
+ *          pass on messages/kz.json pending. Rendered as disabled stub
+ *          to avoid implying functional Kazakh UI.
+ *
+ * Reviewers who hit /en or /kz get a clear status banner via
+ * <LocaleBanner> with a one-click jump back to /ru.
  */
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname, routing, type Locale } from "@/i18n/routing";
+import { useRouter, usePathname, type Locale } from "@/i18n/routing";
 
 export function LanguageSwitcher() {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
 
-  function goRussian() {
-    if (locale === "ru") return;
-    router.replace(pathname, { locale: "ru" });
+  function go(target: Locale) {
+    if (locale === target) return;
+    router.replace(pathname, { locale: target });
   }
+
+  const baseCls = "rounded px-1.5 py-0.5 text-[11px]";
+  const activeCls = "bg-foreground text-background";
+  const idleCls = "text-muted-foreground hover:text-foreground";
 
   return (
     <div className="inline-flex items-center gap-1">
       <button
         type="button"
-        onClick={goRussian}
+        onClick={() => go("ru")}
         aria-current={locale === "ru" ? "true" : undefined}
-        className={`rounded px-1.5 py-0.5 text-[11px] ${
-          locale === "ru" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-        }`}
+        className={`${baseCls} ${locale === "ru" ? activeCls : idleCls}`}
       >
         Русский
       </button>
+      <button
+        type="button"
+        onClick={() => go("en")}
+        aria-current={locale === "en" ? "true" : undefined}
+        className={`${baseCls} ${locale === "en" ? activeCls : idleCls}`}
+      >
+        English
+      </button>
       <span
-        title="Казахская версия в разработке"
+        title="Қазақша нұсқа дайындалуда — Kazakh UI in progress"
         aria-disabled="true"
-        className="rounded px-1.5 py-0.5 text-[11px] text-muted-foreground/60 cursor-not-allowed"
+        className={`${baseCls} text-muted-foreground/60 cursor-not-allowed`}
       >
         Қазақша · скоро
       </span>
     </div>
   );
 }
-
-// Silence unused warnings — kept for future swap-in when KZ ships.
-void routing;

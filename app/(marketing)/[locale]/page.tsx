@@ -82,7 +82,14 @@ const CAT_ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+
   const FEATURED_INCLUDE = {
     prices: { take: 1, orderBy: { createdAt: "desc" } },
     inventorySnapshot: true,
@@ -124,38 +131,77 @@ export default async function HomePage() {
         <div className="container-x hero-body">
           <div className="hero-layout">
             <div>
-              <h1>Поставки для пекарен, кофеен и кондитеров в&nbsp;Астане.</h1>
-              <p className="hero-subhead">оптом и в наличии.</p>
+              {isEn ? (
+                <>
+                  <h1>Wholesale supply for bakeries, cafes, and pastry chefs in&nbsp;Astana.</h1>
+                  <p className="hero-subhead">wholesale and in stock.</p>
 
-              <p className="lede">
-                Умные закупки: помогаем следить за остатками, обеспечиваем стабильные поставки и быструю
-                доставку. 3 сценария закупок: для HoReCa, домашнего кондитера, групповые закупки для
-                физических лиц.
-              </p>
+                  <p className="lede">
+                    Smart procurement: we keep an eye on your stock, guarantee reliable supply
+                    and fast delivery. Three procurement modes — for HoReCa, for independent
+                    pastry makers, and group buying for individual customers.
+                  </p>
 
-              <div className="hero-ctas">
-                <Link href="/catalog" className="btn btn-orange btn-lg cta-arrow">
-                  Открыть каталог · {skuCount} товаров
-                  <ArrowRight className="h-3.5 w-3.5 cta-arrow-icon" />
-                </Link>
-                <a
-                  href={COMPANY.whatsappLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-lg hero-wa-btn"
-                >
-                  <MessageCircle className="h-4 w-4" style={{ color: "#25D366" }} />
-                  Написать в WhatsApp
-                </a>
-              </div>
+                  <div className="hero-ctas">
+                    <Link href="/catalog" className="btn btn-orange btn-lg cta-arrow">
+                      Open catalog · {skuCount} products
+                      <ArrowRight className="h-3.5 w-3.5 cta-arrow-icon" />
+                    </Link>
+                    <a
+                      href={COMPANY.whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-lg hero-wa-btn"
+                    >
+                      <MessageCircle className="h-4 w-4" style={{ color: "#25D366" }} />
+                      Message on WhatsApp
+                    </a>
+                  </div>
 
-              <div className="min-fact">
-                <span>
-                  <b>Бесплатная доставка от 20 000 ₸</b>
-                </span>
-                <span className="show-md">·</span>
-                <span>Безнал, ссылка KaspiPay или счёт на оплату, документы для бухгалтерии</span>
-              </div>
+                  <div className="min-fact">
+                    <span>
+                      <b>Free delivery from 20,000 ₸</b>
+                    </span>
+                    <span className="show-md">·</span>
+                    <span>Bank transfer, KaspiPay link, or invoice — bookkeeping-ready documents</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h1>Поставки для пекарен, кофеен и кондитеров в&nbsp;Астане.</h1>
+                  <p className="hero-subhead">оптом и в наличии.</p>
+
+                  <p className="lede">
+                    Умные закупки: помогаем следить за остатками, обеспечиваем стабильные поставки и быструю
+                    доставку. 3 сценария закупок: для HoReCa, домашнего кондитера, групповые закупки для
+                    физических лиц.
+                  </p>
+
+                  <div className="hero-ctas">
+                    <Link href="/catalog" className="btn btn-orange btn-lg cta-arrow">
+                      Открыть каталог · {skuCount} товаров
+                      <ArrowRight className="h-3.5 w-3.5 cta-arrow-icon" />
+                    </Link>
+                    <a
+                      href={COMPANY.whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-lg hero-wa-btn"
+                    >
+                      <MessageCircle className="h-4 w-4" style={{ color: "#25D366" }} />
+                      Написать в WhatsApp
+                    </a>
+                  </div>
+
+                  <div className="min-fact">
+                    <span>
+                      <b>Бесплатная доставка от 20 000 ₸</b>
+                    </span>
+                    <span className="show-md">·</span>
+                    <span>Безнал, ссылка KaspiPay или счёт на оплату, документы для бухгалтерии</span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Hero right: live product card preview */}
