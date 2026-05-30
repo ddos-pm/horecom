@@ -3,9 +3,14 @@
 import { Suspense, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useLocaleCookie } from "@/lib/use-locale-cookie";
+
+// Supabase auth client (~80 KB) is dynamically imported only when the
+// password form actually submits — otherwise visitors who pick
+// WhatsApp OTP, or who land on /login but bounce back, never pay for
+// it. /api/auth/otp/* runs server-side and doesn't need the browser
+// SDK at all.
 
 function StandaloneLogo() {
   return (
@@ -133,6 +138,9 @@ function PasswordForm({
     e.preventDefault();
     setLoading(true);
     onError(null);
+    // Code-split the Supabase auth bundle — only the visitor who
+    // actually submits the password form pays for the ~80 KB SDK.
+    const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
