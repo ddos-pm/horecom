@@ -21,6 +21,6 @@ export function buildPluginManifest(origin: string) {
       manifest: `${origin}/api/mcp/manifest.json`,
     },
     contact_email: "Horecomkz@gmail.com",
-    legal_info_url: `${origin}/ru/privacy`,
+    legal_info_url: `${origin}/en/privacy`,
   };
 }

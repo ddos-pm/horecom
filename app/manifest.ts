@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 /**
  * PWA manifest. Icons live in public/ at stable URLs so the manifest can
@@ -7,13 +8,23 @@ import type { MetadataRoute } from "next";
  *
  * Theme color matches the orange brand mark for the chrome tint shown
  * around the address bar / app shell when installed.
+ *
+ * Locale awareness: when the user installs the PWA from /en/ the cookie
+ * is set to "en", and the manifest exposes English name + description.
+ * start_url respects the same locale so the installed app opens to the
+ * right home page.
  */
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const locale = await getLocaleFromCookie();
+  const isEn = locale === "en";
+
   return {
-    name: "Horecom — B2B оптовая платформа",
+    name: isEn ? "Horecom — B2B wholesale platform" : "Horecom — B2B оптовая платформа",
     short_name: "Horecom",
-    description: "Оптовая поставка ингредиентов для HoReCa в Астане",
-    start_url: "/ru",
+    description: isEn
+      ? "Wholesale ingredient supply for HoReCa in Astana"
+      : "Оптовая поставка ингредиентов для HoReCa в Астане",
+    start_url: `/${locale}`,
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#F18305",
