@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { COMPANY } from "@/lib/company";
 import { WaitlistIsland, WaitlistSkeleton } from "./waitlist-island";
 import { LiveCountdown } from "./countdown";
 import "./group-buying.css";

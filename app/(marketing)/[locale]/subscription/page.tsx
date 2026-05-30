@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { Link } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { COMPANY } from "@/lib/company";
 import { RequestFormIsland, RequestFormSkeleton } from "./request-form-island";

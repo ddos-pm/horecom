@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { Globe, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocaleCookie } from "@/lib/use-locale-cookie";
-import { routing, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
 
 const LOCALES: { value: Locale; label: string; native: string }[] = [
   { value: "ru", label: "RU", native: "Русский" },
