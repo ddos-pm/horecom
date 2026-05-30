@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { MessageCircle, ArrowRight } from "lucide-react";
 import { setRequestLocale } from "next-intl/server";
-import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
+import { getHomePageData } from "@/lib/home-loader";
 import { StatusStrip } from "@/components/marketing/status-strip";
 import { SuppliersMarquee } from "@/components/marketing/suppliers-marquee";
 import { TopMonthList } from "@/components/marketing/top-month-list";
@@ -94,32 +94,10 @@ export default async function HomePage({
   setRequestLocale(locale);
   const isEn = locale === "en";
 
-  const FEATURED_INCLUDE = {
-    prices: { take: 1, orderBy: { createdAt: "desc" } },
-    inventorySnapshot: true,
-    category: true,
-  } as const;
-
-  // The hero card uses Масло Рогачёв as the visual example (the team's pick).
-  // Pin it explicitly so the hero stays stable regardless of seed-order
-  // changes; if it's ever delisted, we fall back to the rest of `featured`.
-  const [categories, heroProduct, featured, skuCount] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { sortOrder: "asc" },
-      include: { _count: { select: { products: { where: { isActive: true } } } } },
-    }),
-    prisma.product.findFirst({
-      where: { slug: "maslo-rogachev-82-5-5kg", isActive: true },
-      include: FEATURED_INCLUDE,
-    }),
-    prisma.product.findMany({
-      where: { isActive: true },
-      take: 18,
-      orderBy: { createdAt: "asc" },
-      include: FEATURED_INCLUDE,
-    }),
-    prisma.product.count({ where: { isActive: true } }),
-  ]);
+  // Cached for 10 min — first visitor pays for the 4 Tokyo Supabase trips,
+  // everyone else hits the warm cache. See lib/home-loader.ts for why we
+  // don't rely on Next's SSG here despite the build output labelling it ●.
+  const { categories, heroProduct, featured, skuCount } = await getHomePageData();
   const hero = heroProduct ?? featured[0] ?? null;
 
   return (
