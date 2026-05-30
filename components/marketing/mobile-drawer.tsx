@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 import { HeaderSearchInput } from "./header-search-input";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function MobileDrawer() {
   const t = useTranslations("header");
@@ -89,6 +90,10 @@ export function MobileDrawer() {
         </nav>
 
         <div className="hc-drawer-divider" />
+
+        <div style={{ padding: "0 4px 12px" }}>
+          <LanguageSwitcher />
+        </div>
 
         <div className="hc-drawer-contacts">
           <div className="t-eyebrow" style={{ marginBottom: 10 }}>{t("contacts")}</div>

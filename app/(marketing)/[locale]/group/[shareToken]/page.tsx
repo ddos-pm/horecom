@@ -15,26 +15,37 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ shareToken: string }>;
+  params: Promise<{ locale: string; shareToken: string }>;
 }): Promise<Metadata> {
-  const { shareToken } = await params;
+  const { locale, shareToken } = await params;
+  const isEn = locale === "en";
   const offer = await prisma.groupBuyOffer.findUnique({
     where: { shareToken },
     include: { product: true },
   });
-  if (!offer) return { title: "Групповая закупка не найдена" };
+  if (!offer) return { title: isEn ? "Group buy not found" : "Групповая закупка не найдена" };
   return {
-    title: `Групповая закупка · ${offer.product.name}`,
-    description: `Присоединяйтесь к закупке: оптовая цена ${formatKzt(Number(offer.groupPrice))} при наборе группы. До ${new Date(offer.deadlineAt).toLocaleString("ru-RU")}.`,
+    title: isEn ? `Group buy · ${offer.product.name}` : `Групповая закупка · ${offer.product.name}`,
+    description: isEn
+      ? `Join the group: wholesale price ${formatKzt(Number(offer.groupPrice))} once the group fills. Until ${new Date(offer.deadlineAt).toLocaleString("en-US")}.`
+      : `Присоединяйтесь к закупке: оптовая цена ${formatKzt(Number(offer.groupPrice))} при наборе группы. До ${new Date(offer.deadlineAt).toLocaleString("ru-RU")}.`,
   };
 }
 
-const STATUS_LABEL: Record<string, { label: string; tone: "active" | "success" | "failed" | "neutral" }> = {
+const STATUS_LABEL_RU: Record<string, { label: string; tone: "active" | "success" | "failed" | "neutral" }> = {
   OPEN: { label: "Идёт набор", tone: "active" },
   THRESHOLD_REACHED: { label: "Группа собрана", tone: "success" },
   CLOSED_SUCCESS: { label: "Закрыта · успех", tone: "success" },
   CLOSED_FAILED: { label: "Не собралась", tone: "failed" },
   CANCELLED: { label: "Отменена", tone: "neutral" },
+};
+
+const STATUS_LABEL_EN: Record<string, { label: string; tone: "active" | "success" | "failed" | "neutral" }> = {
+  OPEN: { label: "Filling", tone: "active" },
+  THRESHOLD_REACHED: { label: "Group complete", tone: "success" },
+  CLOSED_SUCCESS: { label: "Closed · success", tone: "success" },
+  CLOSED_FAILED: { label: "Did not fill", tone: "failed" },
+  CANCELLED: { label: "Cancelled", tone: "neutral" },
 };
 
 export default async function GroupBuyPage({
@@ -43,6 +54,9 @@ export default async function GroupBuyPage({
   params: Promise<{ shareToken: string; locale: string }>;
 }) {
   const { shareToken, locale } = await params;
+  const isEn = locale === "en";
+  const STATUS_LABEL = isEn ? STATUS_LABEL_EN : STATUS_LABEL_RU;
+  const numFmt = isEn ? "en-US" : "ru-RU";
 
   const offer = await prisma.groupBuyOffer.findUnique({
     where: { shareToken },
@@ -82,9 +96,9 @@ export default async function GroupBuyPage({
   return (
     <main className="container-x gb-page">
       <nav className="breadcrumb">
-        <Link href="/">Главная</Link>
+        <Link href="/">{isEn ? "Home" : "Главная"}</Link>
         <span className="sep">/</span>
-        <Link href="/group-buying">Групповая закупка</Link>
+        <Link href="/group-buying">{isEn ? "Group buying" : "Групповая закупка"}</Link>
         <span className="sep">/</span>
         <span className="curr">{offer.product.name}</span>
       </nav>
@@ -116,11 +130,11 @@ export default async function GroupBuyPage({
 
           <div className="gb-prices">
             <div className="gb-price-cell">
-              <div className="lbl">Розничная</div>
+              <div className="lbl">{isEn ? "Retail" : "Розничная"}</div>
               <div className="val strike tabular">{formatKzt(solo)}</div>
             </div>
             <div className="gb-price-cell hi">
-              <div className="lbl">В группе</div>
+              <div className="lbl">{isEn ? "In the group" : "В группе"}</div>
               <div className="val tabular">{formatKzt(group)}</div>
               <div className="save">−{savings}%</div>
             </div>
@@ -128,7 +142,7 @@ export default async function GroupBuyPage({
 
           <div className="gb-progress">
             <div className="gb-progress-head">
-              <span>Прогресс группы</span>
+              <span>{isEn ? "Group progress" : "Прогресс группы"}</span>
               <span className="val tabular">
                 {offer.currentQty} / {offer.targetQty} {offer.product.packLabel}
               </span>
@@ -140,7 +154,8 @@ export default async function GroupBuyPage({
               <div className="gb-progress-foot">
                 <Users className="h-3.5 w-3.5" />
                 <span>
-                  Участников: <b>{offer.currentParticipants}</b> / {offer.targetParticipants}
+                  {isEn ? "Participants: " : "Участников: "}
+                  <b>{offer.currentParticipants}</b> / {offer.targetParticipants}
                 </span>
                 {participantsPct != null && <span>· {participantsPct}%</span>}
               </div>
@@ -149,8 +164,12 @@ export default async function GroupBuyPage({
               <Clock className="h-3.5 w-3.5" />
               <span>
                 {deadlinePassed
-                  ? "Дедлайн прошёл"
-                  : `До ${new Date(offer.deadlineAt).toLocaleString("ru-RU")}`}
+                  ? isEn
+                    ? "Deadline passed"
+                    : "Дедлайн прошёл"
+                  : isEn
+                    ? `Until ${new Date(offer.deadlineAt).toLocaleString(numFmt)}`
+                    : `До ${new Date(offer.deadlineAt).toLocaleString(numFmt)}`}
               </span>
             </div>
           </div>
@@ -168,7 +187,7 @@ export default async function GroupBuyPage({
 
           {offer.participations.length > 0 && (
             <div className="gb-participants">
-              <h3>Участники</h3>
+              <h3>{isEn ? "Participants" : "Участники"}</h3>
               <ul className="ul-clean">
                 {offer.participations.map((p) => (
                   <li key={p.id}>
@@ -185,12 +204,23 @@ export default async function GroupBuyPage({
 
         <aside className="gb-page-aside">
           <div className="gb-info-card">
-            <h3>Как это работает</h3>
+            <h3>{isEn ? "How it works" : "Как это работает"}</h3>
             <ol>
-              <li>Присоединяетесь — указываете сколько ведёр / мешков заберёте.</li>
-              <li>Делитесь ссылкой — закупка набирается участниками.</li>
-              <li>Когда набирается порог — оптовая цена активируется для всех.</li>
-              <li>Если не набралась к дедлайну — оплата не списывается.</li>
+              {isEn ? (
+                <>
+                  <li>Join — pick how many buckets / sacks you'll take.</li>
+                  <li>Share the link — the group fills with participants.</li>
+                  <li>When the threshold is reached — the wholesale price activates for everyone.</li>
+                  <li>If the group doesn't fill by the deadline — no charge.</li>
+                </>
+              ) : (
+                <>
+                  <li>Присоединяетесь — указываете сколько ведёр / мешков заберёте.</li>
+                  <li>Делитесь ссылкой — закупка набирается участниками.</li>
+                  <li>Когда набирается порог — оптовая цена активируется для всех.</li>
+                  <li>Если не набралась к дедлайну — оплата не списывается.</li>
+                </>
+              )}
             </ol>
           </div>
         </aside>

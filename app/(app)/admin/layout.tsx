@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ShoppingBag, Package, Repeat, Users, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -11,8 +12,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?redirectTo=/admin");
 
-  const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
+  const [dbUser, locale] = await Promise.all([
+    prisma.user.findUnique({ where: { supabaseId: user.id } }),
+    getLocaleFromCookie(),
+  ]);
   if (!dbUser?.isAdmin) notFound();
+  const isEn = locale === "en";
 
   const [pendingOrders, pendingSubs, pendingInterests] = await Promise.all([
     prisma.order.count({ where: { status: { in: ["CREATED", "WAITING_PAYMENT", "CONFIRMED"] } } }),
@@ -21,9 +26,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   ]);
 
   const NAV = [
-    { href: "/admin/orders", label: "Заказы", icon: ShoppingBag, badge: pendingOrders },
-    { href: "/admin/catalog", label: "Каталог", icon: Package, badge: 0 },
-    { href: "/admin/subscriptions", label: "Подписки", icon: Repeat, badge: pendingSubs },
+    { href: "/admin/orders", label: isEn ? "Orders" : "Заказы", icon: ShoppingBag, badge: pendingOrders },
+    { href: "/admin/catalog", label: isEn ? "Catalog" : "Каталог", icon: Package, badge: 0 },
+    { href: "/admin/subscriptions", label: isEn ? "Subscriptions" : "Подписки", icon: Repeat, badge: pendingSubs },
     { href: "/admin/group-buy-interests", label: "Group Buy", icon: Users, badge: pendingInterests },
   ];
 
@@ -34,7 +39,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="border-b border-border px-4 py-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               <Shield className="h-3.5 w-3.5" />
-              Админ-панель
+              {isEn ? "Admin panel" : "Админ-панель"}
             </div>
           </div>
           <nav className="flex flex-col gap-1 p-3">

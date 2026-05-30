@@ -7,22 +7,25 @@ import { Button } from "@/components/ui/button";
 import { markInterestProcessed, unmarkInterestProcessed } from "./actions";
 
 export function InterestRowActions({
+  locale,
   id,
   processed,
   email,
   phone,
 }: {
+  locale: string;
   id: string;
   processed: boolean;
   email: string;
   phone: string | null;
 }) {
+  const isEn = locale === "en";
   const [pending, startTransition] = useTransition();
 
   function markDone() {
     startTransition(async () => {
       const r = await markInterestProcessed(id, "");
-      if (r.success) toast.success("Помечено как обработано");
+      if (r.success) toast.success(isEn ? "Marked as processed" : "Помечено как обработано");
       else toast.error(r.error);
     });
   }
@@ -30,7 +33,7 @@ export function InterestRowActions({
   function undo() {
     startTransition(async () => {
       const r = await unmarkInterestProcessed(id);
-      if (r.success) toast.success("Возвращено в работу");
+      if (r.success) toast.success(isEn ? "Sent back to queue" : "Возвращено в работу");
       else toast.error(r.error);
     });
   }
@@ -38,7 +41,9 @@ export function InterestRowActions({
   const cleanedPhone = phone?.replace(/\D/g, "");
   const waLink = cleanedPhone
     ? `https://api.whatsapp.com/send/?phone=${cleanedPhone}&text=${encodeURIComponent(
-        "Здравствуйте! По вашей заявке на групповые закупки в Horecom…",
+        isEn
+          ? "Hello! Regarding your group-buying request at Horecom…"
+          : "Здравствуйте! По вашей заявке на групповые закупки в Horecom…",
       )}`
     : null;
 
@@ -57,13 +62,19 @@ export function InterestRowActions({
         </a>
       )}
       {processed ? (
-        <Button size="sm" variant="ghost" disabled={pending} onClick={undo} title="Вернуть в работу">
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={pending}
+          onClick={undo}
+          title={isEn ? "Return to queue" : "Вернуть в работу"}
+        >
           <RotateCcw className="h-4 w-4" />
         </Button>
       ) : (
         <Button size="sm" disabled={pending} onClick={markDone}>
           <Check className="h-4 w-4" />
-          Обработано
+          {isEn ? "Processed" : "Обработано"}
         </Button>
       )}
     </div>

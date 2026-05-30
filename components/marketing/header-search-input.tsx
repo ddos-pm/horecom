@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Search } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/routing";
 
 /**
@@ -36,6 +37,7 @@ export function HeaderSearchInput({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useLocale();
   // Read ?q= from the URL via window after mount instead of useSearchParams —
   // subscribing here would bail every statically prerendered marketing page
   // out of the static export with a "missing-suspense-with-csr-bailout" error.
@@ -100,7 +102,7 @@ export function HeaderSearchInput({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        aria-label="Поиск товаров"
+        aria-label={locale === "en" ? "Search products" : "Поиск товаров"}
       />
       {showShortcut && <kbd className="kbd-shortcut">⌘K</kbd>}
     </form>

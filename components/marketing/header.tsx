@@ -3,6 +3,7 @@ import { Link } from "@/i18n/routing";
 import { MobileDrawer } from "./mobile-drawer";
 import { CartIconBadge } from "@/components/cart/cart-icon-badge";
 import { HeaderSearchInput } from "./header-search-input";
+import { LanguageSwitcher } from "./language-switcher";
 
 export async function MarketingHeader() {
   const t = await getTranslations("header");
@@ -33,6 +34,7 @@ export async function MarketingHeader() {
               in middleware) — using next-intl <Link> here would prefix them
               with /ru and produce 404. Plain <a> hits the real path. */}
           <div className="hc-actions">
+            <LanguageSwitcher />
             <a href="/login" className="hc-login show-md">
               {t("login")}
             </a>

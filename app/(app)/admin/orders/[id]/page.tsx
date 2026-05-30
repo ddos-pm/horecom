@@ -4,12 +4,13 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 import { OrderStatusControls } from "./status-controls";
 import { ItemControls } from "./item-controls";
 
 export const metadata = { title: "Заказ · Admin" };
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_RU: Record<string, string> = {
   CREATED: "Создан",
   INVOICE_SENT: "Счёт выставлен",
   WAITING_PAYMENT: "Ждёт оплату",
@@ -22,12 +23,33 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Отменён",
 };
 
-const ITEM_STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_EN: Record<string, string> = {
+  CREATED: "Created",
+  INVOICE_SENT: "Invoice sent",
+  WAITING_PAYMENT: "Awaiting payment",
+  PAID: "Paid",
+  CONFIRMED: "Confirmed",
+  PARTIALLY_CONFIRMED: "Partially confirmed",
+  PICKING: "Picking",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
+const ITEM_STATUS_LABEL_RU: Record<string, string> = {
   PENDING: "В ожидании",
   CONFIRMED: "Подтверждена",
   SUBSTITUTED: "Замена",
   OUT_OF_STOCK: "Нет в наличии",
   CANCELLED: "Отменена",
+};
+
+const ITEM_STATUS_LABEL_EN: Record<string, string> = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  SUBSTITUTED: "Substituted",
+  OUT_OF_STOCK: "Out of stock",
+  CANCELLED: "Cancelled",
 };
 
 export default async function AdminOrderDetailPage({
@@ -36,6 +58,11 @@ export default async function AdminOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocaleFromCookie();
+  const isEn = locale === "en";
+  const STATUS_LABEL = isEn ? STATUS_LABEL_EN : STATUS_LABEL_RU;
+  const ITEM_STATUS_LABEL = isEn ? ITEM_STATUS_LABEL_EN : ITEM_STATUS_LABEL_RU;
+  const numFmt = isEn ? "en-US" : "ru-RU";
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -58,15 +85,17 @@ export default async function AdminOrderDetailPage({
   return (
     <div className="container-tight py-6 md:py-8">
       <Link href="/admin/orders" className="mb-3 inline-block text-sm text-muted-foreground hover:text-foreground">
-        ← К списку
+        {isEn ? "← Back to list" : "← К списку"}
       </Link>
 
       <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold md:text-2xl">Заказ {order.number}</h1>
+          <h1 className="text-xl font-bold md:text-2xl">
+            {isEn ? `Order ${order.number}` : `Заказ ${order.number}`}
+          </h1>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {order.company.name} · Создан{" "}
-            {new Date(order.createdAt).toLocaleString("ru-RU")}
+            {order.company.name} · {isEn ? "Created " : "Создан "}
+            {new Date(order.createdAt).toLocaleString(numFmt)}
           </p>
         </div>
         <Badge variant={order.status === "CANCELLED" ? "danger" : "info"}>
@@ -75,13 +104,15 @@ export default async function AdminOrderDetailPage({
       </header>
 
       <div className="mb-4 rounded-lg border border-border bg-card p-4">
-        <div className="mb-2 text-xs font-medium text-muted-foreground">Действия со статусом</div>
-        <OrderStatusControls orderId={order.id} status={order.status} />
+        <div className="mb-2 text-xs font-medium text-muted-foreground">
+          {isEn ? "Status actions" : "Действия со статусом"}
+        </div>
+        <OrderStatusControls locale={locale} orderId={order.id} status={order.status} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
         <section className="space-y-2">
-          <h3 className="text-sm font-medium">Позиции</h3>
+          <h3 className="text-sm font-medium">{isEn ? "Items" : "Позиции"}</h3>
           {order.items.map((item) => (
             <div key={item.id} className="rounded-lg border border-border bg-card p-3">
               <div className="flex gap-3">
@@ -114,6 +145,7 @@ export default async function AdminOrderDetailPage({
                 </div>
               </div>
               <ItemControls
+                locale={locale}
                 itemId={item.id}
                 itemStatus={item.itemStatus}
                 substituteProductId={item.substituteProductId}
@@ -126,21 +158,25 @@ export default async function AdminOrderDetailPage({
 
         <aside className="h-fit space-y-3 rounded-lg border border-border bg-card p-4 text-sm">
           <div>
-            <div className="text-xs font-medium text-muted-foreground">Клиент</div>
+            <div className="text-xs font-medium text-muted-foreground">
+              {isEn ? "Customer" : "Клиент"}
+            </div>
             <div className="mt-1">{order.company.name}</div>
             {order.company.binOrIin && (
-              <div className="text-xs text-muted-foreground">БИН/ИИН {order.company.binOrIin}</div>
+              <div className="text-xs text-muted-foreground">BIN/IIN {order.company.binOrIin}</div>
             )}
           </div>
           <div>
-            <div className="text-xs font-medium text-muted-foreground">Адрес</div>
+            <div className="text-xs font-medium text-muted-foreground">
+              {isEn ? "Address" : "Адрес"}
+            </div>
             <div className="mt-1">
               {order.address.street}, {order.address.house}
               {order.address.details ? `, ${order.address.details}` : ""}
             </div>
             {window.date && (
               <div className="text-xs text-muted-foreground">
-                {new Date(window.date).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+                {new Date(window.date).toLocaleDateString(numFmt, { day: "numeric", month: "short" })}
                 {", "}
                 {window.slot}
               </div>
@@ -148,22 +184,26 @@ export default async function AdminOrderDetailPage({
           </div>
           {order.comment && (
             <div>
-              <div className="text-xs font-medium text-muted-foreground">Комментарий клиента</div>
+              <div className="text-xs font-medium text-muted-foreground">
+                {isEn ? "Customer note" : "Комментарий клиента"}
+              </div>
               <div className="mt-1 text-sm">«{order.comment}»</div>
             </div>
           )}
           <div className="border-t border-border pt-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Товары</span>
+              <span className="text-muted-foreground">{isEn ? "Items" : "Товары"}</span>
               <span className="tabular-nums">{formatPrice(order.subtotal.toString())}</span>
             </div>
             <div className="mt-1 flex justify-between font-semibold">
-              <span>Итого</span>
+              <span>{isEn ? "Total" : "Итого"}</span>
               <span className="tabular-nums">{formatPrice(order.total.toString())}</span>
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium text-muted-foreground">Замены</div>
+            <div className="text-xs font-medium text-muted-foreground">
+              {isEn ? "Substitutions" : "Замены"}
+            </div>
             <div className="mt-1">{order.substitutionPreference}</div>
           </div>
         </aside>

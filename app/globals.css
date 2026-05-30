@@ -473,6 +473,65 @@
     border: 2px solid #fff;
   }
 
+  /* Language switcher — globe-icon dropdown.
+     Lives next to the cart icon in the header and in the mobile drawer.
+     Two variants share the same look: <LanguageSwitcher> (next-intl router)
+     for marketing, <LanguageSwitcherCookie> (NEXT_LOCALE cookie + reload)
+     for app pages outside the [locale] segment. */
+  .hc-lang { position: relative; flex-shrink: 0; }
+  .hc-lang-trigger {
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 36px; padding: 0 10px;
+    background: transparent; border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--c-fg-2); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background 120ms ease, color 120ms ease;
+  }
+  .hc-lang-trigger:hover {
+    background: var(--c-bg-muted); color: var(--c-fg);
+  }
+  .hc-lang-trigger[aria-expanded="true"] {
+    background: var(--c-bg-muted); color: var(--c-fg);
+  }
+  .hc-lang-code { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+  .hc-lang-menu {
+    position: absolute; right: 0; top: calc(100% + 6px);
+    z-index: 60;
+    min-width: 180px; padding: 4px;
+    background: #fff; border: 1px solid var(--c-border);
+    border-radius: 10px;
+    box-shadow: 0 10px 32px -8px rgba(15, 23, 42, 0.18),
+                0 4px 12px -4px rgba(15, 23, 42, 0.08);
+  }
+  .hc-lang-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 8px 10px;
+    background: transparent; border: 0; border-radius: 6px;
+    text-align: left; color: var(--c-fg);
+    font-size: 13px; cursor: pointer;
+  }
+  .hc-lang-item:hover { background: var(--c-bg-muted); }
+  .hc-lang-item.active { color: var(--c-primary, var(--c-fg)); }
+  .hc-lang-item-code {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 28px; padding: 2px 6px;
+    background: var(--c-bg-muted); border-radius: 4px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--c-fg-2);
+  }
+  .hc-lang-item.active .hc-lang-item-code {
+    background: var(--c-ink); color: #fff;
+  }
+  .hc-lang-item-native { flex: 1; }
+  .hc-lang-item-check { color: var(--c-success, var(--c-primary)); }
+
+  /* Mobile drawer variant — wider menu, opens above the trigger to clear the
+     edge of the drawer. */
+  .hc-drawer .hc-lang { width: 100%; }
+  .hc-drawer .hc-lang-trigger { width: 100%; justify-content: space-between; padding: 10px 12px; }
+  .hc-drawer .hc-lang-menu { right: auto; left: 0; width: 100%; }
+
   /* Drawer — portaled to <body>, so z values compete at the document
      root level. Set above the floating cart bar (z:60) so the drawer
      can never end up sandwiched. */

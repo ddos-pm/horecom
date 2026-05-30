@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ProductPicker, type PickerProduct } from "@/components/product-picker";
 import { submitGroupBuyInterest } from "./actions";
@@ -15,6 +16,8 @@ export function GroupBuyWaitlistForm({
   defaultEmail: string | null;
   initialProductIds?: string[];
 }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const [pending, startTransition] = useTransition();
   const [sent, setSent] = useState(false);
   const [email, setEmail] = useState(defaultEmail ?? "");
@@ -33,7 +36,7 @@ export function GroupBuyWaitlistForm({
       });
       if (result.success) {
         setSent(true);
-        toast.success("Заявка отправлена");
+        toast.success(isEn ? "Request sent" : "Заявка отправлена");
       } else {
         toast.error(result.error);
       }
@@ -43,9 +46,11 @@ export function GroupBuyWaitlistForm({
   if (sent) {
     return (
       <div className="rounded-lg border border-success/30 bg-success/5 p-6 text-center">
-        <h3 className="text-lg font-semibold text-success">Спасибо</h3>
+        <h3 className="text-lg font-semibold text-success">{isEn ? "Thank you" : "Спасибо"}</h3>
         <p className="mt-1 text-sm">
-          Мы свяжемся когда соберём первую группу — обычно в течение 2–3 недель.
+          {isEn
+            ? "We'll reach out when we assemble the first group — usually within 2–3 weeks."
+            : "Мы свяжемся когда соберём первую группу — обычно в течение 2–3 недель."}
         </p>
       </div>
     );
@@ -54,10 +59,11 @@ export function GroupBuyWaitlistForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border border-border bg-card p-5">
       <div>
-        <h3 className="text-lg font-semibold">Заявка в пилот</h3>
+        <h3 className="text-lg font-semibold">{isEn ? "Pilot waitlist" : "Заявка в пилот"}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Регистрируем интерес, чтобы запустить первую группу с нужным количеством участников. Свяжемся,
-          когда наберётся достаточно.
+          {isEn
+            ? "We register interest so we can launch the first group with the right number of participants. We'll reach out once it fills."
+            : "Регистрируем интерес, чтобы запустить первую группу с нужным количеством участников. Свяжемся, когда наберётся достаточно."}
         </p>
       </div>
 
@@ -72,7 +78,7 @@ export function GroupBuyWaitlistForm({
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           />
         </Field>
-        <Field label="Телефон / WhatsApp">
+        <Field label={isEn ? "Phone / WhatsApp" : "Телефон / WhatsApp"}>
           <input
             type="tel"
             value={phone}
@@ -85,25 +91,35 @@ export function GroupBuyWaitlistForm({
 
       <div>
         <label className="mb-1.5 block text-sm font-medium">
-          Какие товары интересны (необязательно)
+          {isEn ? "Which products interest you (optional)" : "Какие товары интересны (необязательно)"}
         </label>
         <ProductPicker products={products} selected={productIds} onChange={setProductIds} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Комментарий</label>
+        <label className="mb-1.5 block text-sm font-medium">{isEn ? "Note" : "Комментарий"}</label>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={2}
-          placeholder="Расскажите о себе и о том, какие объёмы вам интересны"
+          placeholder={
+            isEn
+              ? "Tell us about yourself and the volumes you're interested in"
+              : "Расскажите о себе и о том, какие объёмы вам интересны"
+          }
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       </div>
 
       <div className="flex justify-end">
         <Button type="submit" size="lg" disabled={pending || !email}>
-          {pending ? "Отправляю…" : "Отправить заявку"}
+          {pending
+            ? isEn
+              ? "Sending…"
+              : "Отправляю…"
+            : isEn
+              ? "Send request"
+              : "Отправить заявку"}
         </Button>
       </div>
     </form>

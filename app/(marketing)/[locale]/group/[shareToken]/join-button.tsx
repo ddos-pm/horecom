@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Users, Check } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { joinGroupBuy } from "./actions";
 
@@ -19,6 +20,8 @@ export function JoinGroupButton({
   isAuthed: boolean;
   defaultQty: number;
 }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const [qty, setQty] = useState(defaultQty);
   const [pending, startTransition] = useTransition();
 
@@ -26,7 +29,7 @@ export function JoinGroupButton({
     return (
       <div className="gb-join-state ok">
         <Check className="h-4 w-4" />
-        Вы участник этой закупки
+        {isEn ? "You're in this group" : "Вы участник этой закупки"}
       </div>
     );
   }
@@ -37,7 +40,7 @@ export function JoinGroupButton({
         href={`/login?redirectTo=${typeof window !== "undefined" ? encodeURIComponent(window.location.pathname) : ""}`}
         className="btn btn-orange btn-lg"
       >
-        Войти и присоединиться
+        {isEn ? "Sign in to join" : "Войти и присоединиться"}
       </a>
     );
   }
@@ -45,7 +48,7 @@ export function JoinGroupButton({
   if (!canJoin) {
     return (
       <div className="gb-join-state closed">
-        Приём закрыт
+        {isEn ? "Closed" : "Приём закрыт"}
       </div>
     );
   }
@@ -54,17 +57,25 @@ export function JoinGroupButton({
     startTransition(async () => {
       const res = await joinGroupBuy(offerId, qty);
       if (!res.ok) {
-        toast.error(res.error ?? "Не удалось присоединиться");
+        toast.error(res.error ?? (isEn ? "Could not join" : "Не удалось присоединиться"));
         return;
       }
-      toast.success(res.alreadyJoined ? "Вы уже в этой закупке" : "Вы присоединились");
+      toast.success(
+        res.alreadyJoined
+          ? isEn
+            ? "You're already in this group"
+            : "Вы уже в этой закупке"
+          : isEn
+            ? "You joined the group"
+            : "Вы присоединились",
+      );
     });
   }
 
   return (
     <div className="gb-join">
       <label className="gb-join-qty">
-        <span>Сколько берёте</span>
+        <span>{isEn ? "Quantity" : "Сколько берёте"}</span>
         <input
           type="number"
           min={1}
@@ -76,7 +87,13 @@ export function JoinGroupButton({
       </label>
       <Button onClick={handleJoin} disabled={pending} size="lg">
         <Users className="h-4 w-4" />
-        {pending ? "Присоединяюсь…" : "Присоединиться"}
+        {pending
+          ? isEn
+            ? "Joining…"
+            : "Присоединяюсь…"
+          : isEn
+            ? "Join"
+            : "Присоединиться"}
       </Button>
     </div>
   );

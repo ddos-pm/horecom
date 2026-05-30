@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 import { ProductRow } from "./row";
 
 export const metadata = { title: "Каталог · Admin" };
@@ -15,6 +16,8 @@ export default async function AdminCatalogPage({
   const q = sp.q?.trim() ?? "";
   const page = Math.max(1, Number(sp.page ?? "1"));
   const category = sp.category ?? "";
+  const locale = await getLocaleFromCookie();
+  const isEn = locale === "en";
 
   const where = {
     AND: [
@@ -48,9 +51,14 @@ export default async function AdminCatalogPage({
   return (
     <div className="container-tight py-6 md:py-8">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-xl font-bold md:text-2xl">Каталог</h1>
+        <h1 className="text-xl font-bold md:text-2xl">{isEn ? "Catalog" : "Каталог"}</h1>
         <p className="text-xs text-muted-foreground">
-          {total} {plural(total, "товар", "товара", "товаров")}
+          {total}{" "}
+          {isEn
+            ? total === 1
+              ? "product"
+              : "products"
+            : pluralRu(total, "товар", "товара", "товаров")}
         </p>
       </div>
 
@@ -58,7 +66,7 @@ export default async function AdminCatalogPage({
         <input
           name="q"
           defaultValue={q}
-          placeholder="Поиск (имя / бренд / SKU)"
+          placeholder={isEn ? "Search (name / brand / SKU)" : "Поиск (имя / бренд / SKU)"}
           className="flex-1 min-w-[200px] rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
         <select
@@ -66,31 +74,34 @@ export default async function AdminCatalogPage({
           defaultValue={category}
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"
         >
-          <option value="">Все категории</option>
+          <option value="">{isEn ? "All categories" : "Все категории"}</option>
           {categories.map((c) => (
             <option key={c.slug} value={c.slug}>
               {c.name}
             </option>
           ))}
         </select>
-        <button className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Найти</button>
+        <button className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+          {isEn ? "Find" : "Найти"}
+        </button>
       </form>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left">Товар</th>
-              <th className="px-3 py-2 text-left">Бренд</th>
-              <th className="px-3 py-2 text-left">Категория</th>
-              <th className="px-3 py-2 text-right">Сток</th>
-              <th className="px-3 py-2 text-center">Активен</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Product" : "Товар"}</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Brand" : "Бренд"}</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Category" : "Категория"}</th>
+              <th className="px-3 py-2 text-right">{isEn ? "Stock" : "Сток"}</th>
+              <th className="px-3 py-2 text-center">{isEn ? "Active" : "Активен"}</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
               <ProductRow
                 key={p.id}
+                locale={locale}
                 product={{
                   id: p.id,
                   name: p.name,
@@ -112,7 +123,7 @@ export default async function AdminCatalogPage({
       {totalPages > 1 && (
         <div className="mt-3 flex items-center justify-between text-sm">
           <div className="text-muted-foreground">
-            Страница {page} из {totalPages}
+            {isEn ? `Page ${page} of ${totalPages}` : `Страница ${page} из ${totalPages}`}
           </div>
           <div className="flex gap-2">
             {page > 1 && (
@@ -120,7 +131,7 @@ export default async function AdminCatalogPage({
                 href={{ pathname: "/admin/catalog", query: { q, category, page: page - 1 } }}
                 className="rounded-md border border-input bg-background px-3 py-1.5 hover:bg-muted"
               >
-                ← Назад
+                {isEn ? "← Previous" : "← Назад"}
               </Link>
             )}
             {page < totalPages && (
@@ -128,7 +139,7 @@ export default async function AdminCatalogPage({
                 href={{ pathname: "/admin/catalog", query: { q, category, page: page + 1 } }}
                 className="rounded-md border border-input bg-background px-3 py-1.5 hover:bg-muted"
               >
-                Вперёд →
+                {isEn ? "Next →" : "Вперёд →"}
               </Link>
             )}
           </div>
@@ -138,7 +149,7 @@ export default async function AdminCatalogPage({
   );
 }
 
-function plural(n: number, one: string, few: string, many: string) {
+function pluralRu(n: number, one: string, few: string, many: string) {
   const mod10 = n % 10;
   const mod100 = n % 100;
   if (mod10 === 1 && mod100 !== 11) return one;

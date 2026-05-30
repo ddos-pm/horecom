@@ -4,6 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { getLocaleFromCookie } from "@/lib/locale-cookie";
+import { LanguageSwitcherCookie } from "@/components/marketing/language-switcher-cookie";
 import { UserMenu } from "./user-menu";
 
 export async function AppHeader() {
@@ -30,6 +31,7 @@ export async function AppHeader() {
         </Link>
 
         <div className="flex items-center gap-1">
+          <LanguageSwitcherCookie />
           <Link href="/cart" aria-label={isEn ? "Cart" : "Корзина"}>
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />

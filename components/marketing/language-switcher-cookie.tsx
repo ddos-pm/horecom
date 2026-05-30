@@ -1,22 +1,19 @@
 "use client";
 
 /**
- * Globe-icon language switcher for marketing surfaces.
+ * Globe-icon language switcher for routes OUTSIDE the [locale] segment
+ * (/cart, /checkout, /profile, /admin, …). Reads + writes NEXT_LOCALE
+ * cookie, then router.refresh() so the server components re-render with
+ * the new locale.
  *
- * Three locales (RU primary, EN active, KZ draft). Renders a small
- * pill-button showing the current locale code plus a globe icon; click
- * opens a dropdown with the three options. Uses next-intl router.replace
- * to stay on the same pathname when switching.
- *
- * For app pages outside the [locale] segment use <LanguageSwitcherCookie>
- * instead — that one sets NEXT_LOCALE cookie and reloads, since there's
- * no URL locale to rewrite.
+ * Marketing-side equivalent: <LanguageSwitcher> (uses URL routing).
  */
 
 import { useEffect, useRef, useState } from "react";
 import { Globe, Check } from "lucide-react";
-import { useLocale } from "next-intl";
-import { useRouter, usePathname, type Locale } from "@/i18n/routing";
+import { useRouter } from "next/navigation";
+import { useLocaleCookie } from "@/lib/use-locale-cookie";
+import { routing, type Locale } from "@/i18n/routing";
 
 const LOCALES: { value: Locale; label: string; native: string }[] = [
   { value: "ru", label: "RU", native: "Русский" },
@@ -24,10 +21,9 @@ const LOCALES: { value: Locale; label: string; native: string }[] = [
   { value: "kz", label: "KZ", native: "Қазақша" },
 ];
 
-export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
-  const locale = useLocale() as Locale;
+export function LanguageSwitcherCookie({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const locale = useLocaleCookie();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +46,10 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   function pick(target: Locale) {
     setOpen(false);
     if (target === locale) return;
-    router.replace(pathname, { locale: target });
+    // 1 year cookie, root path so it works across the whole app.
+    const oneYear = 60 * 60 * 24 * 365;
+    document.cookie = `NEXT_LOCALE=${target}; path=/; max-age=${oneYear}; samesite=lax`;
+    router.refresh();
   }
 
   const current = LOCALES.find((l) => l.value === locale) ?? LOCALES[0];

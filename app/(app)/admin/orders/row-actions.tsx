@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { updateOrderStatus } from "./actions";
 
-const NEXT: Record<string, { value: string; label: string }[]> = {
+const NEXT_RU: Record<string, { value: string; label: string }[]> = {
   CREATED: [
     { value: "CONFIRMED", label: "Подтвердить" },
     { value: "CANCELLED", label: "Отменить" },
@@ -31,15 +31,51 @@ const NEXT: Record<string, { value: string; label: string }[]> = {
   ],
 };
 
-export function OrderRowActions({ orderId, status }: { orderId: string; status: string }) {
+const NEXT_EN: Record<string, { value: string; label: string }[]> = {
+  CREATED: [
+    { value: "CONFIRMED", label: "Confirm" },
+    { value: "CANCELLED", label: "Cancel" },
+  ],
+  CONFIRMED: [
+    { value: "PICKING", label: "To picking" },
+    { value: "CANCELLED", label: "Cancel" },
+  ],
+  PICKING: [
+    { value: "OUT_FOR_DELIVERY", label: "To delivery" },
+    { value: "CANCELLED", label: "Cancel" },
+  ],
+  OUT_FOR_DELIVERY: [
+    { value: "DELIVERED", label: "Delivered" },
+    { value: "CANCELLED", label: "Cancel" },
+  ],
+  WAITING_PAYMENT: [
+    { value: "PAID", label: "Payment received" },
+    { value: "CANCELLED", label: "Cancel" },
+  ],
+  PARTIALLY_CONFIRMED: [
+    { value: "PICKING", label: "To picking" },
+    { value: "CANCELLED", label: "Cancel" },
+  ],
+};
+
+export function OrderRowActions({
+  locale,
+  orderId,
+  status,
+}: {
+  locale: string;
+  orderId: string;
+  status: string;
+}) {
+  const isEn = locale === "en";
   const [pending, startTransition] = useTransition();
-  const next = NEXT[status] ?? [];
+  const next = (isEn ? NEXT_EN : NEXT_RU)[status] ?? [];
 
   function trigger(value: string) {
-    if (value === "CANCELLED" && !confirm("Отменить заказ?")) return;
+    if (value === "CANCELLED" && !confirm(isEn ? "Cancel the order?" : "Отменить заказ?")) return;
     startTransition(async () => {
       const r = await updateOrderStatus(orderId, value as Parameters<typeof updateOrderStatus>[1]);
-      if (r.success) toast.success("Статус обновлён");
+      if (r.success) toast.success(isEn ? "Status updated" : "Статус обновлён");
       else toast.error(r.error);
     });
   }
@@ -58,7 +94,7 @@ export function OrderRowActions({ orderId, status }: { orderId: string; status: 
       }}
       className="rounded-md border border-input bg-background px-2 py-1 text-xs"
     >
-      <option value="">Действие…</option>
+      <option value="">{isEn ? "Action…" : "Действие…"}</option>
       {next.map((n) => (
         <option key={n.value} value={n.value}>
           {n.label}

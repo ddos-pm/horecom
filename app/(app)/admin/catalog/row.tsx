@@ -24,13 +24,21 @@ const STOCK_TONE: Record<string, "success" | "warning" | "danger"> = {
   OUT_OF_STOCK: "danger",
 };
 
-const STOCK_LABEL: Record<string, string> = {
+const STOCK_LABEL_RU: Record<string, string> = {
   IN_STOCK: "В наличии",
   LOW_STOCK: "Мало",
   OUT_OF_STOCK: "Нет",
 };
 
-export function ProductRow({ product }: { product: Product }) {
+const STOCK_LABEL_EN: Record<string, string> = {
+  IN_STOCK: "In stock",
+  LOW_STOCK: "Low",
+  OUT_OF_STOCK: "Out",
+};
+
+export function ProductRow({ locale, product }: { locale: string; product: Product }) {
+  const isEn = locale === "en";
+  const STOCK_LABEL = isEn ? STOCK_LABEL_EN : STOCK_LABEL_RU;
   const [pending, startTransition] = useTransition();
   const [stock, setStock] = useState(String(product.stock));
   const [brand, setBrand] = useState(product.brand ?? "");
@@ -39,13 +47,13 @@ export function ProductRow({ product }: { product: Product }) {
   function saveStock() {
     const n = Number(stock);
     if (Number.isNaN(n) || n < 0) {
-      toast.error("Неверное количество");
+      toast.error(isEn ? "Invalid quantity" : "Неверное количество");
       return;
     }
     if (n === product.stock) return;
     startTransition(async () => {
       const r = await updateStock(product.id, { availableQty: n });
-      if (r.success) toast.success("Сток обновлён");
+      if (r.success) toast.success(isEn ? "Stock updated" : "Сток обновлён");
       else toast.error(r.error);
     });
   }
@@ -54,7 +62,7 @@ export function ProductRow({ product }: { product: Product }) {
     if (brand === (product.brand ?? "")) return;
     startTransition(async () => {
       const r = await updateProduct(product.id, { brand });
-      if (r.success) toast.success("Бренд обновлён");
+      if (r.success) toast.success(isEn ? "Brand updated" : "Бренд обновлён");
       else toast.error(r.error);
     });
   }
@@ -65,7 +73,15 @@ export function ProductRow({ product }: { product: Product }) {
       const r = await updateProduct(product.id, { isActive: next });
       if (r.success) {
         setIsActive(next);
-        toast.success(next ? "Активирован" : "Скрыт");
+        toast.success(
+          next
+            ? isEn
+              ? "Activated"
+              : "Активирован"
+            : isEn
+              ? "Hidden"
+              : "Скрыт",
+        );
       } else {
         toast.error(r.error);
       }

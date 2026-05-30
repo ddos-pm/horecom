@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
+import { useLocale } from "next-intl";
 
 export type PickerProduct = {
   id: string;
@@ -22,6 +23,8 @@ export function ProductPicker({
   onChange: (next: string[]) => void;
   max?: number;
 }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
@@ -52,7 +55,7 @@ export function ProductPicker({
           type="text"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Поиск по названию, бренду, SKU"
+          placeholder={isEn ? "Search by name, brand, SKU" : "Поиск по названию, бренду, SKU"}
           className="w-full rounded-md border border-input bg-background py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
         {q && (
@@ -60,7 +63,7 @@ export function ProductPicker({
             type="button"
             onClick={() => setQ("")}
             className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 hover:bg-muted"
-            aria-label="Очистить"
+            aria-label={isEn ? "Clear" : "Очистить"}
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -69,15 +72,15 @@ export function ProductPicker({
 
       {selected.length > 0 && (
         <div className="text-xs text-muted-foreground">
-          Выбрано: <b>{selected.length}</b>
-          {max ? ` из ${max}` : ""}
+          {isEn ? "Selected: " : "Выбрано: "}<b>{selected.length}</b>
+          {max ? (isEn ? ` of ${max}` : ` из ${max}`) : ""}
         </div>
       )}
 
       <div className="max-h-72 space-y-1 overflow-y-auto rounded-md border border-input p-1.5">
         {filtered.length === 0 && (
           <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-            Ничего не найдено
+            {isEn ? "Nothing found" : "Ничего не найдено"}
           </div>
         )}
         {filtered.map((p) => {

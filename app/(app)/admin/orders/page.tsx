@@ -3,11 +3,12 @@ import type { OrderStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 import { OrderRowActions } from "./row-actions";
 
 export const metadata = { title: "Заказы · Admin" };
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL_RU: Record<string, string> = {
   CREATED: "Создан",
   INVOICE_SENT: "Счёт выставлен",
   WAITING_PAYMENT: "Ждёт оплату",
@@ -20,7 +21,20 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Отменён",
 };
 
-const ALL_STATUSES = Object.keys(STATUS_LABEL);
+const STATUS_LABEL_EN: Record<string, string> = {
+  CREATED: "Created",
+  INVOICE_SENT: "Invoice sent",
+  WAITING_PAYMENT: "Awaiting payment",
+  PAID: "Paid",
+  CONFIRMED: "Confirmed",
+  PARTIALLY_CONFIRMED: "Partially confirmed",
+  PICKING: "Picking",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
+
+const ALL_STATUSES = Object.keys(STATUS_LABEL_RU);
 
 export default async function AdminOrdersPage({
   searchParams,
@@ -29,6 +43,10 @@ export default async function AdminOrdersPage({
 }) {
   const { status } = await searchParams;
   const filterStatus = status && ALL_STATUSES.includes(status) ? status : null;
+  const locale = await getLocaleFromCookie();
+  const isEn = locale === "en";
+  const STATUS_LABEL = isEn ? STATUS_LABEL_EN : STATUS_LABEL_RU;
+  const numFmt = isEn ? "en-US" : "ru-RU";
 
   const where: Prisma.OrderWhereInput = filterStatus
     ? { status: filterStatus as OrderStatus }
@@ -44,12 +62,14 @@ export default async function AdminOrdersPage({
   return (
     <div className="container-tight py-6 md:py-8">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-xl font-bold md:text-2xl">Заказы</h1>
-        <p className="text-xs text-muted-foreground">{orders.length} заказов</p>
+        <h1 className="text-xl font-bold md:text-2xl">{isEn ? "Orders" : "Заказы"}</h1>
+        <p className="text-xs text-muted-foreground">
+          {orders.length} {isEn ? (orders.length === 1 ? "order" : "orders") : "заказов"}
+        </p>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-1">
-        <FilterPill href="/admin/orders" label="Активные" active={!filterStatus} />
+        <FilterPill href="/admin/orders" label={isEn ? "Active" : "Активные"} active={!filterStatus} />
         {ALL_STATUSES.map((s) => (
           <FilterPill key={s} href={`/admin/orders?status=${s}`} label={STATUS_LABEL[s]} active={filterStatus === s} />
         ))}
@@ -59,19 +79,19 @@ export default async function AdminOrdersPage({
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left">Номер</th>
-              <th className="px-3 py-2 text-left">Клиент</th>
-              <th className="px-3 py-2 text-right">Сумма</th>
-              <th className="px-3 py-2 text-left">Статус</th>
-              <th className="px-3 py-2 text-left">Создан</th>
-              <th className="px-3 py-2 text-right">Действия</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Number" : "Номер"}</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Customer" : "Клиент"}</th>
+              <th className="px-3 py-2 text-right">{isEn ? "Total" : "Сумма"}</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Status" : "Статус"}</th>
+              <th className="px-3 py-2 text-left">{isEn ? "Created" : "Создан"}</th>
+              <th className="px-3 py-2 text-right">{isEn ? "Actions" : "Действия"}</th>
             </tr>
           </thead>
           <tbody>
             {orders.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
-                  Нет заказов в этом фильтре
+                  {isEn ? "No orders in this filter" : "Нет заказов в этом фильтре"}
                 </td>
               </tr>
             )}
@@ -81,7 +101,9 @@ export default async function AdminOrdersPage({
                   <Link href={`/admin/orders/${o.id}`} className="font-medium hover:text-primary">
                     {o.number}
                   </Link>
-                  <div className="text-xs text-muted-foreground">{o.items.length} поз.</div>
+                  <div className="text-xs text-muted-foreground">
+                    {o.items.length} {isEn ? (o.items.length === 1 ? "item" : "items") : "поз."}
+                  </div>
                 </td>
                 <td className="px-3 py-2 text-xs">{o.company.name}</td>
                 <td className="px-3 py-2 text-right tabular-nums">{formatPrice(o.total.toString())}</td>
@@ -91,7 +113,7 @@ export default async function AdminOrdersPage({
                   </Badge>
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">
-                  {new Date(o.createdAt).toLocaleString("ru-RU", {
+                  {new Date(o.createdAt).toLocaleString(numFmt, {
                     day: "numeric",
                     month: "short",
                     hour: "2-digit",
@@ -99,7 +121,7 @@ export default async function AdminOrdersPage({
                   })}
                 </td>
                 <td className="px-3 py-2 text-right">
-                  <OrderRowActions orderId={o.id} status={o.status} />
+                  <OrderRowActions locale={locale} orderId={o.id} status={o.status} />
                 </td>
               </tr>
             ))}

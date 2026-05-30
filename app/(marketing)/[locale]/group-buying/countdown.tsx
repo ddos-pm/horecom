@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 
 function diff(target: number) {
   const ms = Math.max(0, target - Date.now());
@@ -13,6 +14,8 @@ function diff(target: number) {
 }
 
 export function LiveCountdown({ targetIso }: { targetIso: string }) {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const target = new Date(targetIso).getTime();
   const [t, setT] = useState(() => diff(target));
 
@@ -27,19 +30,21 @@ export function LiveCountdown({ targetIso }: { targetIso: string }) {
     <div className="gb-time">
       <div className="cell">
         <div className="n">{pad(t.days)}</div>
-        <div className="l">{t.days === 1 ? "день" : "дня"}</div>
+        <div className="l">
+          {isEn ? (t.days === 1 ? "day" : "days") : t.days === 1 ? "день" : "дня"}
+        </div>
       </div>
       <div className="cell">
         <div className="n">{pad(t.hours)}</div>
-        <div className="l">часов</div>
+        <div className="l">{isEn ? "hours" : "часов"}</div>
       </div>
       <div className="cell">
         <div className="n">{pad(t.mins)}</div>
-        <div className="l">мин</div>
+        <div className="l">{isEn ? "min" : "мин"}</div>
       </div>
       <div className="cell">
         <div className="n">{pad(t.secs)}</div>
-        <div className="l">сек</div>
+        <div className="l">{isEn ? "sec" : "сек"}</div>
       </div>
     </div>
   );
