@@ -1,3 +1,4 @@
+import { setRequestLocale } from "next-intl/server";
 import { COMPANY } from "@/lib/company";
 
 export async function generateMetadata({
@@ -21,6 +22,7 @@ export default async function OfferPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
 
   if (isEn) {

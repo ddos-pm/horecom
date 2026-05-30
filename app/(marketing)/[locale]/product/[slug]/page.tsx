@@ -13,6 +13,7 @@ import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { localizePackLabel } from "@/lib/format-pack";
 import { pickLocalized } from "@/lib/i18n-field";
 import { getProductBySlug } from "@/lib/product-loader";
+import { setRequestLocale } from "next-intl/server";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -121,6 +122,7 @@ export default async function ProductPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
 
   // Stage 1: load the product. generateMetadata already called the same

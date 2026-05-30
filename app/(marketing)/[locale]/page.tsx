@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MessageCircle, ArrowRight } from "lucide-react";
+import { setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
@@ -90,6 +91,7 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
 
   const FEATURED_INCLUDE = {

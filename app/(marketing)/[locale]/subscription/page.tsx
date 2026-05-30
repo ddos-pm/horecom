@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { COMPANY } from "@/lib/company";
 import { RequestFormIsland, RequestFormSkeleton } from "./request-form-island";
@@ -39,6 +40,7 @@ export default async function SubscriptionPage({
   searchParams: Promise<{ product?: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
   const sp = await searchParams;
 

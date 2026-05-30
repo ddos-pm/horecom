@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
 import { JsonLd } from "@/components/json-ld";
 
 export async function generateMetadata({
@@ -130,6 +131,7 @@ export default async function FaqPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
   const FAQ = isEn ? FAQ_EN : FAQ_RU;
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 
 export async function generateMetadata({
@@ -23,6 +24,7 @@ export default async function HowOrderingWorksPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
 
   const STEPS = isEn

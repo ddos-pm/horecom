@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
+import { setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { WaitlistIsland, WaitlistSkeleton } from "./waitlist-island";
 import { LiveCountdown } from "./countdown";
@@ -35,6 +36,7 @@ export default async function GroupBuyingPage({
   searchParams: Promise<{ product?: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
   const sp = await searchParams;
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { setRequestLocale } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 
 export async function generateMetadata({
@@ -26,6 +27,7 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
 
   return (

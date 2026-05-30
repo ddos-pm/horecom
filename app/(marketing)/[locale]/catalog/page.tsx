@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Filter, ArrowDownUp, Grid3x3, List, ChevronDown } from "lucide-react";
+import { setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/routing";
 import { QuickAddButton } from "@/components/cart/quick-add-button";
@@ -61,6 +62,7 @@ export default async function CatalogPage({
   }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const isEn = locale === "en";
   const sp = await searchParams;
   const query = sp.q?.trim() ?? "";
