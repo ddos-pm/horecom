@@ -3,11 +3,22 @@ import Link from "next/link";
 import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "О компании — оптовая поставка ингредиентов в Астане",
-  description:
-    "Horecom — B2B-платформа закупок для кондитерских и HoReCa в Центральной Азии. 10 лет работы, 50+ клиентов, 50 поставщиков.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn
+      ? "About — wholesale ingredient supply in Astana"
+      : "О компании — оптовая поставка ингредиентов в Астане",
+    description: isEn
+      ? "Horecom is a B2B procurement platform for pastry shops and HoReCa in Central Asia. 10 years on the market, 50+ customers, 50 suppliers."
+      : "Horecom — B2B-платформа закупок для кондитерских и HoReCa в Центральной Азии. 10 лет работы, 50+ клиентов, 50 поставщиков.",
+  };
+}
 
 export default async function AboutPage({
   params,

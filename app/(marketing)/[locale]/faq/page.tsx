@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 
-export const metadata: Metadata = {
-  title: "Частые вопросы — оплата, доставка, подписка на поставку",
-  description:
-    "Способы оплаты, доставка по Астане, как работает подписка на поставку, что делать если товара нет.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn
+      ? "FAQ — payment, delivery, supply subscription"
+      : "Частые вопросы — оплата, доставка, подписка на поставку",
+    description: isEn
+      ? "Payment methods, delivery across Astana, how the supply subscription works, what happens when an item is out of stock."
+      : "Способы оплаты, доставка по Астане, как работает подписка на поставку, что делать если товара нет.",
+  };
+}
 
 const FAQ_RU = [
   {

@@ -1,10 +1,19 @@
 import { COMPANY } from "@/lib/company";
 
-export const metadata = {
-  title: "Публичная оферта",
-  description:
-    "Условия публичной оферты Horecom: оптовая поставка ингредиентов для HoReCa в Астане. Оплата, доставка, возврат, ответственность сторон.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn ? "Public offer" : "Публичная оферта",
+    description: isEn
+      ? "Horecom public offer terms: wholesale ingredient supply for HoReCa in Astana. Payment, delivery, returns, liability."
+      : "Условия публичной оферты Horecom: оптовая поставка ингредиентов для HoReCa в Астане. Оплата, доставка, возврат, ответственность сторон.",
+  };
+}
 
 export default async function OfferPage({
   params,

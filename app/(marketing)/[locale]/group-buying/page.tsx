@@ -11,11 +11,22 @@ import "./group-buying.css";
 // /subscription for the PPR limitation note.
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Групповая закупка — оптовые цены для самозанятых кондитеров",
-  description:
-    "Объединяйтесь с 3–5 кондитерами и купите оптовое ведро шоколада или мешок муки — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn
+      ? "Group buying — wholesale prices for independent pastry makers"
+      : "Групповая закупка — оптовые цены для самозанятых кондитеров",
+    description: isEn
+      ? "Team up with 3–5 pastry chefs to buy a wholesale bucket of chocolate or a sack of flour — each takes their share at the wholesale price. The price is locked from the moment the group is created."
+      : "Объединяйтесь с 3–5 кондитерами и купите оптовое ведро шоколада или мешок муки — каждый получит свою долю и оптовую цену. Цена защищена с момента создания группы.",
+  };
+}
 
 export default async function GroupBuyingPage({
   params,

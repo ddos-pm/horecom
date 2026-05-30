@@ -15,6 +15,13 @@ export const COMPANY = {
 
   // Operational address (warehouse + pickup point — public).
   physicalAddress: "г. Астана, ул. Шамши Калдаякова, 1",
+  physicalAddressEn: "Astana, 1 Shamshi Kaldayakov St.",
+  // Address parts kept separate for JSON-LD PostalAddress (where street and
+  // locality are addressed in different fields).
+  streetAddressRu: "ул. Шамши Калдаякова, 1",
+  streetAddressEn: "1 Shamshi Kaldayakov St.",
+  addressLocalityRu: "Астана",
+  addressLocalityEn: "Astana",
   city: "Astana",
   country: "KZ",
 

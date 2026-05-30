@@ -1,10 +1,19 @@
 import { COMPANY } from "@/lib/company";
 
-export const metadata = {
-  title: "Политика конфиденциальности",
-  description:
-    "Как Horecom обрабатывает персональные данные клиентов в соответствии с законом РК «О персональных данных и их защите».",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn ? "Privacy policy" : "Политика конфиденциальности",
+    description: isEn
+      ? 'How Horecom processes customer personal data in accordance with the Republic of Kazakhstan Law "On Personal Data and Its Protection".'
+      : "Как Horecom обрабатывает персональные данные клиентов в соответствии с законом РК «О персональных данных и их защите».",
+  };
+}
 
 export default async function PrivacyPage({
   params,

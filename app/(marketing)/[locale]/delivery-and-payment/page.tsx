@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Доставка и оплата",
-  description:
-    "Доставка по Астане каждые 3 часа. Оплата ссылкой KaspiPay или счётом на оплату. Бесплатная доставка от 20 000 ₸.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn ? "Delivery and payment" : "Доставка и оплата",
+    description: isEn
+      ? "Delivery across Astana every 3 hours. Payment by KaspiPay link or invoice. Free delivery from 20,000 ₸."
+      : "Доставка по Астане каждые 3 часа. Оплата ссылкой KaspiPay или счётом на оплату. Бесплатная доставка от 20 000 ₸.",
+  };
+}
 
 export default async function DeliveryPage({
   params,

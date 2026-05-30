@@ -19,11 +19,22 @@ import "./catalog.css";
 // to the exact searchParams.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Каталог · опт ингредиентов для кондитерских и HoReCa",
-  description:
-    "Полный каталог Horecom: шоколад, бакалея, начинки, молочная продукция, упаковка. Оптовые цены, доставка по Астане.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn
+      ? "Catalog · wholesale ingredients for pastry shops and HoReCa"
+      : "Каталог · опт ингредиентов для кондитерских и HoReCa",
+    description: isEn
+      ? "Full Horecom catalog: chocolate, staples, fillings, dairy, packaging. Wholesale prices, delivery across Astana."
+      : "Полный каталог Horecom: шоколад, бакалея, начинки, молочная продукция, упаковка. Оптовые цены, доставка по Астане.",
+  };
+}
 
 const STOCK_CLASS: Record<string, string> = {
   IN_STOCK: "v green",

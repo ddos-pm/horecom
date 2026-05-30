@@ -15,11 +15,22 @@ import "./subscription.css";
 // effectively inert until cookies stop leaking dynamic-ness upward.
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Подписка на поставку — предиктивный движок",
-  description:
-    "Подписка на поставку с предиктивным движком и WhatsApp-напоминаниями. За 24 часа до отгрузки — подтвердить/изменить/пропустить в один тап. Edit/Skip/Pause всегда доступны. Бесплатно.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn
+      ? "Supply subscription — predictive engine"
+      : "Подписка на поставку — предиктивный движок",
+    description: isEn
+      ? "Supply subscription with a predictive engine and WhatsApp reminders. 24 hours before shipment — confirm / edit / skip in one tap. Edit / Skip / Pause always available. Free."
+      : "Подписка на поставку с предиктивным движком и WhatsApp-напоминаниями. За 24 часа до отгрузки — подтвердить/изменить/пропустить в один тап. Edit/Skip/Pause всегда доступны. Бесплатно.",
+  };
+}
 
 export default async function SubscriptionPage({
   params,

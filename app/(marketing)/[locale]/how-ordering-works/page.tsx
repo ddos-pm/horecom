@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "Как заказать — пошагово",
-  description:
-    "Заказ в Horecom за 4 шага: каталог → корзина → доставка → оплата. Доставка по Астане, оплата через Kaspi.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn ? "How to order — step by step" : "Как заказать — пошагово",
+    description: isEn
+      ? "Ordering on Horecom in 4 steps: catalog → cart → delivery → payment. Delivery across Astana, payment via Kaspi."
+      : "Заказ в Horecom за 4 шага: каталог → корзина → доставка → оплата. Доставка по Астане, оплата через Kaspi.",
+  };
+}
 
 export default async function HowOrderingWorksPage({
   params,
