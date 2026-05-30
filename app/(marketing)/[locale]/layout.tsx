@@ -88,15 +88,24 @@ export default async function MarketingLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
+  // Per-locale lang attribute lives on this wrapper instead of <html>
+  // so we don't have to read cookies in the root layout and de-opt
+  // every SSG marketing page. Screen readers and :lang() CSS honor
+  // the nearest ancestor with a lang attribute. Map kz → kk for
+  // BCP-47 conformance.
+  const wrapperLang = locale === "kz" ? "kk" : locale;
+
   return (
     <NextIntlClientProvider>
       <JsonLd data={buildOrgJsonLd(locale)} />
       <JsonLd data={buildWebsiteJsonLd(locale)} />
-      <MarketingHeader />
-      <LocaleBanner />
-      <main className="flex-1">{children}</main>
-      <MarketingFooter />
-      <FloatingCartBar />
+      <div lang={wrapperLang} className="contents">
+        <MarketingHeader />
+        <LocaleBanner />
+        <main className="flex-1">{children}</main>
+        <MarketingFooter />
+        <FloatingCartBar />
+      </div>
       <Toaster richColors position="bottom-right" />
     </NextIntlClientProvider>
   );

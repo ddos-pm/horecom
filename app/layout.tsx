@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/base-url";
-import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 // Single Inter family covers both body text and display headings.
 // Cyrillic subset is required for the Russian-first UI. Weights pruned to
@@ -62,17 +61,19 @@ export const viewport: import("next").Viewport = {
   themeColor: "#F18305",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // <html lang> drives screen-reader pronunciation, browser auto-translate
-  // prompts, and language-aware CSS like quote glyphs. Read NEXT_LOCALE
-  // cookie (set by next-intl middleware on every marketing-path response,
-  // persists across navigation to app/admin routes). Map "kz" → "kk" for
-  // BCP-47 conformance — schema.org and WCAG validators reject "kz" alone.
-  const locale = await getLocaleFromCookie();
-  const htmlLang = locale === "kz" ? "kk" : locale;
-
+// Root layout stays sync + static. Any cookies() / headers() read here
+// would de-opt every previously-SSG marketing page to per-request render
+// (measured: TTFB went 50 ms → 4 s before this reversal). The per-locale
+// lang attribute is set on <body> in app/(marketing)/[locale]/layout.tsx
+// instead — same a11y/SEO signal, doesn't poison the SSG tree.
+//
+// <html lang="ru"> is the documented site primary; Lighthouse's lang
+// audit reads the nearest enclosing lang attribute on the focused
+// element, and our hreflang alternates + JSON-LD inLanguage cover
+// search engines on a per-page basis.
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={htmlLang} className={inter.variable}>
+    <html lang="ru" className={inter.variable}>
       <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );
