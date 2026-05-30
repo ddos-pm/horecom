@@ -13,9 +13,9 @@ export async function GET() {
 ## About
 
 - **Company name:** Horecom
-- **Location:** Astana, Kazakhstan (physical store: ул. Шамши Калдаякова 1)
+- **Location:** Astana, Kazakhstan (physical store: 1 Shamshi Kaldayakov St.)
 - **Founded:** 2016
-- **Languages:** Russian (primary), Kazakh
+- **Languages:** Russian (primary), English, Kazakh
 - **Website:** https://horecom.kz
 - **Instagram:** @horecom.kz (76,000 followers)
 - **Phone:** +7 707 860 77 79
@@ -80,21 +80,21 @@ Horecom exposes an MCP (Model Context Protocol) server so AI agents can search t
 
 Tools available: search_products, get_product, check_inventory, get_volume_pricing, find_similar, create_draft_order.
 
-## Key pages
+## Key pages (English versions; /ru/* and /kz/* also available)
 
-- [Catalog](${SITE_URL}/ru/catalog)
-- [How ordering works](${SITE_URL}/ru/how-ordering-works)
-- [Subscription](${SITE_URL}/ru/subscription)
-- [Group buying](${SITE_URL}/ru/group-buying)
-- [Delivery and payment](${SITE_URL}/ru/delivery-and-payment)
-- [FAQ](${SITE_URL}/ru/faq)
-- [About](${SITE_URL}/ru/about)
+- [Catalog](${SITE_URL}/en/catalog)
+- [How ordering works](${SITE_URL}/en/how-ordering-works)
+- [Subscription](${SITE_URL}/en/subscription)
+- [Group buying](${SITE_URL}/en/group-buying)
+- [Delivery and payment](${SITE_URL}/en/delivery-and-payment)
+- [FAQ](${SITE_URL}/en/faq)
+- [About](${SITE_URL}/en/about)
 
 ## Contact
 
 - WhatsApp: +7 707 860 77 79
 - Email: info@horecom.kz
-- Address: Астана, ул. Шамши Калдаякова 1
+- Address: 1 Shamshi Kaldayakov St., Astana, Kazakhstan
 - Instagram: https://www.instagram.com/horecom.kz/
 `;
 

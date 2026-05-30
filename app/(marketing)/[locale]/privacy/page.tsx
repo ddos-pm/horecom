@@ -52,7 +52,7 @@ export default async function PrivacyPage({
           Kazakhstan Law "On Personal Data and Its Protection".
         </p>
         <ul>
-          <li>Warehouse and pickup point: {COMPANY.physicalAddress}</li>
+          <li>Warehouse and pickup point: {COMPANY.physicalAddressEn}</li>
           <li>Inquiries email: <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a></li>
           <li>WhatsApp: {COMPANY.phoneWhatsAppDisplay}</li>
         </ul>

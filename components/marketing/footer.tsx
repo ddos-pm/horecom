@@ -10,7 +10,9 @@ import { COMPANY } from "@/lib/company";
 // privacy page on request.
 
 export async function MarketingFooter() {
-  const t = await getTranslations("footer");
+  const { getLocale } = await import("next-intl/server");
+  const [t, locale] = await Promise.all([getTranslations("footer"), getLocale()]);
+  const isEn = locale === "en";
   const year = new Date().getFullYear();
 
   return (
@@ -108,7 +110,7 @@ export async function MarketingFooter() {
               <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a>
             </li>
             <li className="t-meta" style={{ marginTop: 8 }}>
-              {COMPANY.physicalAddress}
+              {isEn ? COMPANY.physicalAddressEn : COMPANY.physicalAddress}
               <br />
               {t("hours")}
             </li>

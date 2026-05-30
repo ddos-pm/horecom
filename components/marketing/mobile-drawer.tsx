@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, MessageCircle, Phone } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { COMPANY } from "@/lib/company";
 import { HeaderSearchInput } from "./header-search-input";
@@ -11,6 +11,8 @@ import { LanguageSwitcher } from "./language-switcher";
 
 export function MobileDrawer() {
   const t = useTranslations("header");
+  const locale = useLocale();
+  const isEn = locale === "en";
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -117,7 +119,7 @@ export function MobileDrawer() {
             </div>
           </a>
           <div className="hc-drawer-meta">
-            {COMPANY.physicalAddress}
+            {isEn ? COMPANY.physicalAddressEn : COMPANY.physicalAddress}
             <br />
             {t("contactsCaption.pickup")}
           </div>

@@ -84,7 +84,7 @@ export default async function OfferPage({
           </li>
           <li>Delivery time is chosen by the Buyer at checkout from the available windows.</li>
           <li>
-            Pickup — from the warehouse at {COMPANY.physicalAddress} by prior arrangement.
+            Pickup — from the warehouse at {COMPANY.physicalAddressEn} by prior arrangement.
           </li>
         </ul>
 
@@ -130,7 +130,7 @@ export default async function OfferPage({
         <ul>
           <li>Email: <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a></li>
           <li>WhatsApp: {COMPANY.phoneWhatsAppDisplay}</li>
-          <li>Warehouse and pickup point: {COMPANY.physicalAddress}</li>
+          <li>Warehouse and pickup point: {COMPANY.physicalAddressEn}</li>
         </ul>
 
         <h2>10. Amendments to the offer</h2>
