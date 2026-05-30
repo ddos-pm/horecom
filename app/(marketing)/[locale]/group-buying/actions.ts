@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 const Schema = z.object({
   email: z.string().email(),
@@ -14,8 +15,10 @@ const Schema = z.object({
 export async function submitGroupBuyInterest(
   input: z.input<typeof Schema>,
 ): Promise<{ success: true } | { success: false; error: string }> {
+  const isEn = (await getLocaleFromCookie()) === "en";
   const parsed = Schema.safeParse(input);
-  if (!parsed.success) return { success: false, error: "Проверьте поля формы" };
+  if (!parsed.success)
+    return { success: false, error: isEn ? "Check the form fields" : "Проверьте поля формы" };
 
   const supabase = await createClient();
   const {

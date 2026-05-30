@@ -4,8 +4,24 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 type Result = { success: true } | { success: false; error: string };
+
+// Locale-aware error strings — keyed lookup keeps server-action returns
+// localized without giant inline branches on every guard clause.
+async function getErrors() {
+  const isEn = (await getLocaleFromCookie()) === "en";
+  return {
+    notAuth: isEn ? "Not authorized" : "Не авторизованы",
+    checkFields: isEn ? "Check the form fields" : "Проверьте поля",
+    checkAddressFields: isEn ? "Check the address fields" : "Проверьте поля адреса",
+    addressNotFound: isEn ? "Address not found" : "Адрес не найден",
+    addressInUse: isEn
+      ? "Address is referenced by orders. Cannot delete."
+      : "Адрес используется в заказах. Удалить нельзя.",
+  };
+}
 
 async function getCurrentDbUser() {
   const supabase = await createClient();
@@ -25,11 +41,12 @@ const CompanySchema = z.object({
 });
 
 export async function updateCompany(input: z.input<typeof CompanySchema>): Promise<Result> {
+  const E = await getErrors();
   const dbUser = await getCurrentDbUser();
-  if (!dbUser?.companyId) return { success: false, error: "Не авторизованы" };
+  if (!dbUser?.companyId) return { success: false, error: E.notAuth };
 
   const parsed = CompanySchema.safeParse(input);
-  if (!parsed.success) return { success: false, error: "Проверьте поля" };
+  if (!parsed.success) return { success: false, error: E.checkFields };
 
   await prisma.company.update({
     where: { id: dbUser.companyId },
@@ -51,11 +68,12 @@ const ContactSchema = z.object({
 });
 
 export async function updateContact(input: z.input<typeof ContactSchema>): Promise<Result> {
+  const E = await getErrors();
   const dbUser = await getCurrentDbUser();
-  if (!dbUser) return { success: false, error: "Не авторизованы" };
+  if (!dbUser) return { success: false, error: E.notAuth };
 
   const parsed = ContactSchema.safeParse(input);
-  if (!parsed.success) return { success: false, error: "Проверьте поля" };
+  if (!parsed.success) return { success: false, error: E.checkFields };
 
   await prisma.user.update({
     where: { id: dbUser.id },
@@ -79,11 +97,12 @@ const AddressSchema = z.object({
 });
 
 export async function upsertAddress(input: z.input<typeof AddressSchema>): Promise<Result> {
+  const E = await getErrors();
   const dbUser = await getCurrentDbUser();
-  if (!dbUser?.companyId) return { success: false, error: "Не авторизованы" };
+  if (!dbUser?.companyId) return { success: false, error: E.notAuth };
 
   const parsed = AddressSchema.safeParse(input);
-  if (!parsed.success) return { success: false, error: "Проверьте поля адреса" };
+  if (!parsed.success) return { success: false, error: E.checkAddressFields };
 
   const data = {
     label: parsed.data.label.trim(),
@@ -96,7 +115,7 @@ export async function upsertAddress(input: z.input<typeof AddressSchema>): Promi
   if (parsed.data.id) {
     const existing = await prisma.address.findUnique({ where: { id: parsed.data.id } });
     if (!existing || existing.companyId !== dbUser.companyId) {
-      return { success: false, error: "Адрес не найден" };
+      return { success: false, error: E.addressNotFound };
     }
     await prisma.address.update({ where: { id: parsed.data.id }, data });
   } else {
@@ -112,17 +131,18 @@ export async function upsertAddress(input: z.input<typeof AddressSchema>): Promi
 }
 
 export async function deleteAddress(id: string): Promise<Result> {
+  const E = await getErrors();
   const dbUser = await getCurrentDbUser();
-  if (!dbUser?.companyId) return { success: false, error: "Не авторизованы" };
+  if (!dbUser?.companyId) return { success: false, error: E.notAuth };
 
   const existing = await prisma.address.findUnique({ where: { id } });
   if (!existing || existing.companyId !== dbUser.companyId) {
-    return { success: false, error: "Адрес не найден" };
+    return { success: false, error: E.addressNotFound };
   }
 
   const ordersUsingAddress = await prisma.order.count({ where: { addressId: id } });
   if (ordersUsingAddress > 0) {
-    return { success: false, error: "Адрес используется в заказах. Удалить нельзя." };
+    return { success: false, error: E.addressInUse };
   }
 
   await prisma.address.delete({ where: { id } });
@@ -143,12 +163,13 @@ export async function deleteAddress(id: string): Promise<Result> {
 }
 
 export async function setDefaultAddress(id: string): Promise<Result> {
+  const E = await getErrors();
   const dbUser = await getCurrentDbUser();
-  if (!dbUser?.companyId) return { success: false, error: "Не авторизованы" };
+  if (!dbUser?.companyId) return { success: false, error: E.notAuth };
 
   const existing = await prisma.address.findUnique({ where: { id } });
   if (!existing || existing.companyId !== dbUser.companyId) {
-    return { success: false, error: "Адрес не найден" };
+    return { success: false, error: E.addressNotFound };
   }
 
   await prisma.$transaction([

@@ -3,6 +3,23 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
+
+async function getErrors() {
+  const isEn = (await getLocaleFromCookie()) === "en";
+  return {
+    badQty: isEn ? "Enter a valid quantity" : "Укажите корректное количество",
+    notAuth: isEn ? "Sign in to join" : "Войдите чтобы присоединиться",
+    needOnboarding: isEn
+      ? "Finish company onboarding first"
+      : "Сначала завершите онбординг компании",
+    offerNotFound: isEn ? "Group buy not found" : "Закупка не найдена",
+    notAccepting: isEn
+      ? "This group buy is no longer accepting participants"
+      : "Эта закупка больше не принимает участников",
+    deadlinePassed: isEn ? "Deadline passed" : "Дедлайн прошёл",
+  };
+}
 
 /**
  * Join a group-buy offer. Adds a GroupBuyParticipation for the caller's
@@ -15,32 +32,33 @@ import { prisma } from "@/lib/prisma";
  * on CLOSED_FAILED, fallbackMode handling. Those are V1.5 / V2.
  */
 export async function joinGroupBuy(offerId: string, reservedQty: number) {
+  const E = await getErrors();
   if (!Number.isFinite(reservedQty) || reservedQty < 1) {
-    return { ok: false, error: "Укажите корректное количество" };
+    return { ok: false, error: E.badQty };
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Войдите чтобы присоединиться" };
+  if (!user) return { ok: false, error: E.notAuth };
 
   const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
   if (!dbUser?.companyId) {
-    return { ok: false, error: "Сначала завершите онбординг компании" };
+    return { ok: false, error: E.needOnboarding };
   }
 
   const offer = await prisma.groupBuyOffer.findUnique({
     where: { id: offerId },
     include: { product: true },
   });
-  if (!offer) return { ok: false, error: "Закупка не найдена" };
+  if (!offer) return { ok: false, error: E.offerNotFound };
 
   if (offer.status !== "OPEN") {
-    return { ok: false, error: "Эта закупка больше не принимает участников" };
+    return { ok: false, error: E.notAccepting };
   }
   if (new Date(offer.deadlineAt) < new Date()) {
-    return { ok: false, error: "Дедлайн прошёл" };
+    return { ok: false, error: E.deadlinePassed };
   }
 
   // Idempotent — if the company is already in, return as-is.

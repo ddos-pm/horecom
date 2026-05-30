@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 const SubscriptionRequestSchema = z.object({
   productIds: z.array(z.string()).min(1).max(50),
@@ -16,27 +17,45 @@ const SubscriptionRequestSchema = z.object({
 export async function submitSubscriptionRequest(
   input: z.input<typeof SubscriptionRequestSchema>,
 ): Promise<{ success: true } | { success: false; error: string }> {
+  const isEn = (await getLocaleFromCookie()) === "en";
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Войдите чтобы оформить запрос" };
+  if (!user)
+    return {
+      success: false,
+      error: isEn ? "Sign in to submit a request" : "Войдите чтобы оформить запрос",
+    };
 
   const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
-  if (!dbUser?.companyId) return { success: false, error: "Сначала пройдите онбординг" };
+  if (!dbUser?.companyId)
+    return {
+      success: false,
+      error: isEn ? "Finish onboarding first" : "Сначала пройдите онбординг",
+    };
 
   const parsed = SubscriptionRequestSchema.safeParse(input);
-  if (!parsed.success) return { success: false, error: "Проверьте поля формы" };
+  if (!parsed.success)
+    return { success: false, error: isEn ? "Check the form fields" : "Проверьте поля формы" };
 
   const products = await prisma.product.findMany({
     where: { id: { in: parsed.data.productIds }, isActive: true },
   });
-  if (products.length === 0) return { success: false, error: "Выберите хотя бы один товар" };
+  if (products.length === 0)
+    return {
+      success: false,
+      error: isEn ? "Pick at least one product" : "Выберите хотя бы один товар",
+    };
 
   const notes = [
-    `Дни: ${parsed.data.days.join(", ")}`,
-    `Время: ${parsed.data.timeOfDay}`,
-    parsed.data.notes?.trim() ? `Комментарий: ${parsed.data.notes.trim()}` : null,
+    isEn ? `Days: ${parsed.data.days.join(", ")}` : `Дни: ${parsed.data.days.join(", ")}`,
+    isEn ? `Time: ${parsed.data.timeOfDay}` : `Время: ${parsed.data.timeOfDay}`,
+    parsed.data.notes?.trim()
+      ? isEn
+        ? `Note: ${parsed.data.notes.trim()}`
+        : `Комментарий: ${parsed.data.notes.trim()}`
+      : null,
   ]
     .filter(Boolean)
     .join("\n");

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 const Schema = z.object({
   segment: z.enum(["ENTERPRISE", "SMB_REPLENISHMENT", "MICRO_GROUPBUY"]),
@@ -19,20 +20,29 @@ export type OnboardingInput = z.input<typeof Schema>;
 export async function completeOnboarding(
   input: OnboardingInput,
 ): Promise<{ success: true } | { success: false; error: string }> {
+  const isEn = (await getLocaleFromCookie()) === "en";
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Не авторизованы" };
+  if (!user) return { success: false, error: isEn ? "Not authorized" : "Не авторизованы" };
 
   const parsed = Schema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: "Проверьте поля формы" };
+    return { success: false, error: isEn ? "Check the form fields" : "Проверьте поля формы" };
   }
 
   const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
-  if (!dbUser) return { success: false, error: "Пользователь не найден в БД" };
-  if (dbUser.companyId) return { success: false, error: "Онбординг уже пройден" };
+  if (!dbUser)
+    return {
+      success: false,
+      error: isEn ? "User record not found" : "Пользователь не найден в БД",
+    };
+  if (dbUser.companyId)
+    return {
+      success: false,
+      error: isEn ? "Onboarding already completed" : "Онбординг уже пройден",
+    };
 
   const company = await prisma.company.create({
     data: {
@@ -41,7 +51,7 @@ export async function completeOnboarding(
       segment: parsed.data.segment,
       addresses: {
         create: {
-          label: "Основной",
+          label: isEn ? "Main" : "Основной",
           street: parsed.data.addressStreet.trim(),
           house: parsed.data.addressHouse.trim(),
           details: parsed.data.addressDetails?.trim() || null,

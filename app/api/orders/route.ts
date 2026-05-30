@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmation, sendOrderToManager } from "@/lib/email";
 import { pushOrderToAmoCRM } from "@/lib/amocrm";
+import { getLocaleFromCookie } from "@/lib/locale-cookie";
 
 const ItemSchema = z.object({
   productId: z.string(),
@@ -24,29 +25,42 @@ const FREE_DELIVERY_THRESHOLD = 20_000;
 const DELIVERY_FEE = 1_000;
 
 export async function POST(request: Request) {
+  const isEn = (await getLocaleFromCookie()) === "en";
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "Не авторизованы" }, { status: 401 });
+    return NextResponse.json(
+      { error: isEn ? "Not authorized" : "Не авторизованы" },
+      { status: 401 },
+    );
   }
 
   const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } });
   if (!dbUser?.companyId) {
-    return NextResponse.json({ error: "Сначала пройдите онбординг" }, { status: 400 });
+    return NextResponse.json(
+      { error: isEn ? "Finish onboarding first" : "Сначала пройдите онбординг" },
+      { status: 400 },
+    );
   }
 
   const parsed = Body.safeParse(await request.json());
   if (!parsed.success) {
-    return NextResponse.json({ error: "Некорректные данные" }, { status: 400 });
+    return NextResponse.json(
+      { error: isEn ? "Invalid data" : "Некорректные данные" },
+      { status: 400 },
+    );
   }
 
   const { items, addressId, deliveryDate, deliverySlot, substitutionPreference, comment } = parsed.data;
 
   const address = await prisma.address.findUnique({ where: { id: addressId } });
   if (!address || address.companyId !== dbUser.companyId) {
-    return NextResponse.json({ error: "Адрес не найден" }, { status: 404 });
+    return NextResponse.json(
+      { error: isEn ? "Address not found" : "Адрес не найден" },
+      { status: 404 },
+    );
   }
 
   const productIds = items.map((i) => i.productId);
@@ -55,7 +69,10 @@ export async function POST(request: Request) {
     include: { prices: { take: 1 } },
   });
   if (products.length !== productIds.length) {
-    return NextResponse.json({ error: "Некоторые товары больше не активны" }, { status: 400 });
+    return NextResponse.json(
+      { error: isEn ? "Some products are no longer active" : "Некоторые товары больше не активны" },
+      { status: 400 },
+    );
   }
 
   const orderItems = items.map((i) => {
@@ -73,8 +90,13 @@ export async function POST(request: Request) {
 
   const subtotal = orderItems.reduce((s, i) => s + i.lineTotal, 0);
   if (subtotal < MIN_ORDER_TOTAL) {
+    const min = MIN_ORDER_TOTAL.toLocaleString(isEn ? "en-US" : "ru-RU");
     return NextResponse.json(
-      { error: `Минимальный заказ — ${MIN_ORDER_TOTAL.toLocaleString("ru-RU")} ₸` },
+      {
+        error: isEn
+          ? `Minimum order — ${min} ₸`
+          : `Минимальный заказ — ${min} ₸`,
+      },
       { status: 400 },
     );
   }

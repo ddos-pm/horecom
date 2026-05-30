@@ -92,15 +92,28 @@ export function getCartTotal(items: CartItem[]) {
   return subtotal + getDeliveryFee(subtotal);
 }
 
-export function getCartWarnings(items: CartItem[]) {
+export function getCartWarnings(items: CartItem[], locale: "ru" | "en" | "kz" = "ru") {
   const subtotal = getCartSubtotal(items);
   const warnings: string[] = [];
   if (items.length === 0) return warnings;
+  const isEn = locale === "en";
+  const numFmt = isEn ? "en-US" : "ru-RU";
   if (subtotal < MIN_ORDER_TOTAL) {
-    warnings.push(`Минимальный заказ — ${MIN_ORDER_TOTAL.toLocaleString("ru-RU")} ₸. До минимума: ${(MIN_ORDER_TOTAL - subtotal).toLocaleString("ru-RU")} ₸.`);
+    const min = MIN_ORDER_TOTAL.toLocaleString(numFmt);
+    const remaining = (MIN_ORDER_TOTAL - subtotal).toLocaleString(numFmt);
+    warnings.push(
+      isEn
+        ? `Minimum order — ${min} ₸. To reach the minimum: ${remaining} ₸.`
+        : `Минимальный заказ — ${min} ₸. До минимума: ${remaining} ₸.`,
+    );
   }
   if (subtotal < FREE_DELIVERY_THRESHOLD) {
-    warnings.push(`До бесплатной доставки: ${(FREE_DELIVERY_THRESHOLD - subtotal).toLocaleString("ru-RU")} ₸.`);
+    const remaining = (FREE_DELIVERY_THRESHOLD - subtotal).toLocaleString(numFmt);
+    warnings.push(
+      isEn
+        ? `To free delivery: ${remaining} ₸.`
+        : `До бесплатной доставки: ${remaining} ₸.`,
+    );
   }
   return warnings;
 }

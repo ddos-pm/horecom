@@ -29,7 +29,7 @@ export default function CartPage() {
   const subtotal = getCartSubtotal(items);
   const delivery = getDeliveryFee(subtotal);
   const total = getCartTotal(items);
-  const warnings = getCartWarnings(items);
+  const warnings = getCartWarnings(items, locale as "ru" | "en" | "kz");
   const belowMin = subtotal < CART_LIMITS.MIN_ORDER_TOTAL;
 
   return (

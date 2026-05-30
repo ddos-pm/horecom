@@ -3,7 +3,7 @@
  * abbreviation in the active locale.
  *
  * Falls back to the raw value if unmapped. Default locale is Russian; pass
- * "kz" for Kazakh display where it makes a visible difference.
+ * "en" or "kz" for the corresponding display.
  */
 
 const RU: Record<string, string> = {
@@ -28,8 +28,22 @@ const KZ: Record<string, string> = {
   ml: "мл",
 };
 
-export function formatUnit(unitType: string | null | undefined, locale: "ru" | "kz" = "ru"): string {
+const EN: Record<string, string> = {
+  piece: "pc",
+  pcs: "pcs",
+  unit: "pc",
+  pack: "pack",
+  kg: "kg",
+  g: "g",
+  l: "L",
+  ml: "mL",
+};
+
+export function formatUnit(
+  unitType: string | null | undefined,
+  locale: "ru" | "en" | "kz" = "ru",
+): string {
   if (!unitType) return "";
-  const dict = locale === "kz" ? KZ : RU;
+  const dict = locale === "en" ? EN : locale === "kz" ? KZ : RU;
   return dict[unitType.toLowerCase()] ?? unitType;
 }
