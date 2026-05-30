@@ -12,6 +12,7 @@ import { SITE_URL } from "@/lib/base-url";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { localizePackLabel } from "@/lib/format-pack";
 import { pickLocalized } from "@/lib/i18n-field";
+import { getProductBySlug } from "@/lib/product-loader";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -53,10 +54,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const isEn = locale === "en";
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: { category: true, prices: { take: 1 } },
-  });
+  // Cached loader — same call inside ProductPage() will reuse this result
+  // for the duration of the request (saves a Tokyo round-trip per PDP).
+  const product = await getProductBySlug(slug);
   if (!product) return { title: isEn ? "Product not found" : "Товар не найден" };
 
   return {
@@ -123,17 +123,11 @@ export default async function ProductPage({
   const { locale, slug } = await params;
   const isEn = locale === "en";
 
-  // Stage 1: load the product (we need its categoryId before we can fetch
-  // related). Each Tokyo round-trip is ~250ms from Frankfurt, so we keep
-  // this one hop minimal.
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      prices: { orderBy: { createdAt: "desc" } },
-      inventorySnapshot: true,
-    },
-  });
+  // Stage 1: load the product. generateMetadata already called the same
+  // cached loader earlier in the request, so this resolves from the
+  // React.cache() memo with no DB hit. We still need the categoryId
+  // before we can kick off the related-products query.
+  const product = await getProductBySlug(slug);
 
   if (!product || !product.isActive) notFound();
 
