@@ -21,10 +21,40 @@ const APP_PREFIXES = [
   "/api",
 ];
 
+// Stateless / public API routes that should NOT run Supabase session
+// refresh. Every middleware invocation refreshes the auth cookie via a
+// Supabase auth-API hit (~50-100 ms + 1 quota slot); for these endpoints
+// the session is irrelevant and the round-trip is pure waste.
+//
+//   /api/healthz                       — uptime probe (Vercel + status pages)
+//   /api/mcp/{manifest,tools,call}     — public catalog access for AI agents
+//   /api/cron/subscription-reminders   — Vercel cron-signed
+//   /api/amocrm/webhook                — third-party push
+//   /api/payments/kaspi/webhook        — third-party push (HMAC-verified)
+//   /api/auth/otp/{request,verify}     — pre-login, no session yet
+//
+// Order matters with the prefix check: list more specific paths first
+// so /api/auth/otp/request matches before a hypothetical /api wildcard.
+const STATELESS_API_PATHS = [
+  "/api/healthz",
+  "/api/mcp/manifest.json",
+  "/api/mcp/tools",
+  "/api/mcp/call",
+  "/api/cron/subscription-reminders",
+  "/api/amocrm/webhook",
+  "/api/payments/kaspi/webhook",
+  "/api/auth/otp/request",
+  "/api/auth/otp/verify",
+];
+
 const LOCALE_PREFIXES = routing.locales.map((l) => `/${l}`);
 
 function isAppPath(pathname: string) {
   return APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function isStatelessApi(pathname: string) {
+  return STATELESS_API_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 // Strip a /ru or /kz prefix if the rest of the path is an app route. Returns
@@ -47,6 +77,13 @@ export async function middleware(request: NextRequest) {
   // don't run it through Supabase session refresh or next-intl locale
   // routing. Pass through to the route handler directly.
   if (pathname.startsWith("/.well-known/")) {
+    return;
+  }
+
+  // Stateless / public API routes bypass Supabase session refresh.
+  // Saves a ~50-100 ms auth-API hit on every healthz probe, MCP tool
+  // call, webhook delivery, and OTP request.
+  if (isStatelessApi(pathname)) {
     return;
   }
 
