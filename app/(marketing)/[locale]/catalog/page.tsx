@@ -95,7 +95,28 @@ export default async function CatalogPage({
       : {}),
   };
 
-  const [categories, products, total, brandAgg] = await Promise.all([
+  // Sidebar facets (subscription/group/in-stock counts) collapse into
+  // one raw SQL aggregate. PostgreSQL's FILTER (WHERE …) lets a single
+  // SELECT compute three counts in one row, replacing three separate
+  // round-trips with one. The Promise.all below now fires 4 queries
+  // in parallel instead of 4 + 3 sequential (7 total), so the slowest
+  // query becomes the TTFB floor, not their sum.
+  type SidebarCounts = { sub: bigint; grp: bigint; stock: bigint };
+  const sidebarCountsPromise = prisma.$queryRaw<SidebarCounts[]>`
+    SELECT
+      COUNT(*) FILTER (WHERE "isSubscriptionEligible") AS sub,
+      COUNT(*) FILTER (WHERE "isGroupEligible")        AS grp,
+      COUNT(*) FILTER (
+        WHERE EXISTS (
+          SELECT 1 FROM "InventorySnapshot" i
+          WHERE i."productId" = "Product"."id" AND i."availableQty" > 0
+        )
+      )                                                AS stock
+    FROM "Product"
+    WHERE "isActive" = TRUE
+  `.catch(() => [{ sub: 0n, grp: 0n, stock: 0n }] as SidebarCounts[]);
+
+  const [categories, products, total, brandAgg, sidebarCountsRows] = await Promise.all([
     prisma.category.findMany({
       orderBy: { sortOrder: "asc" },
       include: { _count: { select: { products: { where: { isActive: true } } } } },
@@ -128,21 +149,17 @@ export default async function CatalogPage({
       orderBy: { _count: { brandResolved: "desc" } },
       take: 24,
     }),
+    sidebarCountsPromise,
   ]);
   const brands = brandAgg
     .filter((b): b is { brandResolved: string; _count: { _all: number } } => !!b.brandResolved)
     .map((b) => ({ name: b.brandResolved, count: b._count._all }));
 
   const activeCategory = categorySlug ? categories.find((c) => c.slug === categorySlug) : null;
-  const [subscriptionCount, groupCount, inStockCount] = await Promise.all([
-    prisma.product
-      .count({ where: { isActive: true, isSubscriptionEligible: true } })
-      .catch(() => 0),
-    prisma.product.count({ where: { isActive: true, isGroupEligible: true } }).catch(() => 0),
-    prisma.product
-      .count({ where: { isActive: true, inventorySnapshot: { availableQty: { gt: 0 } } } })
-      .catch(() => 0),
-  ]);
+  const sidebarCounts = sidebarCountsRows[0] ?? { sub: 0n, grp: 0n, stock: 0n };
+  const subscriptionCount = Number(sidebarCounts.sub);
+  const groupCount = Number(sidebarCounts.grp);
+  const inStockCount = Number(sidebarCounts.stock);
 
   // ItemList JSON-LD — gives Google + AI crawlers a structured view of
   // the catalog grid. Position-keyed so order is preserved. Caps at the
