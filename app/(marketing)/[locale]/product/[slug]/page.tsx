@@ -11,6 +11,7 @@ import { formatUnit } from "@/lib/units";
 import { SITE_URL } from "@/lib/base-url";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { localizePackLabel } from "@/lib/format-pack";
+import { pickLocalized } from "@/lib/i18n-field";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -255,10 +256,10 @@ export default async function ProductPage({
           <Link href="/catalog">{isEn ? "Catalog" : "Каталог"}</Link>
           <span className="sep">/</span>
           <Link href={{ pathname: "/catalog", query: { category: product.category.slug } }}>
-            {product.category.name}
+            {pickLocalized(product.category, locale, "name")}
           </Link>
           <span className="sep">/</span>
-          <span className="curr">{product.name}</span>
+          <span className="curr">{pickLocalized(product, locale, "name")}</span>
         </nav>
 
         <div className="pdp">
@@ -285,11 +286,11 @@ export default async function ProductPage({
                   <span>·</span>
                 </>
               )}
-              <span>{product.category.name}</span>
+              <span>{pickLocalized(product.category, locale, "name")}</span>
               <span className="sku">{product.sku}</span>
             </div>
 
-            <h1 className="pdp-name">{product.name}</h1>
+            <h1 className="pdp-name">{pickLocalized(product, locale, "name")}</h1>
 
             <div className="pdp-badges">
               <span className={stockMeta.cls}>{stockMeta.label(stock?.availableQty ?? 0, unitWord)}</span>

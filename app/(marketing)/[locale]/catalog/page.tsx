@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/base-url";
 import { formatUnit } from "@/lib/units";
 import { localizePackLabel } from "@/lib/format-pack";
+import { pickLocalized } from "@/lib/i18n-field";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
 import "./catalog.css";
@@ -256,7 +257,7 @@ export default async function CatalogPage({
                 href={`/${locale}/catalog?category=${c.slug}`}
                 className={`cat-pill${categorySlug === c.slug ? " active" : ""}`}
               >
-                {c.name}
+                {pickLocalized(c, locale, "name")}
               </a>
             ))}
           </div>
@@ -334,7 +335,7 @@ export default async function CatalogPage({
                     href={`/${locale}/catalog?category=${c.slug}`}
                     className={categorySlug === c.slug ? "active" : ""}
                   >
-                    <span>{c.name}</span>
+                    <span>{pickLocalized(c, locale, "name")}</span>
                     <span className="n">{c._count.products}</span>
                   </a>
                 ))}
@@ -489,7 +490,7 @@ export default async function CatalogPage({
                           <span className="pack">{localizePackLabel(p.packLabel, locale)}</span>
                         </div>
                         <Link href={`/product/${p.slug}`} className="card-name">
-                          {p.name}
+                          {pickLocalized(p, locale, "name")}
                         </Link>
                         <div className="card-data">
                           <div>

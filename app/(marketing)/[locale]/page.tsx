@@ -8,6 +8,7 @@ import { SuppliersMarquee } from "@/components/marketing/suppliers-marquee";
 import { TopMonthList } from "@/components/marketing/top-month-list";
 import { formatUnit } from "@/lib/units";
 import { localizePackLabel } from "@/lib/format-pack";
+import { pickLocalized } from "@/lib/i18n-field";
 import "./home.css";
 
 // ISR — Tyler/grant reviewers should never wait on a cold start. Marketing
@@ -233,7 +234,7 @@ export default async function HomePage({
                   </Link>
                   <div className="hero-card-info">
                     <div className="meta">
-                      {hero?.brand ?? "Рогачёв"} · {hero?.category.name ?? (isEn ? "Dairy" : "Молочная")}
+                      {hero?.brand ?? "Рогачёв"} · {hero?.category ? pickLocalized(hero.category, locale, "name") : isEn ? "Dairy" : "Молочная"}
                     </div>
                     <div className="name">{hero?.name ?? (isEn ? 'Butter "Rogachev" 82.5% 5 kg' : 'Масло "Рогачев" 82,5% 5кг')}</div>
                     <div className="price">
@@ -448,7 +449,7 @@ export default async function HomePage({
                 <div className="cat-icon">
                   {CAT_ICONS[c.slug] ?? CAT_ICONS["ingredients"]}
                 </div>
-                <div className="cat-name">{c.name}</div>
+                <div className="cat-name">{pickLocalized(c, locale, "name")}</div>
                 <div className="cat-count">
                   <b>{c._count.products}</b>{" "}
                   {isEn

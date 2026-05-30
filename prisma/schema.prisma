@@ -215,6 +215,7 @@ model Category {
   id        String     @id @default(cuid())
   name      String
   nameKz    String?
+  nameEn    String?
   slug      String     @unique
   sortOrder Int        @default(0)
   parentId  String?
@@ -228,9 +229,11 @@ model Product {
   sku                     String      @unique
   name                    String
   nameKz                  String?
+  nameEn                  String?
   slug                    String      @unique
   description             String?
   descriptionKz           String?
+  descriptionEn           String?
   brand                   String?
   imageUrl                String?
   imageUrls               String[]    @default([])
