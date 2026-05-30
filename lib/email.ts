@@ -11,6 +11,11 @@
  * Sender domain: defaults to `orders@horecom.kz`. Override with
  * RESEND_FROM if the verified domain on Resend is different.
  * Manager copy goes to RESEND_MANAGER or falls back to Horecomkz@gmail.com.
+ *
+ * Localization: the customer-facing confirmation switches RU/EN based on
+ * the locale captured at order time. The manager copy stays Russian —
+ * the ops team reads it in Russian, and a bilingual subject line is
+ * unhelpful for inbox triage.
  */
 
 type OrderSummary = {
@@ -22,12 +27,22 @@ type OrderSummary = {
   deliveryWindow: { date: string; slot: string };
 };
 
+type Locale = "ru" | "en" | "kz";
+
 const FROM = process.env.RESEND_FROM ?? "Horecom <orders@horecom.kz>";
 const MANAGER_EMAIL = process.env.RESEND_MANAGER ?? "Horecomkz@gmail.com";
 
-function formatBody(order: OrderSummary, audience: "client" | "manager"): { subject: string; html: string } {
-  const totalKzt = order.total.toLocaleString("ru-RU");
+function formatBody(
+  order: OrderSummary,
+  audience: "client" | "manager",
+  locale: Locale,
+): { subject: string; html: string } {
+  const isEn = locale === "en";
+  const numFmt = isEn && audience === "client" ? "en-US" : "ru-RU";
+  const totalKzt = order.total.toLocaleString(numFmt);
+
   if (audience === "manager") {
+    // Manager copy is always Russian — ops team's working language.
     return {
       subject: `Новый заказ ${order.number} · ${totalKzt} ₸ · ${order.companyName}`,
       html: `
@@ -39,6 +54,21 @@ function formatBody(order: OrderSummary, audience: "client" | "manager"): { subj
       `,
     };
   }
+
+  if (isEn) {
+    return {
+      subject: `Order ${order.number} accepted · Horecom`,
+      html: `
+        <h2>Order accepted</h2>
+        <p>Number: <b>${order.number}</b></p>
+        <p>Total: <b>${totalKzt} ₸</b> · ${order.itemCount} items</p>
+        <p>Delivery: ${order.deliveryWindow.date} ${order.deliveryWindow.slot}</p>
+        <p>Address: ${order.deliveryAddress}</p>
+        <p>An account manager will reach out on WhatsApp to confirm stock availability and delivery time.</p>
+      `,
+    };
+  }
+
   return {
     subject: `Заказ ${order.number} принят · Horecom`,
     html: `
@@ -73,8 +103,12 @@ async function sendViaResend(to: string, subject: string, html: string): Promise
   }
 }
 
-export async function sendOrderConfirmation(order: OrderSummary, customerEmail: string) {
-  const { subject, html } = formatBody(order, "client");
+export async function sendOrderConfirmation(
+  order: OrderSummary,
+  customerEmail: string,
+  locale: Locale = "ru",
+) {
+  const { subject, html } = formatBody(order, "client", locale);
   if (process.env.RESEND_API_KEY) {
     await sendViaResend(customerEmail, subject, html);
   } else {
@@ -83,7 +117,8 @@ export async function sendOrderConfirmation(order: OrderSummary, customerEmail: 
 }
 
 export async function sendOrderToManager(order: OrderSummary, customerEmail: string) {
-  const { subject, html } = formatBody(order, "manager");
+  // Manager copy always RU — see formatBody comment.
+  const { subject, html } = formatBody(order, "manager", "ru");
   const body = `${html}<p><i>Контакт клиента:</i> ${customerEmail}</p>`;
   if (process.env.RESEND_API_KEY) {
     await sendViaResend(MANAGER_EMAIL, subject, body);

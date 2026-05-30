@@ -138,7 +138,11 @@ export async function POST(request: Request) {
     deliveryWindow: { date: deliveryDate, slot: deliverySlot },
   };
 
-  await sendOrderConfirmation(summary, dbUser.email ?? user.email ?? "");
+  await sendOrderConfirmation(
+    summary,
+    dbUser.email ?? user.email ?? "",
+    isEn ? "en" : "ru",
+  );
   await sendOrderToManager(summary, dbUser.email ?? user.email ?? "");
 
   // Fire-and-forget AmoCRM push. We do NOT await — order creation must
