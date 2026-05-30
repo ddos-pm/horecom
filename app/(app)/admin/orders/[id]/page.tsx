@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import { getLocaleFromCookie } from "@/lib/locale-cookie";
 import { OrderStatusControls } from "./status-controls";
 import { ItemControls } from "./item-controls";
+import { IssueInvoiceButton } from "./issue-invoice-button";
 
 export const metadata = { title: "Заказ · Admin" };
 
@@ -108,6 +109,23 @@ export default async function AdminOrderDetailPage({
           {isEn ? "Status actions" : "Действия со статусом"}
         </div>
         <OrderStatusControls locale={locale} orderId={order.id} status={order.status} />
+      </div>
+
+      <div className="mb-4 rounded-lg border border-border bg-card p-4">
+        <div className="mb-2 text-xs font-medium text-muted-foreground">
+          {isEn ? "Payment" : "Оплата"}
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="text-muted-foreground">
+            {isEn ? "Status: " : "Статус: "}
+            <b className="text-foreground">{order.paymentStatus}</b>
+          </span>
+          <IssueInvoiceButton
+            orderId={order.id}
+            locale={locale}
+            existingPaymentUrl={order.paymentHandoffRef}
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
