@@ -7,6 +7,7 @@ import { StatusStrip } from "@/components/marketing/status-strip";
 import { SuppliersMarquee } from "@/components/marketing/suppliers-marquee";
 import { TopMonthList } from "@/components/marketing/top-month-list";
 import { formatUnit } from "@/lib/units";
+import { localizePackLabel } from "@/lib/format-pack";
 import "./home.css";
 
 // ISR — Tyler/grant reviewers should never wait on a cold start. Marketing
@@ -242,7 +243,7 @@ export default async function HomePage({
                           : (isEn ? "33,800" : "33 800")}{" "}
                         ₸
                       </b>
-                      <span>/ {hero?.packLabel ?? (isEn ? "pack" : "упак")}</span>
+                      <span>/ {hero?.packLabel ? localizePackLabel(hero.packLabel, locale) : isEn ? "pack" : "упак"}</span>
                     </div>
                   </div>
                 </div>

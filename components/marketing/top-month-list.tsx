@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { formatUnit } from "@/lib/units";
+import { localizePackLabel } from "@/lib/format-pack";
 import { useCart } from "@/lib/cart-store";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
@@ -84,7 +85,7 @@ export function TopMonthList({ products }: { products: FeaturedProduct[] }) {
               <div className="prod-info">
                 <div className="prod-meta">
                   {p.brand ? `${p.brand} · ` : ""}
-                  {p.packLabel}
+                  {localizePackLabel(p.packLabel, locale)}
                 </div>
                 <Link href={`/product/${p.slug}`} className="prod-name">
                   {p.name}

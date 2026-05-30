@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
 import { formatKzt } from "@/lib/pricing";
+import { localizePackLabel } from "@/lib/format-pack";
 import { JoinGroupButton } from "./join-button";
 import { ShareGroupButton } from "./share-button";
 import "./group.css";
@@ -112,7 +113,7 @@ export default async function GroupBuyPage({
             <span>·</span>
             <span>{offer.product.category.name}</span>
             <span>·</span>
-            <span>{offer.product.packLabel}</span>
+            <span>{localizePackLabel(offer.product.packLabel, locale)}</span>
           </div>
 
           {offer.product.imageUrl && (
@@ -144,7 +145,7 @@ export default async function GroupBuyPage({
             <div className="gb-progress-head">
               <span>{isEn ? "Group progress" : "Прогресс группы"}</span>
               <span className="val tabular">
-                {offer.currentQty} / {offer.targetQty} {offer.product.packLabel}
+                {offer.currentQty} / {offer.targetQty} {localizePackLabel(offer.product.packLabel, locale)}
               </span>
             </div>
             <div className="gb-bar">
@@ -193,7 +194,7 @@ export default async function GroupBuyPage({
                   <li key={p.id}>
                     <span className="company">{p.company.name}</span>
                     <span className="qty tabular">
-                      × {p.reservedQty} {offer.product.packLabel}
+                      × {p.reservedQty} {localizePackLabel(offer.product.packLabel, locale)}
                     </span>
                   </li>
                 ))}

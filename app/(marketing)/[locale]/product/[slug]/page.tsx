@@ -10,6 +10,7 @@ import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { formatUnit } from "@/lib/units";
 import { SITE_URL } from "@/lib/base-url";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
+import { localizePackLabel } from "@/lib/format-pack";
 import { Gallery } from "./gallery";
 import "./product.css";
 
@@ -318,7 +319,7 @@ export default async function ProductPage({
                     <span className="amount tabular">
                       {Number(basePrice.basePrice).toLocaleString(isEn ? "en-US" : "ru-RU")} ₸
                     </span>
-                    <span className="per">/ {product.packLabel}</span>
+                    <span className="per">/ {localizePackLabel(product.packLabel, locale)}</span>
                   </div>
                 </div>
 
@@ -549,7 +550,7 @@ export default async function ProductPage({
                   </div>
                   <div className="spec">
                     <span className="k">{isEn ? "Pack" : "Фасовка"}</span>
-                    <span className="v">{product.packLabel}</span>
+                    <span className="v">{localizePackLabel(product.packLabel, locale)}</span>
                   </div>
                   <div className="spec">
                     <span className="k">{isEn ? "Storage" : "Хранение"}</span>
@@ -632,7 +633,7 @@ export default async function ProductPage({
                     <div className="rel-info">
                       <div className="m">
                         {r.brand && <>{r.brand} · </>}
-                        {r.packLabel}
+                        {localizePackLabel(r.packLabel, locale)}
                       </div>
                       <div className="n">{r.name}</div>
                       <div className="p">

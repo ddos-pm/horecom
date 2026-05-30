@@ -13,6 +13,7 @@ import {
   CART_LIMITS,
 } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
+import { localizePackLabel } from "@/lib/format-pack";
 import { useLocaleCookie } from "@/lib/use-locale-cookie";
 
 export default function CartPage() {
@@ -61,7 +62,7 @@ export default function CartPage() {
                   {item.name}
                 </Link>
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {item.packLabel} · {formatPrice(item.price.toString())} ·{" "}
+                  {localizePackLabel(item.packLabel, locale)} · {formatPrice(item.price.toString())} ·{" "}
                   {isEn ? `min. ${item.minOrderQty}` : `мин. ${item.minOrderQty}`}
                 </div>
                 <div className="mt-auto flex items-center justify-between pt-2">

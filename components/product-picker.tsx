@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useLocale } from "next-intl";
+import { localizePackLabel } from "@/lib/format-pack";
 
 export type PickerProduct = {
   id: string;
@@ -102,7 +103,7 @@ export function ProductPicker({
                 <div className="line-clamp-1">{p.name}</div>
                 <div className="text-[11px] text-muted-foreground">
                   {p.brand ? `${p.brand} · ` : ""}
-                  {p.packLabel} · {p.sku}
+                  {localizePackLabel(p.packLabel, locale)} · {p.sku}
                 </div>
               </div>
             </label>

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 import { COMPANY } from "@/lib/company";
 import { getLocaleFromCookie } from "@/lib/locale-cookie";
+import { localizePackLabel } from "@/lib/format-pack";
 import { ReorderButton } from "./reorder-button";
 
 export const metadata = { title: "Заказ" };
@@ -200,7 +201,7 @@ export default async function OrderDetailPage({
                 <div className="flex flex-1 flex-col text-sm">
                   <div className="font-medium">{item.productNameSnapshot}</div>
                   <div className="text-xs text-muted-foreground">
-                    {item.unitLabelSnapshot} · {formatPrice(item.unitPrice.toString())} × {item.quantity}
+                    {localizePackLabel(item.unitLabelSnapshot, locale)} · {formatPrice(item.unitPrice.toString())} × {item.quantity}
                   </div>
                 </div>
                 <div className="tabular-nums text-sm font-medium">

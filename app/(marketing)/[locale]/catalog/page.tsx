@@ -8,6 +8,7 @@ import { CatalogSearchInput } from "@/components/marketing/catalog-search-input"
 import { JsonLd } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/base-url";
 import { formatUnit } from "@/lib/units";
+import { localizePackLabel } from "@/lib/format-pack";
 import { getDisplayPrices, formatKzt } from "@/lib/pricing";
 import { PRODUCT_BLUR_DATA_URL, PRODUCT_IMAGE_QUALITY } from "@/lib/image-blur";
 import "./catalog.css";
@@ -485,7 +486,7 @@ export default async function CatalogPage({
                               </>
                             ) : null;
                           })()}
-                          <span className="pack">{p.packLabel}</span>
+                          <span className="pack">{localizePackLabel(p.packLabel, locale)}</span>
                         </div>
                         <Link href={`/product/${p.slug}`} className="card-name">
                           {p.name}
