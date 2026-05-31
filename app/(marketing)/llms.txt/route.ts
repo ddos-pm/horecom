@@ -1,10 +1,18 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL } from "@/lib/base-url";
 
-export const dynamic = "force-dynamic";
+// AI agents (ChatGPT, Claude, Perplexity) hit /llms.txt to discover what
+// the site does. Categories don't change often — cache the list for an
+// hour so the route doesn't burn a Tokyo round-trip on every probe.
+const getCategories = unstable_cache(
+  () => prisma.category.findMany({ orderBy: { sortOrder: "asc" } }),
+  ["llms-txt-categories"],
+  { revalidate: 3600, tags: ["categories"] },
+);
 
 export async function GET() {
-  const categories = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
+  const categories = await getCategories();
 
   const content = `# Horecom
 

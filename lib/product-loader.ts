@@ -1,26 +1,27 @@
 /**
- * React-cached product loader.
+ * Product loader for the PDP — two-layer cache.
  *
- * The PDP at app/(marketing)/[locale]/product/[slug]/page.tsx calls
- * `prisma.product.findUnique({where:{slug}, ...})` twice per request:
- *   1. In generateMetadata to build the page title + OG description.
- *   2. In the page body to render the product card itself.
+ * Layer 1: unstable_cache (cross-request, 10 min revalidate, per-slug key)
+ *   First visitor to a SKU pays for the Tokyo Supabase round-trip.
+ *   Every subsequent visitor in the next 10 min gets the data from the
+ *   Next data cache — no DB hit, no Tokyo network cost.
  *
- * Both calls hit the Tokyo Supabase pooler (~250 ms each from Frankfurt
- * edge). React's request-scoped `cache()` dedupes by argument identity
- * inside the same render, so wrapping the loader in `cache()` collapses
- * the two trips to one without changing any call sites' contracts.
+ * Layer 2: React.cache (intra-request, dedup)
+ *   generateMetadata and ProductPage both call getProductBySlug(slug)
+ *   inside the same request. React.cache memoizes by argument identity
+ *   so the second call resolves from the in-memory memo without going
+ *   through unstable_cache again.
  *
- * The loader uses the SUPERSET include shape (category + prices + inventory
- * snapshot) so both callers can rely on the same return type. The
- * generateMetadata path only reads a handful of scalar fields, so the
- * extra columns cost almost nothing to fetch over Postgres' row format.
+ * Tag: `product:<slug>` lets a downstream admin mutation hit
+ * revalidateTag(`product:${slug}`) and invalidate one PDP cache entry
+ * without burning the whole catalog.
  */
 
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
-export const getProductBySlug = cache(async (slug: string) => {
+function fetchProduct(slug: string) {
   return prisma.product.findUnique({
     where: { slug },
     include: {
@@ -29,6 +30,24 @@ export const getProductBySlug = cache(async (slug: string) => {
       inventorySnapshot: true,
     },
   });
-});
+}
 
-export type LoadedProduct = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>;
+// Layer 1: cross-request data cache, per-slug.
+function buildCachedFetch(slug: string) {
+  return unstable_cache(() => fetchProduct(slug), [`product:${slug}`], {
+    revalidate: 600,
+    tags: [`product:${slug}`],
+  });
+}
+
+// Layer 2: intra-request React cache. The outer cache() wrapper dedupes
+// the unstable_cache builder itself so both PDP call sites share the
+// same memo for one render pass.
+const getCachedFetcher = cache((slug: string) => buildCachedFetch(slug));
+
+export async function getProductBySlug(slug: string) {
+  const fetcher = getCachedFetcher(slug);
+  return fetcher();
+}
+
+export type LoadedProduct = NonNullable<Awaited<ReturnType<typeof fetchProduct>>>;
