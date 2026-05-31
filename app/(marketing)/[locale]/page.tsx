@@ -108,7 +108,7 @@ export default async function HomePage({
         <div className="hero-glow" />
         <div className="hero-glow-2" />
 
-        <StatusStrip />
+        <StatusStrip skuCount={skuCount} />
 
         <div className="container-x hero-body">
           <div className="hero-layout">

@@ -1,11 +1,19 @@
 import { getLocale } from "next-intl/server";
-import { prisma } from "@/lib/prisma";
 
-export async function StatusStrip() {
-  const [skuCount, locale] = await Promise.all([
-    prisma.product.count({ where: { isActive: true } }).catch(() => 190),
-    getLocale(),
-  ]);
+/**
+ * Hero strip with operational status (warehouse open, dispatch time,
+ * catalog SKU count, WhatsApp response time).
+ *
+ * skuCount comes in as a prop from the parent page — the home page
+ * already loads it via getHomePageData() so duplicating the
+ * prisma.product.count call here was a wasted Tokyo round-trip.
+ *
+ * Default to 190 (the team's actual catalog size at the time of the
+ * grant submission) so the component renders sanely if it's ever
+ * mounted on a route that doesn't have a count handy.
+ */
+export async function StatusStrip({ skuCount = 190 }: { skuCount?: number }) {
+  const locale = await getLocale();
   const isEn = locale === "en";
 
   return (
