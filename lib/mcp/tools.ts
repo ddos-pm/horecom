@@ -18,8 +18,12 @@ const PUBLIC_BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ||
   "https://horecom-platform-eosin.vercel.app";
 
+// MCP responses are consumed by AI agents that mostly speak English.
+// Default to /en/* product URLs so when the agent quotes the link back
+// to its user, they land on the English PDP. The catalog is locale-
+// routed; /ru and /kz both resolve to the same product.
 function productUrl(slug: string) {
-  return `${PUBLIC_BASE_URL}/ru/product/${slug}`;
+  return `${PUBLIC_BASE_URL}/en/product/${slug}`;
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -571,7 +575,10 @@ export async function createDraftOrder(
     },
   });
 
-  const confirmationUrl = `${PUBLIC_BASE_URL}/ru/orders/${order.id}?just_created=true`;
+  // /orders/[id] lives OUTSIDE the [locale] segment (per middleware
+  // APP_PREFIXES), so no locale prefix needed. The NEXT_LOCALE cookie
+  // drives the page locale once the customer lands.
+  const confirmationUrl = `${PUBLIC_BASE_URL}/orders/${order.id}?just_created=true`;
   const waText = `Здравствуйте! Я хочу подтвердить заказ ${number} (создан через AI-агент). Состав: ${itemsDetailed
     .map((i) => `${i.name} × ${i.quantity}`)
     .join(", ")}. Итого: ${total.toLocaleString("ru-RU")} ₸. Адрес: ${input.delivery_address}. Связь: ${input.customer_name}, ${input.customer_phone}.`;
