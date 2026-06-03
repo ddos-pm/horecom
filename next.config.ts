@@ -73,14 +73,21 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react"],
-    // Force the Next.js client router cache to drop dynamic segments
+    // Force the Next.js client router cache to drop DYNAMIC segments
     // immediately. Without this, clicking a catalog sidebar Link to
     // /ru/catalog?category=X from /ru/catalog (same pathname, different
     // query) reuses the cached unfiltered RSC payload and the filter
     // doesn't apply on soft-nav. Direct URL loads worked because they
     // bypass the cache; only the click was broken. Playwright caught it
     // in tests/e2e/site-walkthrough.spec.ts §3.
-    staleTimes: { dynamic: 0, static: 0 },
+    //
+    // STATIC pages keep the default 5-min client cache (was set to 0
+    // earlier alongside dynamic but that was a leak: every nav between
+    // landings — about → faq → privacy etc. — refetched the same RSC
+    // payload that the edge had already cached. Static:300 saves the
+    // round-trip and the catalog-filter bug is unaffected because that
+    // route is force-dynamic, not static).
+    staleTimes: { dynamic: 0, static: 300 },
     // Partial Prerendering would let the auth-dependent Suspense island
     // coexist with a cached static shell, BUT it requires Next canary —
     // stable 15.x rejects `experimental.ppr` at build time. Sticking with
