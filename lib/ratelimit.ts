@@ -13,6 +13,13 @@
  *               surface that's expensive to abuse.
  *   - webhook:  AmoCRM POSTs, can legit-burst when a manager processes
  *               many leads back-to-back — 60 / minute per IP.
+ *   - orders:   authenticated checkout — 10 orders / 5 min per CUSTOMER
+ *               (not IP, which would let a logged-in attacker flood
+ *               from one source). Triggers email + AmoCRM push so the
+ *               blast radius of abuse is wide.
+ *   - invoice:  Kaspi invoice issuance — 20 / 5 min per user. Idempotent
+ *               at the route handler (returns existing handoff ref) but
+ *               the limit prevents quota-burn on Kaspi's API.
  *
  * Usage at a call site:
  *   const { success } = await ratelimit.mcp.limit(ipFromRequest(req));
@@ -47,6 +54,8 @@ function makeLimiter(window: `${number} ${"s" | "m" | "h"}`, requests: number, p
 export const ratelimit = {
   mcp: makeLimiter("10 s", 20, "horecom:rl:mcp"),
   webhook: makeLimiter("1 m", 60, "horecom:rl:webhook"),
+  orders: makeLimiter("5 m", 10, "horecom:rl:orders"),
+  invoice: makeLimiter("5 m", 20, "horecom:rl:invoice"),
 };
 
 /** Extracts a stable client key (CF/Vercel forward the real IP via x-forwarded-for). */

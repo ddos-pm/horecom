@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createInvoice } from "@/lib/kaspi";
 import { SITE_URL } from "@/lib/base-url";
 import { getLocaleFromCookie } from "@/lib/locale-cookie";
+import { ratelimit } from "@/lib/ratelimit";
 
 const BodySchema = z.object({ orderId: z.string().min(1) });
 
@@ -30,6 +31,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: isEn ? "Not authorized" : "Не авторизованы" },
       { status: 401 },
+    );
+  }
+
+  // Per-user rate limit. Idempotent inside (returns existing handoff ref)
+  // but the limit prevents quota-burn on the Kaspi API when a runaway
+  // client retries hard.
+  const { success: rlOk } = await ratelimit.invoice.limit(`user:${user.id}`);
+  if (!rlOk) {
+    return NextResponse.json(
+      {
+        error: isEn
+          ? "Too many invoice requests. Try again in a few minutes."
+          : "Слишком много запросов на счёт. Попробуйте через несколько минут.",
+      },
+      { status: 429 },
     );
   }
 

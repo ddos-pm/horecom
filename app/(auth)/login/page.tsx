@@ -30,12 +30,36 @@ function StandaloneLogo() {
 
 type Mode = "password" | "otp";
 
+/**
+ * Validate that the redirectTo query parameter resolves to a same-origin
+ * relative path. Blocks open-redirect attacks where an attacker crafts
+ * /login?redirectTo=https://evil.com/phish to harvest credentials after
+ * a successful sign-in.
+ *
+ * Allows:  "/dashboard", "/orders/123", "/profile?tab=address"
+ * Rejects: "//evil.com", "https://evil.com", "javascript:...", ""
+ */
+function safeRedirectTo(raw: string | null): string {
+  const fallback = "/dashboard";
+  if (!raw) return fallback;
+  // Must start with a single forward slash (not "//" which browsers
+  // interpret as protocol-relative → cross-origin).
+  if (!raw.startsWith("/") || raw.startsWith("//")) return fallback;
+  // Protect against backslash tricks (Windows-style separators that
+  // some user-agents normalize to forward slashes).
+  if (raw.includes("\\")) return fallback;
+  // No scheme prefix or @-style userinfo. Belt-and-suspenders: even
+  // with the leading-slash check above, URL parsers vary.
+  if (/^\/[^/]*[:@]/.test(raw)) return fallback;
+  return raw;
+}
+
 function LoginForm() {
   const params = useSearchParams();
   const router = useRouter();
   const locale = useLocaleCookie();
   const isEn = locale === "en";
-  const redirectTo = params.get("redirectTo") ?? "/dashboard";
+  const redirectTo = safeRedirectTo(params.get("redirectTo"));
   const errorParam = params.get("error");
   const [mode, setMode] = useState<Mode>("password");
 

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmation, sendOrderToManager } from "@/lib/email";
 import { pushOrderToAmoCRM } from "@/lib/amocrm";
 import { getLocaleFromCookie } from "@/lib/locale-cookie";
+import { ratelimit } from "@/lib/ratelimit";
 
 const ItemSchema = z.object({
   productId: z.string(),
@@ -34,6 +35,22 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: isEn ? "Not authorized" : "Не авторизованы" },
       { status: 401 },
+    );
+  }
+
+  // Per-customer rate limit. Triggers email + AmoCRM push so a logged-in
+  // attacker could otherwise flood the ops team. 10 orders / 5 min is
+  // well above the legit pattern (peak observed: 1-2 orders / hour per
+  // company) and still kills sustained abuse.
+  const { success: rlOk } = await ratelimit.orders.limit(`user:${user.id}`);
+  if (!rlOk) {
+    return NextResponse.json(
+      {
+        error: isEn
+          ? "Too many orders. Try again in a few minutes."
+          : "Слишком много заказов. Попробуйте через несколько минут.",
+      },
+      { status: 429 },
     );
   }
 
